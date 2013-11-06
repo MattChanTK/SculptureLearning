@@ -10,7 +10,7 @@ random.seed()
 class SimSon:
 
     minV = -3
-    maxV = 100
+    maxV = 80
     minOmega = -math.pi/10
     maxOmega = math.pi/10
 
