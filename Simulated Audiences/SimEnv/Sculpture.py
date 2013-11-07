@@ -7,14 +7,14 @@ class Sculpture:
 
     def __init__(self):
         #number of attractor
-        self.numAtt = 1
+        self.numAtt = 4
         # size of sculpture
-        self.artSizeX = 10
-        self.artSizeY = 10
+        self.artSizeX = 100
+        self.artSizeY = 100
         self.artSize = [self.artSizeX, self.artSizeY]
 
         # centre location
-        self.artLowerLeft = [200, 50]
+        self.artLowerLeft = [100, 50]
 
         # Creating the sculptures
         self.att = [Attractor.Attractor() for i in range(self.numAtt)]

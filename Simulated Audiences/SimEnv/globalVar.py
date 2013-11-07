@@ -1,5 +1,5 @@
 # number of people in the room
-numSimSon = 100
+numSimSon = 10
 
 # size of the room
 roomSizeX = 240

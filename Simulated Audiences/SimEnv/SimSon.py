@@ -9,8 +9,8 @@ random.seed()
 # Simulated Person
 class SimSon:
 
-    minV = -3
-    maxV = 80
+    minV = 3
+    maxV = 100
     minOmega = -math.pi/10
     maxOmega = math.pi/10
 
@@ -30,9 +30,13 @@ class SimSon:
         self.interest = 1  #max 1; min 0
         self.angShiftStdDev = 0.008
 
+        #distance reduction vs speed constants
+        self.speedReduceK = 0.02
+
         #set initial speed
         self.v = random.uniform(SimSon.minV, SimSon.maxV)
         self.omega = random.uniform(SimSon.minOmega, SimSon.maxOmega)
+
 
         #enter room
         self.enterRoom()
@@ -97,14 +101,17 @@ class SimSon:
             #print ("(%f,%f, %f)" %(self.x, self.y, math.degrees(self.r)))
             #print ("v = %f   omega = %f" %(self.v, math.degrees(self.omega)))
             self.__init__();
-
-        
     def attIsInFOV(self, art):
 
         angleToAtt = [0] * art.numAtt
         #get the angle of the attractor relative to the person
         for i in range(art.numAtt):
             angleToAtt[i] = math.atan2(art.att[i].y - self.y, art.att[i].x - self.x)
+
+        distToAtt = [0] * art.numAtt
+        #get the distance of the attractor relative to the person
+        for i in range(art.numAtt):
+            distToAtt[i] = math.sqrt((art.att[i].x - self.x)**2 + (art.att[i].y - self.y)**2)
 
         attInFov = [0] * art.numAtt
 
@@ -115,11 +122,13 @@ class SimSon:
             attInFov[i] = (angleToAtt[i] < (self.r + self.fov/2)) & \
                             (angleToAtt[i] > (self.r - self.fov/2))
 
-        return [attInFov, angleToAtt]
+        return [attInFov, angleToAtt, distToAtt]
 
-    def angleShift(self, art):
+    def angleShift(self, art, attInFOV):
+        #[attInFov, angleToAtt] = self.attIsInFOV(art)
+        attInFov = attInFOV[0]
+        angleToAtt = attInFOV[1]
 
-        [attInFov, angleToAtt] = self.attIsInFOV(art)
         sumOfAttLevel = 0
         angShift = 0
         for i in range(len(attInFov)):
@@ -133,11 +142,41 @@ class SimSon:
             angShift /= sumOfAttLevel
 
         return angShift
+    def speedReduce(self, art, attInFOV):
+        attInFov = attInFOV[0]
+        distToAtt = attInFOV[2]
+
+        sumOfAttLevel = 0
+        speedReduce = 0
+        for i in range(len(attInFov)):
+             # if the attractor is in FOV
+            if art.att[i].attOn & attInFov[i]:
+                speedReduce += art.att[i].attLevel*(distToAtt[i])
+                sumOfAttLevel += art.att[i].attLevel
+
+        if sumOfAttLevel > 0:
+            speedReduce /= sumOfAttLevel
+
+        return speedReduce
 
     def lookToAttractor(self, art):
-        meanAngShift = self.angleShift(art)
+        attInFov = self.attIsInFOV(art)
+
+        meanAngShift = self.angleShift(art, attInFov)
         newR = random.gauss(self.r + self.interest*meanAngShift, SimSon.angShiftStdDev)
         self.r = (newR + 2*math.pi) % (2*math.pi)
+
+        meanSpeedReduce = self.speedReduce(art, attInFov)
+        self.v = max(SimSon.minV, self.v*self.speedReduceK*meanSpeedReduce)
+        #print(self.v)
+
+
+
+
+
+
+
+
 
 
 
