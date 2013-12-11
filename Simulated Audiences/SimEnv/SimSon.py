@@ -9,7 +9,7 @@ random.seed()
 # Simulated Person
 class SimSon:
 
-    minV = 3
+    minV = 0
     maxV = 100
     minOmega = -math.pi/10
     maxOmega = math.pi/10
@@ -27,7 +27,7 @@ class SimSon:
         self.fov = math.radians(150)
 
         #personal interest in art
-        self.interest = 1  #max 1; min 0
+        self.interest = 0.5  #max 1; min 0
         self.angShiftStdDev = 0.008
 
         #distance reduction vs speed constants
