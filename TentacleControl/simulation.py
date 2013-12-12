@@ -6,7 +6,7 @@ import Tentacle
 from matplotlib import pyplot as plt
 
 # simulation parameters
-num_step = 300
+num_step = 1200
 sim_step = 0.01
 
 # instantiating the Tentacle
@@ -14,7 +14,11 @@ plant = Tentacle.Tentacle(num_seg=14)
 print 'initial angle: %f' % plant.get_angle()
 
 # set desired angle
-ang_ref = 75
+#ang_ref = 120
+neutral_ang = 90
+ang_amplitude = 30
+ref_freq = 0.01
+ang_ref = neutral_ang
 
 # controller parameter
 kp = -3
@@ -27,6 +31,7 @@ err_0 = 0
 
 # array of angles for plotting purposes
 ang_t = [plant.get_angle()]
+ang_ref_t = [ang_ref]
 
 for t in range(num_step):
 
@@ -45,10 +50,21 @@ for t in range(num_step):
     print '[%4d] angle: %7.4f     errors: %8.4f, %8.4f     input: %2d' % (t+1, plant.get_angle(), error_ang, error_change, input_val)
 
     ang_t.append(plant.get_angle())
+    ang_ref_t.append((ang_ref))
+
+    #if (math.fabs(error_ang) < 1):
+    #    ang_ref -= 5
+    #    if ang_ref < 60:
+    #       ang_ref = 60
+    ang_ref = ang_amplitude*math.sin(ref_freq*t) + neutral_ang
 
 # plotting
 plt.clf()
-plt.plot(ang_t)
-plt.show()
+plt.ion()
+time_label = [step*sim_step for step in range(0, num_step+1)]
+plt.plot(time_label, ang_t)
+plt.plot(time_label, ang_ref_t)
+#plt.ioff()
+plt.show(block=True)
 
 
