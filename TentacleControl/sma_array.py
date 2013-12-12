@@ -17,6 +17,11 @@ class sma_array(object):
             length += self.array[i].length
         return length
 
+    def get_length_range(self):
+        max_length = seg.sma_segment.cold_length*self.get_num_seg()
+        min_length = seg.sma_segment.hot_length*self.get_num_seg()
+
+        return max_length-min_length
 
     def turn_on(self, num_on, num_step, sim_step=0.01):
         if num_on > self.get_num_seg():
@@ -46,6 +51,8 @@ class sma_array(object):
             self.array[i].set_steady_hot()
         for j in range(num_on, self.get_num_seg()):
             self.array[j].set_steady_cold()
+
+
 
 
 
