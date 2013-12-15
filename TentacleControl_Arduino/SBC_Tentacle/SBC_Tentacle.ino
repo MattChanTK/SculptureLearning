@@ -47,6 +47,10 @@ void setup()
     ground(sma[i]);
     smaOn[i] = 0;
   }    
+  
+  ground(led);
+  
+  Serial.begin(9600);
 }
 
 void turnOff(const int sma_id)
@@ -60,13 +64,27 @@ void turnOn(const int sma_id)
   smaOn[sma_id] = 1;
 }
 
+int serialIn = 0;
 void loop()
 {
+  
+  //read some serial
+  if (Serial.available() > 0)
+  {
+    serialIn = Serial.parseInt();
+  }
+  
   //update current time
   currTime = micros();
-  
+    
   boolean startNewCycle = false;
-  in_level = 6;
+  in_level = serialIn - 1;
+  //Serial.println(in_level, DEC);
+  
+  //read from potentiometer
+  int pot_val = analogRead(pot);
+  Serial.println(pot_val, DEC);
+  
   
   //SMA output
   for (int sma_level = 0; sma_level < numLevel; ++sma_level)
