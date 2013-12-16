@@ -1,5 +1,6 @@
 .idea/
 Bradon_IRtracking/
+serial_output*.txt
 
 # Compiled source #
 ###################
