@@ -8,12 +8,14 @@ port = serial.Serial('COM4', 9600)
 
 print(port.name)
 
-input = 's'
+
 current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-file = open('serial_output_'+current_datetime+'.txt', 'a+')  # append mode
+file = open('serial_output_'+current_datetime+'.csv', 'a+')  # append mode
 startTime = time.time()
 timePassed = 0
-while timePassed < 30:
+port.flushOutput()
+file.write(str(timePassed)+',')
+while timePassed < 50:
 
     timePassed = time.time() - startTime
     x = port.read(size=1)  # 1 byte
@@ -28,8 +30,11 @@ while timePassed < 30:
     elif x == b'\r':
         pass  # ignore
     else:
-        file.write(x.decode(encoding='UTF-8'))
-        print(x.decode(encoding='UTF-8'), end="")
+        try:
+            file.write(x.decode(encoding='UTF-8'))
+            print(x.decode(encoding='UTF-8'), end="")
+        except:
+            pass
 
 
 file.close()

@@ -22,9 +22,9 @@ const int pot = A5;
 double pot_ref = 390;
 
 //Controller Parameters
-double kp = -1;
-double kd = -0.5;
-double ki = -0.01;
+double kp = -1.5;
+double kd = 0.8;
+double ki = -0.005;
 
 
 //control variables
@@ -127,8 +127,14 @@ void loop()
   
   in_level = constrain(round(kp*err + kd*err_change + ki*err_sum), -1, numLevel-1);
 
-  pot_ref = serialIn;
+  //pot_ref = serialIn;
+  pot_ref = 5*sin(millis()*0.0002) + 390;
+  
   //in_level = serialIn - 1;
+  Serial.print(pot_ref, DEC);
+  Serial.print("\t");
+  Serial.print(pot_val, DEC);
+  Serial.print("\t");
   Serial.print(in_level+1, DEC);
   Serial.print("\t");
   Serial.println(err, DEC);
@@ -149,7 +155,7 @@ void loop()
     
     if (in_level >-1)
     {
-      analogWrite(voltagePin, (int)round(sma_duty_steady[in_level]*255));
+      analogWrite(voltagePin, (int)round(sma_duty_fast[in_level]*255));
       turnOn(in_level);
     }
    
