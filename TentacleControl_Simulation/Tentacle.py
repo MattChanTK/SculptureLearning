@@ -7,7 +7,7 @@ import sma_segment as ss
 class Tentacle(object):
 
     # length of lever arm
-    r = 20  # unit = mm
+    r = 35  # unit = mm
 
     # saturation values
     min_input = 0
@@ -22,7 +22,7 @@ class Tentacle(object):
 
         # Tentacle parameters
         Tentacle.max_input = num_seg
-        Tentacle.r = self.array.get_length_range()/(2*math.cos(math.radians(60)))
+        #Tentacle.r = self.array.get_length_range()/(2*math.cos(math.radians(60)))
 
 
     def get_angle(self, deg=True):

@@ -3,10 +3,10 @@ __author__ = 'Matthew'
 
 class sma_segment(object):
 
-    cold_length = 10.0  # unit = mm
-    hot_length = 9.0  # unit = mm
-    warming_rate = 3.0  # unit = mm/s
-    cooling_rate = 1.0  # unit = mm/s
+    cold_length = 35.0  # unit = mm
+    hot_length = 34.1  # unit = mm
+    warming_rate = 0.36  # unit = mm/s
+    cooling_rate = 0.05  # unit = mm/s
 
     def __init__(self):
         self.length = sma_segment.cold_length

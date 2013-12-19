@@ -155,7 +155,7 @@ void loop()
     
     if (in_level >-1)
     {
-      analogWrite(voltagePin, (int)round(sma_duty_fast[in_level]*255));
+      analogWrite(voltagePin, (int)round(sma_duty_steady[in_level]*255));
       turnOn(in_level);
     }
    
