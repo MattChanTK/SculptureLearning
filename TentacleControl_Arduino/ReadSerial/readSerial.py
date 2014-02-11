@@ -15,7 +15,7 @@ startTime = time.time()
 timePassed = 0
 port.flushOutput()
 file.write(str(timePassed)+',')
-while timePassed < 50:
+while timePassed < 15:
 
     timePassed = time.time() - startTime
     x = port.read(size=1)  # 1 byte
