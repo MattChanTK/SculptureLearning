@@ -25,7 +25,7 @@ class Spirit(pygame.sprite.Sprite):
 
         # behaviour parameters
         self.v = 6.0
-        self.w = 0.01
+        self.w = 0.05
 
         # internal parameters
         self.dir = random.random()*math.pi*2
@@ -45,9 +45,8 @@ class Spirit(pygame.sprite.Sprite):
         self.dir += self.w
         dx = round(self.v*math.cos(self.dir))
         dy = round(self.v*math.sin(self.dir))
-        print dx, dy
         newpos = self.rect.move(dx, dy)
-        print newpos.x, newpos.y
+
         if not self.area.contains(newpos):
             if self.rect.left < self.area.left or self.rect.right > self.area.right or \
                self.rect.top < self.area.top or self.rect.bottom > self.area.bottom:

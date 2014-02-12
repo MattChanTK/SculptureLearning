@@ -1,28 +1,6 @@
 from setup import *
 import Spirit
-
-
-class Candy(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
-        self.image, self.rect = load_image('ball.gif')
-        self.candying = 0
-
-    def update(self):
-        "move the candy based on the mouse position"
-        pos = pygame.mouse.get_pos()
-        self.rect.midtop=pos
-        if self.candying:
-            self.rect.move_ip(5,10)
-    def candy(self, target):
-        "returns true if the fist collides with the target"
-        if not self.candying:
-            self.candying = 1
-            hitbox = self.rect.inflate(-5, -5)
-            return hitbox.colliderect(target.rect)
-    def uncandy(self):
-        "called to pull the fist back"
-        self.candying = 0
+import Candy
 
 pygame.init()
 screen = pygame.display.set_mode(size)
@@ -31,10 +9,10 @@ pygame.mouse.set_visible(0)
 
 background = pygame.Surface(screen.get_size())
 background = background.convert()
-background.fill((200, 250, 250))
+background.fill(bg_colour)
 
 spirit = Spirit.Spirit()
-candy = Candy()
+candy = Candy.Candy()
 allsprites = pygame.sprite.RenderPlain((candy, spirit))
 clock = pygame.time.Clock()
 
