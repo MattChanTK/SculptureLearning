@@ -97,9 +97,15 @@ class Spirit(pygame.sprite.Sprite):
         if not self.affected:
             # calculate spirit direction
             self.dir += self.w
+
             # computing the new position
             dx = round(self.v*math.cos(self.dir))
             dy = round(self.v*math.sin(self.dir))
+            '''
+            #random change in w and v
+            self.v += (random.random() - 0.5) * 0.5
+            self.w += (random.random() - 0.5) * 0.01
+            '''
         else:
             candy_dt = pygame.time.get_ticks() - self.candy_start_time
             dx = self.a_x*(self.rect.x - self.candy_rect.x) + \
@@ -108,26 +114,31 @@ class Spirit(pygame.sprite.Sprite):
             dy = self.a_y*(self.rect.x - self.candy_rect.x) + \
                  self.b_y*(self.rect.y - self.candy_rect.y) + \
                  self.c_y*math.sin(0.01*candy_dt)
-            print self.c_x*math.cos(candy_dt)
+
+            # random change in the coefficient
+            self.a_x += (random.random() - 0.5) * 0.004
+            self.b_x += (random.random() - 0.5) * 0.001
+            self.c_x += (random.random() - 0.5) * 0.1
+            self.a_y += (random.random() - 0.5) * 0.001
+            self.b_y += (random.random() - 0.5) * 0.004
+            self.c_y += (random.random() - 0.5) * 0.1
+
         newpos = self.rect.move(dx, dy)
+        move_x = dx
+        move_y = dy
 
         if not self.area.contains(newpos):
-            if self.rect.left < self.area.left or self.rect.right > self.area.right or \
-               self.rect.top < self.area.top or self.rect.bottom > self.area.bottom:
-                if self.dir > 0:
-                    self.dir = self.dir - math.pi
-                else:
-                    self.dir = self.dir + math.pi
-                newpos = self.rect.move(-dx, -dy)
-        self.rect = newpos
 
-        # random change in the coefficient
-        self.a_x += (random.random() - 0.5) * 0.001
-        self.b_x += (random.random() - 0.5) * 0.001
-        self.c_x += (random.random() - 0.5) * 0.1
-        self.a_y += (random.random() - 0.5) * 0.001
-        self.b_y += (random.random() - 0.5) * 0.001
-        self.c_y += (random.random() - 0.5) * 0.1
+            if newpos.left < self.area.left or newpos.right > self.area.right:
+                move_x = -dx
+            if newpos.top > self.area.top or newpos.bottom < self.area.bottom:
+                move_y = -dy
+
+            newpos = self.rect.move(move_x, move_y)
+
+        self.rect = newpos
+        self.dir = math.atan2(move_y, move_x)
+
 
 
     def candyed(self, candy_rect, candy_start_time):
