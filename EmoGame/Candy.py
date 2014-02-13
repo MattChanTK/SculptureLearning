@@ -27,8 +27,7 @@ class Candy(pygame.sprite.Sprite):
         if not self.candying:
             self.candying = 1
             self.image = Candy.img2
-            hitbox = self.rect.inflate(-5, -5)
-            return hitbox.colliderect(target.rect)
+            return self.rect.colliderect(target.rect)
     def uncandy(self):
         "called to pull the fist back"
         self.candying = 0

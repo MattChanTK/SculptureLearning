@@ -22,27 +22,44 @@ class Spirit(pygame.sprite.Sprite):
         #randomize the initial location of the dot
         self.rect.move_ip(random.randint(self.area.left, self.area.right),
                           random.randint(self.area.top, self.area.bottom))
+        self.candy_rect = self.rect
 
         # behaviour parameters
         self.v = 6.0
         self.w = 0.05
+        self.k_candy = 0
 
         # internal parameters
         self.dir = random.random()*math.pi*2
 
-        self.dizzy = 0
+        self.affected = 0
+
 
     def update(self):
-        "walk or spin, depending on the monkeys state"
-        if self.dizzy:
-            self.__spin()
+
+        if self.affected:
+            self.k_candy += candy_factor_rate
+            if self.k_candy > 1:
+                self.k_candy = 1
         else:
-            self.__walk()
+            self.k_candy -= candy_factor_rate*5
+            if self.k_candy < 0:
+                self.k_candy = 0
+
+        self.__walk()
 
     def __walk(self):
 
+        # calculate candy direction
+        candy_dir = math.atan2(self.candy_rect.y - self.rect.y, self.candy_rect.x - self.rect.x)
+
         # compute new angle
-        self.dir += self.w
+        self.dir = (1 - self.k_candy)*(self.dir+self.w) + self.k_candy*candy_dir
+
+        # wrapping direction to 2*pi
+        self.dir = math.fmod(self.dir, 2*math.pi)
+        print self.dir
+        # computing the new position
         dx = round(self.v*math.cos(self.dir))
         dy = round(self.v*math.sin(self.dir))
         newpos = self.rect.move(dx, dy)
@@ -55,20 +72,12 @@ class Spirit(pygame.sprite.Sprite):
         self.rect = newpos
 
 
-    def __spin(self):
-        "spin the monkey image"
-        center = self.rect.center
-        self.dizzy += 12
-        if self.dizzy >= 360:
-            self.dizzy = 0
-            self.image = self.original
-        else:
-            rotate = pygame.transform.rotate
-            self.image = rotate(self.original, self.dizzy)
-        self.rect = self.image.get_rect(center=center)
+    def candyed(self, candy_rect):
+        if not self.affected:
+            self.affected = 1
+        self.candy_rect = candy_rect
 
-    def punched(self):
-        "this will cause the monkey to start spinning"
-        if not self.dizzy:
-            self.dizzy = 1
-            self.original = self.image
+    def uncandyed(self):
+        if self.affected:
+            self.affected = 0
+
