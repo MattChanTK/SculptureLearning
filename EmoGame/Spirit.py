@@ -23,11 +23,21 @@ class Spirit(pygame.sprite.Sprite):
         self.rect.move_ip(random.randint(self.area.left, self.area.right),
                           random.randint(self.area.top, self.area.bottom))
         self.candy_rect = self.rect
+        self.candy_start_time = 0
 
-        # behaviour parameters
+        # behaviour parameters for "walk"
         self.v = 6.0
         self.w = 0.05
         self.k_candy = 0
+
+        # behaviour paremeters for "walk2"
+        self.a_x = -0.02
+        self.b_x = -0.00
+        self.c_x = 5
+        self.a_y = -0.00
+        self.b_y = -0.02
+        self.c_y = 5
+
 
         # internal parameters
         self.dir = random.random()*math.pi*2
@@ -46,7 +56,7 @@ class Spirit(pygame.sprite.Sprite):
             if self.k_candy < 0:
                 self.k_candy = 0
 
-        self.__walk()
+        self.__walk2()
 
     def __walk(self):
 
@@ -82,11 +92,49 @@ class Spirit(pygame.sprite.Sprite):
                 newpos = self.rect.move(-dx, -dy)
         self.rect = newpos
 
+    def __walk2(self):
 
-    def candyed(self, candy_rect):
+        if not self.affected:
+            # calculate spirit direction
+            self.dir += self.w
+            # computing the new position
+            dx = round(self.v*math.cos(self.dir))
+            dy = round(self.v*math.sin(self.dir))
+        else:
+            candy_dt = pygame.time.get_ticks() - self.candy_start_time
+            dx = self.a_x*(self.rect.x - self.candy_rect.x) + \
+                 self.b_x*(self.rect.y - self.candy_rect.y) + \
+                 self.c_x*math.cos(0.01*candy_dt)
+            dy = self.a_y*(self.rect.x - self.candy_rect.x) + \
+                 self.b_y*(self.rect.y - self.candy_rect.y) + \
+                 self.c_y*math.sin(0.01*candy_dt)
+            print self.c_x*math.cos(candy_dt)
+        newpos = self.rect.move(dx, dy)
+
+        if not self.area.contains(newpos):
+            if self.rect.left < self.area.left or self.rect.right > self.area.right or \
+               self.rect.top < self.area.top or self.rect.bottom > self.area.bottom:
+                if self.dir > 0:
+                    self.dir = self.dir - math.pi
+                else:
+                    self.dir = self.dir + math.pi
+                newpos = self.rect.move(-dx, -dy)
+        self.rect = newpos
+
+        # random change in the coefficient
+        self.a_x += (random.random() - 0.5) * 0.001
+        self.b_x += (random.random() - 0.5) * 0.001
+        self.c_x += (random.random() - 0.5) * 0.1
+        self.a_y += (random.random() - 0.5) * 0.001
+        self.b_y += (random.random() - 0.5) * 0.001
+        self.c_y += (random.random() - 0.5) * 0.1
+
+
+    def candyed(self, candy_rect, candy_start_time):
         if not self.affected:
             self.affected = 1
         self.candy_rect = candy_rect
+        self.candy_start_time = candy_start_time
 
     def uncandyed(self):
         if self.affected:

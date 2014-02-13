@@ -4,7 +4,7 @@ import Candy
 
 pygame.init()
 screen = pygame.display.set_mode(size)
-pygame.display.set_caption('Mist of Spirits')
+pygame.display.set_caption('Spirits Conductor')
 pygame.mouse.set_visible(0)
 
 background = pygame.Surface(screen.get_size())
@@ -24,6 +24,7 @@ for i in range(0, num_spirit):
 
 
 clock = pygame.time.Clock()
+candy_start_time = pygame.time.get_ticks()
 
 while 1:
     clock.tick(60)
@@ -32,9 +33,13 @@ while 1:
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             sys.exit()
         elif event.type == MOUSEBUTTONDOWN:
-            candy.candy(spirit)
+            if not candy.candying:
+                candy_start_time = pygame.time.get_ticks()
+                candy.candy(spirit)
+
+
             for i in range(0, num_spirit):
-                spirits[i].candyed(candy.rect)
+                spirits[i].candyed(candy.rect, candy_start_time)
 
         elif event.type == MOUSEBUTTONUP:
             candy.uncandy()
