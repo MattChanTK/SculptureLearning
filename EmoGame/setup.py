@@ -35,7 +35,7 @@ def load_sound(name):
         raise SystemExit, message
     return sound
 
-num_spirit = 10
+num_spirit = 5
 bg_colour = (230, 240, 250)
 
 size = (600, 400)

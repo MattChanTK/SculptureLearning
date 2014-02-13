@@ -53,12 +53,20 @@ class Spirit(pygame.sprite.Sprite):
         # calculate candy direction
         candy_dir = math.atan2(self.candy_rect.y - self.rect.y, self.candy_rect.x - self.rect.x)
 
-        # compute new angle
-        self.dir = (1 - self.k_candy)*(self.dir+self.w) + self.k_candy*candy_dir
+        # calculate spirit direction
+        spirit_dir = self.dir+self.w
 
-        # wrapping direction to 2*pi
-        self.dir = math.fmod(self.dir, 2*math.pi)
-        print self.dir
+         # wrapping direction from pi to -pi
+        if spirit_dir  > math.pi:
+            spirit_dir  = -math.pi
+        elif spirit_dir  < -math.pi:
+            spirit_dir  = math.pi
+
+
+        # compute new angle
+        self.dir = (1 - self.k_candy)*spirit_dir + self.k_candy*candy_dir
+
+
         # computing the new position
         dx = round(self.v*math.cos(self.dir))
         dy = round(self.v*math.sin(self.dir))
@@ -67,7 +75,10 @@ class Spirit(pygame.sprite.Sprite):
         if not self.area.contains(newpos):
             if self.rect.left < self.area.left or self.rect.right > self.area.right or \
                self.rect.top < self.area.top or self.rect.bottom > self.area.bottom:
-                self.dir = self.dir - math.pi
+                if self.dir > 0:
+                    self.dir = self.dir - math.pi
+                else:
+                    self.dir = self.dir + math.pi
                 newpos = self.rect.move(-dx, -dy)
         self.rect = newpos
 
