@@ -26,7 +26,7 @@ class Spirit(pygame.sprite.Sprite):
         self.candy_start_time = 0
 
         # behaviour parameters for "walk"
-        self.v = 6.0
+        self.v = 0 #6.0
         self.w = 0.05
         self.k_candy = 0
 
@@ -95,25 +95,21 @@ class Spirit(pygame.sprite.Sprite):
     def __walk2(self):
 
         if not self.affected:
+
+            #random change in w and v
+            self.v += (random.random() - 0.5) * 0.5
+            self.w += (random.random() - 0.5) * 0.001
+
             # calculate spirit direction
             self.dir += self.w
 
             # computing the new position
-            dx = round(self.v*math.cos(self.dir))
-            dy = round(self.v*math.sin(self.dir))
-            '''
-            #random change in w and v
-            self.v += (random.random() - 0.5) * 0.5
-            self.w += (random.random() - 0.5) * 0.01
-            '''
+            dx = self.v*math.cos(self.dir)
+            dy = self.v*math.sin(self.dir)
+
+
+
         else:
-            candy_dt = pygame.time.get_ticks() - self.candy_start_time
-            dx = self.a_x*(self.rect.x - self.candy_rect.x) + \
-                 self.b_x*(self.rect.y - self.candy_rect.y) + \
-                 self.c_x*math.cos(0.01*candy_dt)
-            dy = self.a_y*(self.rect.x - self.candy_rect.x) + \
-                 self.b_y*(self.rect.y - self.candy_rect.y) + \
-                 self.c_y*math.sin(0.01*candy_dt)
 
             # random change in the coefficient
             self.a_x += (random.random() - 0.5) * 0.004
@@ -123,10 +119,19 @@ class Spirit(pygame.sprite.Sprite):
             self.b_y += (random.random() - 0.5) * 0.004
             self.c_y += (random.random() - 0.5) * 0.1
 
+            # calculating displacement
+            candy_dt = pygame.time.get_ticks() - self.candy_start_time
+            dx = self.a_x*(self.rect.x - self.candy_rect.x) + \
+                 self.b_x*(self.rect.y - self.candy_rect.y) + \
+                 self.c_x*math.cos(0.01*candy_dt)
+            dy = self.a_y*(self.rect.x - self.candy_rect.x) + \
+                 self.b_y*(self.rect.y - self.candy_rect.y) + \
+                 self.c_y*math.sin(0.01*candy_dt)
+
         newpos = self.rect.move(dx, dy)
+
         move_x = dx
         move_y = dy
-
         if not self.area.contains(newpos):
 
             if newpos.left < self.area.left or newpos.right > self.area.right:
@@ -136,8 +141,11 @@ class Spirit(pygame.sprite.Sprite):
 
             newpos = self.rect.move(move_x, move_y)
 
-        self.rect = newpos
+        # calculate new speed and direction
+        self.v = math.sqrt(dx*dx + dy*dy)
         self.dir = math.atan2(move_y, move_x)
+        self.rect = newpos
+
 
 
 
