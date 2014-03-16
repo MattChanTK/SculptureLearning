@@ -13,7 +13,8 @@ class Candy(pygame.sprite.Sprite):
 
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)  # call Sprite initializer
-        self.image, self.rect = Candy.img1, Candy.rect1
+        self.image = Candy.img1
+        self.rect = Candy.rect1
         self.candying = 0
 
     def update(self):

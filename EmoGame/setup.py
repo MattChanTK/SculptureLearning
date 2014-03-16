@@ -36,6 +36,7 @@ def load_sound(name):
     return sound
 
 num_spirit = 5
+
 bg_colour = (230, 240, 250)
 
 size = (600, 400)
