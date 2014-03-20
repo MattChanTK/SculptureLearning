@@ -18,13 +18,61 @@ class Region:
     def getRightChild(self):
         return self.right
 
+    def updateRegions(self):
+
+        # it's leaf node
+        if self.left is None and self.right is None:
+            pass
+        elif self.left is not None and self.right is not None:
+            self.left.updateRegions()
+            self.right.updateRegions()
+        else:
+            # there's no right node, only left node
+            if self.right is None:
+                #this node absorbs the right node
+                self.right = self.left.right
+                self.left = self.left.left
+
+            # there's no left node, only right node
+            elif self.left is None:
+                #this node absorbs the left node
+                self.left = self.right.left
+                self.right = self.right.right
+
+            self.updateRegions()
+
+
     def addExemplar(self, exemplar):
+        self.updateRegions()
+        # adding an exemplar
         self.exemplars.append(exemplar)
 
-        if self.left is not None:
-            leftContext = self.left.getContext()
+        #check where it should add the exemplar to
+        if self.left is None and self.right is None:
+            # leave the exemplar here
+            pass
+        else:
 
-        #if exemplar.S
+
+            # determining to add the exemplar to left or right node
+
+            # check context
+            leftContext = self.left.getContext()
+            rightContext = self.right.getContext()
+
+            # if the context is more similar to the left node than right node
+            if abs(exemplar.S.hr - leftContext[0]) < abs(exemplar.S.hr - rightContext[0]):
+                self.left.addExemplar(exemplar)
+            else:
+                self.right.addExemplar(exemplar)
+
+
+
+
+
+
+
+
 
     def getExemplar(self):
         return self.exemplars
@@ -49,16 +97,20 @@ class Region:
 
         numSParam = self.exemplars[0].S.getNumParam()
         numMParam = self.exemplars[0].M.getNumParam()
+        numS2Param = self.exemplars[0].S2.getNumParam()
 
-        avg = [0]*(numSParam + numMParam)
+        avg = [0]*(numSParam + numMParam + numS2Param)
         for exp in self.exemplars:
 
             # Sensor parameters
             for i in range(0, numSParam):
                 avg[i] += exp.S.getParam()[i]
             # Motor parameters
-            for i in range(numSParam, numMParam):
+            for i in range(numSParam, numSParam + numMParam):
                 avg[i] += exp.M.getParam()[i - numSParam]
+            # Sensor(t+1) parameters
+            for i in range(numSParam + numMParam, numSParam + numMParam + numS2Param):
+                avg[i] += exp.S2.getParam()[i - numSParam - numMParam]
 
         # divide by total number of exemplar one by one
         numExp = self.getNumExemplar()

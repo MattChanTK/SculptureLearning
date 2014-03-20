@@ -6,3 +6,4 @@ class Exemplar:
         self.S2 = s2
 
 
+
