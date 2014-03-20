@@ -29,14 +29,16 @@ class Robot(pygame.sprite.Sprite):
         self.dir = random.random()*math.pi*2
 
         #randomize the initial location of the dot
-        self.rect.move_ip(self.x,self.y)
+        self.rect.x = self.x
+        self.rect.y = self.y
 
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
 
 
-    def update(self):
-
+    def update(self, simon):
+        self.__sense(simon)
+        self.act()
         self.__move()
 
     def __move(self):
@@ -71,4 +73,23 @@ class Robot(pygame.sprite.Sprite):
         # calculate new direction (will change if it hits wall)
         self.dir = math.atan2(move_y, move_x)
 
+    def __sense(self, simson):
+        self.sensor.hr = simson.hr
+        self.sensor.skin = simson.skin
+        self.sensor.interest = simson.interest
 
+    def act(self):
+        self.motor.v = self.sensor.hr/8
+        self.motor.w = self.sensor.interest/0.01
+    def setState(self, new_x=None, new_y=None, new_dir=None):
+        if new_x is not None:
+            self.x = new_x
+
+        if new_y is not None:
+            self.y = new_y
+
+        if new_dir is not None:
+            self.dir = new_dir
+
+        self.rect.x = self.x
+        self.rect.y = self.y

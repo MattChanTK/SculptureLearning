@@ -41,7 +41,12 @@ bg_colour = (230, 240, 250)
 
 size = (600, 400)
 robot_size = (20, 20)
+mem_size = 100
+
+
 candy_up_size = (60, 60)
 candy_down_size = (40, 40)
 candy_factor_rate = 0.002
+
+
 

@@ -24,13 +24,14 @@ for i in range(0, num_robot):
 user = Simson.Simson()
 
 # add elements to pygame space
-allsprites = pygame.sprite.RenderPlain()
+allRobots = pygame.sprite.Group()
+
 for i in range(0, num_robot):
-    allsprites.add(robots[i])
+    allRobots.add(robots[i])
 
 #timing
 clock = pygame.time.Clock()
-
+dx = 0
 while 1:
     clock.tick(60)
 
@@ -38,10 +39,28 @@ while 1:
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             sys.exit()
-    allsprites.update()
+
+    allRobots.update(user)
+
+   # user reacts to the animation
+    num_robot = 0
+    for robot in pygame.sprite.Group.sprites(allRobots):
+        # just average speed for now
+        hrFea = robot.motor.v
+        # distance to centre
+        skinFea = math.sqrt((robot.x - size[0]/2)**2 + (robot.y - size[1]/2)**2)
+        # average angular velocity
+        interest = robot.motor.w
+        num_robot += 1
+    fea= [hrFea/num_robot, skinFea/num_robot, interest/num_robot]
+    user.react(fea)
+
+
+
 
     screen.blit(background, (0, 0))
-    allsprites.draw(screen)
+    allRobots.draw(screen)
+
     pygame.display.flip()
 
 
