@@ -19,7 +19,7 @@ class Region:
         return self.right
 
     def updateRegions(self):
-
+        # need codes for forgetting exemplar
         # it's leaf node
         if self.left is None and self.right is None:
             pass
@@ -30,14 +30,18 @@ class Region:
             # there's no right node, only left node
             if self.right is None:
                 #this node absorbs the right node
+                temp = self.left
                 self.right = self.left.right
                 self.left = self.left.left
+                del(temp)
 
             # there's no left node, only right node
             elif self.left is None:
                 #this node absorbs the left node
+                temp = self.right
                 self.left = self.right.left
                 self.right = self.right.right
+                del(temp)
 
             self.updateRegions()
 
@@ -52,8 +56,6 @@ class Region:
             # leave the exemplar here
             pass
         else:
-
-
             # determining to add the exemplar to left or right node
 
             # check context
@@ -65,14 +67,6 @@ class Region:
                 self.left.addExemplar(exemplar)
             else:
                 self.right.addExemplar(exemplar)
-
-
-
-
-
-
-
-
 
     def getExemplar(self):
         return self.exemplars
