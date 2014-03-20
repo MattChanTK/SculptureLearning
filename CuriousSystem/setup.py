@@ -8,7 +8,7 @@ if not pygame.font: print 'Warning, fonts disabled'
 if not pygame.mixer: print 'Warning, sound disabled'
 
 def load_image(name, colorkey=None):
-    fullname = os.path.join('data', name)
+    fullname = os.path.join('img', name)
     try:
         image = pygame.image.load(fullname)
     except pygame.error, message:
@@ -27,7 +27,7 @@ def load_sound(name):
         def play(self): pass
     if not pygame.mixer:
         return NoneSound()
-    fullname = os.path.join('data', name)
+    fullname = os.path.join('audio', name)
     try:
         sound = pygame.mixer.Sound(fullname)
     except pygame.error, message:
@@ -35,12 +35,12 @@ def load_sound(name):
         raise SystemExit, message
     return sound
 
-num_spirit = 5
+num_robot = 1
 
 bg_colour = (230, 240, 250)
 
 size = (600, 400)
-spirit_size = (20, 20)
+robot_size = (20, 20)
 candy_up_size = (60, 60)
 candy_down_size = (40, 40)
 candy_factor_rate = 0.002
