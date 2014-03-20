@@ -22,7 +22,9 @@ class Region:
         # need codes for forgetting exemplar
         # it's leaf node
         if self.left is None and self.right is None:
-            pass
+            # split if C1 is met
+            if self.getNumExemplar() > C1:
+                self.split()
         elif self.left is not None and self.right is not None:
             self.left.updateRegions()
             self.right.updateRegions()

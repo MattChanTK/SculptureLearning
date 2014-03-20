@@ -17,5 +17,3 @@ class Memory:
         self.exp.append(newExemplar)
 
         self.R.addExemplar(self.exp[len(self.exp)-1])
-        if self.R.getNumExemplar() > C1:
-            self.R.split()
