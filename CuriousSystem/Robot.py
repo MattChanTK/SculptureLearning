@@ -2,6 +2,8 @@ from setup import *
 import random
 import Motor
 import Sensor
+import Memory
+import Exemplar
 
 random.seed()
 
@@ -28,18 +30,32 @@ class Robot(pygame.sprite.Sprite):
         self.y = random.randint(self.area.top, self.area.bottom)
         self.dir = random.random()*math.pi*2
 
-        #randomize the initial location of the dot
+        # randomize the initial location of the dot
         self.rect.x = self.x
         self.rect.y = self.y
 
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
 
+        # instantiate the robot's memory
+        self.memory = Memory.Memory()
 
-    def update(self, simon):
-        self.__sense(simon)
-        self.act()
+
+    def update(self, user):
+
+        # Sense the user
+        self.__sense(user)
+        s1 = self.sensor
+        # select action
+        self.__act()
+        m = self.motor
+        # perform action
         self.__move()
+        # check for actuation sensor inputs
+        self.__sense(user)
+        s2 = self.sensor
+
+        self.memory.addExemplar(s1, m, s2)
 
     def __move(self):
 
@@ -73,14 +89,14 @@ class Robot(pygame.sprite.Sprite):
         # calculate new direction (will change if it hits wall)
         self.dir = math.atan2(move_y, move_x)
 
-    def __sense(self, simson):
-        self.sensor.hr = simson.hr
-        self.sensor.skin = simson.skin
-        self.sensor.interest = simson.interest
+    def __sense(self, user):
+        self.sensor.hr = user.hr
+        self.sensor.skin = user.skin
+        self.sensor.interest = user.interest
 
-    def act(self):
+    def __act(self):
         self.motor.v = self.sensor.hr/8
-        self.motor.w = self.sensor.interest/0.01
+        self.motor.w = self.sensor.interest/0.1
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:
             self.x = new_x

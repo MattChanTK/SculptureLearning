@@ -1,6 +1,8 @@
 from setup import *
 
-class Sensor:
+
+class Sensor():
+
     def __init__(self):
         self.hr = 0
         self.skin = 0
@@ -11,6 +13,10 @@ class Sensor:
         #self.y = 0
         #self.dir = 0
 
+    def getParam(self):
+        return [self.hr, self.skin, self.interest]
 
+    def getNumParam(self):
+        return len(self.getParam())
 
 

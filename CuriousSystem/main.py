@@ -40,6 +40,7 @@ while 1:
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             sys.exit()
 
+    # robots move
     allRobots.update(user)
 
    # user reacts to the animation
@@ -50,10 +51,13 @@ while 1:
         # distance to centre
         skinFea = math.sqrt((robot.x - size[0]/2)**2 + (robot.y - size[1]/2)**2)
         # average angular velocity
-        interest = robot.motor.w
+        interestFea = robot.motor.w
         num_robot += 1
-    fea= [hrFea/num_robot, skinFea/num_robot, interest/num_robot]
+        print robot.memory.R.getNumRegion()
+    fea = [hrFea/num_robot, skinFea/num_robot, interestFea/num_robot]
+
     user.react(fea)
+
 
 
 

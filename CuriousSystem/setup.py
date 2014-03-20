@@ -31,7 +31,7 @@ def load_sound(name):
     try:
         sound = pygame.mixer.Sound(fullname)
     except pygame.error, message:
-        print 'Cannot load sound:', wav
+        print 'Cannot load sound:', name
         raise SystemExit, message
     return sound
 
@@ -43,6 +43,7 @@ size = (600, 400)
 robot_size = (20, 20)
 mem_size = 100
 
+C1 = 25
 
 candy_up_size = (60, 60)
 candy_down_size = (40, 40)
