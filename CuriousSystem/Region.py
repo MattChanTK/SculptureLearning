@@ -1,6 +1,6 @@
 from setup import *
-import Motor
-import Sensor
+import random
+
 
 
 class Region:
@@ -11,6 +11,11 @@ class Region:
             self.exemplars = []
         else:
             self.exemplars = exemplars
+
+        self.cut_dim_0 = None
+        self.cut_val_0 = None
+        self.cut_dim = None
+        self.cut_val = None
 
     def getLeftChild(self):
         return self.left
@@ -78,9 +83,101 @@ class Region:
 
     def split(self):
 
-        numExemplar = self.getNumExemplar()
-        self.left = Region(self.exemplars[0:numExemplar/2])
-        self.right = Region(self.exemplars[numExemplar/2:numExemplar])
+        # estimate the best Criterion 2
+        c2 = self.getBestC2()
+        j = c2[0]
+        vj = c2[1]
+
+        if j < 0 or vj < 0:
+            print ('ERROR: j and vj cannot be less than 0!')
+
+        r1 = []
+        r2 = []
+        # for each exemplar
+        for exp in self.exemplars:
+            # splitting to two set according to vj
+            if exp.getVal(j) < vj:
+                r1.append(exp)
+            elif exp.getVal(j) > vj:
+                r2.append(exp)
+            else:
+                # either one is fine
+                if len(r1) > len(r2):
+                    r2.append(exp)
+                else:
+                    r1.append(exp)
+
+        self.left = Region(r1)
+        self.right = Region(r2)
+
+    def getExpValArray(expSet, dim):
+        data = []
+        for exp in expSet:
+            data.append(exp.getVal(dim)) # all the val in i-th dimension
+        return data
+    getExpValArray = staticmethod(getExpValArray)
+
+    def getBestC2(self):
+
+        numDim = self.exemplars[0].getNumOutputParams()
+        numGuess = 100
+        vj_guess = [0] * numGuess
+
+        # keeping tracking of the best C2
+        bestC2 = [-1, -1, -1] #[j, vj, var]
+
+        # for each dimension
+        for j in range(0, numDim):
+
+            # finding bound in v_j
+            valSet = Region.getExpValArray(self.exemplars, j)
+            upBound = max(valSet)
+            lowBound = min(valSet)
+
+            # generate guesses for v_j (random C2)
+            for i in range(0, numGuess):
+                vj_guess[i] = random.random() * (upBound - lowBound) + lowBound
+
+            # split set accordingly
+            for vj in vj_guess:
+                set1 = []
+                set2 = []
+                # for each exemplar
+                for exp in self.exemplars:
+                    # splitting to two set according to vj
+                    if exp.getVal(j) < vj:
+                        set1.append(exp)
+                    elif exp.getVal(j) > vj:
+                        set2.append(exp)
+                    else:
+                        # either one is fine
+                        if len(set1) > len(set2):
+                            set2.append(exp)
+                        else:
+                            set1.append(exp)
+
+                # calculate the sum of (sum of dimensional variances) in each set
+                if not set1 or not set2: # if of the set is empty
+                    pass
+                else:
+                    var1 = [0] * numDim # variance in each dimension in set 1
+                    var2 = [0] * numDim # variance in each dimension in set 2
+                    # for each S(t+1) component in each set
+                    for i in range(0, numDim):
+                        var1[i] = calcVariance(Region.getExpValArray(set1, i))
+                        var2[i] = calcVariance(Region.getExpValArray(set2, i))
+
+                    # sum of total variance
+                    var = sum(var1) + sum(var2)
+
+                    # update best C2 is better than current best
+                    if bestC2[2] < 0 or bestC2[2] > var:
+                        bestC2[2] = var
+                        bestC2[1] = vj
+                        bestC2[0] = j
+
+        return bestC2
+
 
     def getNumRegion(self):
 

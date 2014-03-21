@@ -35,6 +35,13 @@ def load_sound(name):
         raise SystemExit, message
     return sound
 
+def calcVariance(data):
+    mean = sum(data)/len(data)
+    sumDiff = 0
+    for val in data:
+        sumDiff += (val - mean)**2
+    return sumDiff/(len(data))
+
 num_robot = 1
 
 bg_colour = (230, 240, 250)
