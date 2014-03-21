@@ -96,7 +96,7 @@ class Robot(pygame.sprite.Sprite):
 
     def __act(self):
         self.motor.v = self.sensor.hr/8
-        self.motor.w = self.sensor.interest/0.1
+        self.motor.w = self.sensor.interest/0.2
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:
             self.x = new_x

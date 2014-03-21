@@ -31,46 +31,39 @@ for i in range(0, num_robot):
 
 #timing
 clock = pygame.time.Clock()
-fps = 30
-sim_time = 5  # in second
-num_frame = sim_time*fps
-frame = 0
 
 while 1:
 
-
     clock.tick(fps)
-
 
     # pygame update
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
             sys.exit()
-    if frame < num_frame:
-        frame += 1
-
-        # robots move
-        allRobots.update(user)
-
-       # user reacts to the animation
-        num_robot = 0
-        for robot in pygame.sprite.Group.sprites(allRobots):
-            # just average speed for now
-            hrFea = robot.motor.v
-            # distance to centre
-            skinFea = math.sqrt((robot.x - size[0]/2)**2 + (robot.y - size[1]/2)**2)
-            # average angular velocity
-            interestFea = robot.motor.w
-            num_robot += 1
-            print robot.memory.R.getNumRegion()
-        fea = [hrFea/num_robot, skinFea/num_robot, interestFea/num_robot]
-
-        user.react(fea)
 
 
-        screen.blit(background, (0, 0))
-        allRobots.draw(screen)
+    # robots move
+    allRobots.update(user)
 
-        pygame.display.flip()
+    # user reacts to the animation
+    num_robot = 0
+    for robot in pygame.sprite.Group.sprites(allRobots):
+        # just average speed for now
+        hrFea = robot.motor.v
+        # distance to centre
+        skinFea = math.sqrt((robot.x - size[0]/2)**2 + (robot.y - size[1]/2)**2)
+        # average angular velocity
+        interestFea = robot.motor.w
+        num_robot += 1
+        print robot.memory.R.getNumRegion()
+    fea = [hrFea/num_robot, skinFea/num_robot, interestFea/num_robot]
+
+    user.react(fea)
+
+
+    screen.blit(background, (0, 0))
+    allRobots.draw(screen)
+
+    pygame.display.flip()
 
 

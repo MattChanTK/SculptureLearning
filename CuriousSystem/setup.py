@@ -46,11 +46,14 @@ num_robot = 1
 
 bg_colour = (230, 240, 250)
 
+fps = 30
+sim_time = 10  # in second
+
 size = (600, 400)
 robot_size = (20, 20)
 mem_size = 100
 
-C1 = 25
+C1 = 250
 
 candy_up_size = (60, 60)
 candy_down_size = (40, 40)
