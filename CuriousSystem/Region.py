@@ -12,8 +12,6 @@ class Region:
         else:
             self.exemplars = exemplars
 
-        self.cut_dim_0 = None
-        self.cut_val_0 = None
         self.cut_dim = None
         self.cut_val = None
 
@@ -38,6 +36,8 @@ class Region:
             if self.right is None:
                 #this node absorbs the right node
                 temp = self.left
+                self.cut_dim = self.left.cut_dim
+                self.cut_val = self.left.cut_val
                 self.right = self.left.right
                 self.left = self.left.left
                 del(temp)
@@ -46,6 +46,8 @@ class Region:
             elif self.left is None:
                 #this node absorbs the left node
                 temp = self.right
+                self.cut_dim = self.right.cut_dim
+                self.cut_val = self.right.cut_val
                 self.left = self.right.left
                 self.right = self.right.right
                 del(temp)
@@ -64,16 +66,26 @@ class Region:
             pass
         else:
             # determining to add the exemplar to left or right node
-
-            # check context
-            leftContext = self.left.getContext()
-            rightContext = self.right.getContext()
-
-            # if the context is more similar to the left node than right node
-            if abs(exemplar.S.hr - leftContext[0]) < abs(exemplar.S.hr - rightContext[0]):
+            if exemplar.getVal(self.cut_dim) < self.cut_val:
                 self.left.addExemplar(exemplar)
-            else:
+            elif exemplar.getVal(self.cut_dim) > self.cut_val:
                 self.right.addExemplar(exemplar)
+            else:
+                if self.left.getNumExemplar() > self.right.getNumExemplar():
+                    self.right.addExemplar(exemplar)
+                else:
+                    self.left.addExemplar(exemplar)
+
+
+            # check context (using closest average values
+            # leftContext = self.left.getContext()
+            # rightContext = self.right.getContext()
+            #
+            # # if the context is more similar to the left node than right node
+            # if abs(exemplar.S.hr - leftContext[0]) < abs(exemplar.S.hr - rightContext[0]):
+            #     self.left.addExemplar(exemplar)
+            # else:
+            #     self.right.addExemplar(exemplar)
 
     def getExemplar(self):
         return self.exemplars
@@ -91,6 +103,18 @@ class Region:
         if j < 0 or vj < 0:
             print ('ERROR: j and vj cannot be less than 0!')
 
+        r1, r2 = self.applyC2(j,vj)
+
+        # instantiate the new sub regions
+        self.left = Region(r1)
+        self.right = Region(r2)
+
+        # record the new j and vj
+        self.cut_dim = j
+        self.cut_val = vj
+
+    def applyC2(self, j, vj):
+
         r1 = []
         r2 = []
         # for each exemplar
@@ -107,8 +131,7 @@ class Region:
                 else:
                     r1.append(exp)
 
-        self.left = Region(r1)
-        self.right = Region(r2)
+        return r1, r2
 
     def getExpValArray(expSet, dim):
         data = []
@@ -140,21 +163,8 @@ class Region:
 
             # split set accordingly
             for vj in vj_guess:
-                set1 = []
-                set2 = []
-                # for each exemplar
-                for exp in self.exemplars:
-                    # splitting to two set according to vj
-                    if exp.getVal(j) < vj:
-                        set1.append(exp)
-                    elif exp.getVal(j) > vj:
-                        set2.append(exp)
-                    else:
-                        # either one is fine
-                        if len(set1) > len(set2):
-                            set2.append(exp)
-                        else:
-                            set1.append(exp)
+
+                set1, set2 = self.applyC2(j, vj)
 
                 # calculate the sum of (sum of dimensional variances) in each set
                 if not set1 or not set2: # if of the set is empty
@@ -211,3 +221,4 @@ class Region:
             avg[i] /= numExp
 
         return avg
+
