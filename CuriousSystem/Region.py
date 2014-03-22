@@ -182,15 +182,15 @@ class Region:
 
     def getBestC2(self):
 
-        numDim = self.exemplars[0].getNumOutputParams()
-        numGuess = 100
+        numDim, S2_index = self.exemplars[0].getNumOutputParams()
+        numGuess = 30
         vj_guess = [0] * numGuess
 
         # keeping tracking of the best C2
         bestC2 = [-1, -1, -1] #[j, vj, var]
 
         # for each dimension
-        for j in range(0, numDim):
+        for j in range(S2_index, S2_index + numDim):
 
             # finding bound in v_j
             valSet = Region.getExpValArray(self.exemplars, j)

@@ -11,13 +11,12 @@ class Exemplar:
         return self.S.getNumParam() + self.M.getNumParam() + self.S2.getNumParam()
 
     def getNumOutputParams(self):
-        return self.S2.getNumParam()
+        return self.S2.getNumParam(), self.S.getNumParam() + self.M.getNumParam()
 
     def getVal(self, dim):
 
-        vals = self.S.getParam()
-        vals.append(self.M.getParam())
-        vals.append(self.S2.getParam())
+        vals = self.S.getParam() + self.M.getParam() + self.S2.getParam()
+
         return vals[dim]
 
 
