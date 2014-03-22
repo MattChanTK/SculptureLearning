@@ -53,10 +53,16 @@ sim_time = 10  # in second
 
 size = (600, 400)
 robot_size = (20, 20)
-mem_size = 100
 
+# Max number of exemplars before forgetting
+memory_size = 100
+
+#Criterion
 C1 = 25
 
+# Expert Setting
+time_window = 15
+smoothing_parameter = 25
 
 candy_up_size = (60, 60)
 candy_down_size = (40, 40)

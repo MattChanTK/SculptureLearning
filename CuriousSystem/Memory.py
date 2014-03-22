@@ -16,7 +16,7 @@ class Memory:
     def addExemplar(self, s1, m, s2):
 
         # check if memory is full first
-        if len(self.exp)+1 > mem_size:
+        if len(self.exp)+1 > memory_size:
             # forget oldest one if full
             forgotten = self.exp.pop(0)
             self.R.forgetExemplar(forgotten)
@@ -29,6 +29,5 @@ class Memory:
 
 
 
-    #def forgetExemplar(self):
 
 
