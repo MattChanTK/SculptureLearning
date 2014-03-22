@@ -3,6 +3,8 @@ import sys
 import pygame
 import math
 
+
+
 from pygame.locals import *
 if not pygame.font: print 'Warning, fonts disabled'
 if not pygame.mixer: print 'Warning, sound disabled'
@@ -53,7 +55,8 @@ size = (600, 400)
 robot_size = (20, 20)
 mem_size = 100
 
-C1 = 250
+C1 = 25
+
 
 candy_up_size = (60, 60)
 candy_down_size = (40, 40)

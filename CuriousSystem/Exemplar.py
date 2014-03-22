@@ -1,9 +1,11 @@
+from setup import *
 class Exemplar:
 
     def __init__(self, s, m, s2):
         self.S = s
         self.M = m
         self.S2 = s2
+
 
     def getNumParams(self):
         return self.S.getNumParam() + self.M.getNumParam() + self.S2.getNumParam()

@@ -40,7 +40,6 @@ class Robot(pygame.sprite.Sprite):
         # instantiate the robot's memory
         self.memory = Memory.Memory()
 
-
     def update(self, user):
 
         # Sense the user
@@ -56,6 +55,9 @@ class Robot(pygame.sprite.Sprite):
         s2 = self.sensor
 
         self.memory.addExemplar(s1, m, s2)
+
+        self.printRegionPop();
+
 
     def __move(self):
 
@@ -97,6 +99,7 @@ class Robot(pygame.sprite.Sprite):
     def __act(self):
         self.motor.v = self.sensor.hr/8
         self.motor.w = self.sensor.interest/0.2
+
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:
             self.x = new_x
@@ -109,3 +112,8 @@ class Robot(pygame.sprite.Sprite):
 
         self.rect.x = self.x
         self.rect.y = self.y
+
+    def printRegionPop(self):
+        print len(self.memory.exp), '-->'
+        self.memory.R.getNumExemplarRecursive()
+        print('-----------')

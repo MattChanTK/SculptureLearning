@@ -22,38 +22,41 @@ class Region:
         return self.right
 
     def updateRegions(self):
-        # need codes for forgetting exemplar
+        # Forgetting region that has no exemplar
+        if self.left is not None and self.left.getNumExemplar() == 0:
+            self.left = None
+        elif self.right is not None and self.right.getNumExemplar() == 0:
+            self.right = None
+
         # it's leaf node
         if self.left is None and self.right is None:
             # split if C1 is met
             if self.getNumExemplar() > C1:
                 self.split()
         elif self.left is not None and self.right is not None:
+
             self.left.updateRegions()
             self.right.updateRegions()
         else:
             # there's no right node, only left node
             if self.right is None:
                 #this node absorbs the right node
-                temp = self.left
                 self.cut_dim = self.left.cut_dim
                 self.cut_val = self.left.cut_val
                 self.right = self.left.right
                 self.left = self.left.left
-                del(temp)
 
             # there's no left node, only right node
             elif self.left is None:
                 #this node absorbs the left node
-                temp = self.right
                 self.cut_dim = self.right.cut_dim
                 self.cut_val = self.right.cut_val
                 self.left = self.right.left
                 self.right = self.right.right
-                del(temp)
 
             self.updateRegions()
 
+        return self
 
     def addExemplar(self, exemplar):
         self.updateRegions()
@@ -87,11 +90,47 @@ class Region:
             # else:
             #     self.right.addExemplar(exemplar)
 
+    def forgetExemplar(self, exemplar):
+        #self = self.updateRegions()
+        try:
+            self.exemplars.remove(exemplar)
+
+            # delete from the child branches
+            if self.left is not None:
+                self.left.forgetExemplar(exemplar)
+            if self.right is not None:
+                self.right.forgetExemplar(exemplar)
+
+            #if self.right is None and self.right is None:
+            #    print 'exemplar deleted'
+
+        except ValueError:
+            # don't need to search this branch
+            pass
+
     def getExemplar(self):
         return self.exemplars
 
     def getNumExemplar(self):
         return len(self.exemplars)
+
+    def getNumExemplarRecursive(self):
+
+        numInLeft = 0
+        numInRight = 0
+        if self.left is not None:
+            numInLeft = self.left.getNumExemplarRecursive()
+
+        if self.right is not None:
+            numInRight = self.right.getNumExemplarRecursive()
+
+        if self.right is None and self.left is None:
+            print '(' ,len(self.exemplars), ')'
+            return len(self.exemplars)
+
+        print numInLeft + numInRight
+        return numInLeft + numInRight
+
 
     def split(self):
 
@@ -106,8 +145,9 @@ class Region:
         r1, r2 = self.applyC2(j,vj)
 
         # instantiate the new sub regions
-        self.left = Region(r1)
-        self.right = Region(r2)
+        self.left = Region(exemplars=r1)
+        self.right = Region(exemplars=r2)
+        print 'Split Region'
 
         # record the new j and vj
         self.cut_dim = j
@@ -188,7 +228,6 @@ class Region:
 
         return bestC2
 
-
     def getNumRegion(self):
 
         if self.getLeftChild() is None:
@@ -221,4 +260,5 @@ class Region:
             avg[i] /= numExp
 
         return avg
+
 
