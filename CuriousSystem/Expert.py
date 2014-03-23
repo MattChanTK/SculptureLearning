@@ -39,6 +39,7 @@ class Expert:
             for i in range(0, len(s2)):
                 y_train[i][expId] = s2[i]
 
+        print len(y_train[0])
         # train for each output dimension
         for i in range(0, numYDim):
             try:
@@ -49,8 +50,6 @@ class Expert:
                 temp_x_train.append([0]*len(x_train[0]))
                 temp_y_train.append(0)
                 self.model[i].fit(temp_x_train, temp_y_train)
-
-
 
     def predict(self, sensor, motor):
 
@@ -68,14 +67,20 @@ class Expert:
         return Sensor.Sensor(prediction)
 
 
-    def addPredictError(self, actual, prediction):
+    def addPredictError(self, s_actual, s_prediction):
 
-        if len(self.error)+1 > (self.smoothing+self.time_window):
+        if len(self.error)+1 > (self.smoothing+self.window):
             # forget oldest one if full
             self.error.pop(0)
 
-        error = actual - prediction
+        actual = s_actual.getParam()
+        prediction = s_prediction.getParam()
+
+        error = [0]*len(actual)
+        for i in range(0, len(error)):
+            error[i] = actual[i] - prediction[i]
         self.error.append(error)
+        return error
 
     def calcLearningProgress(self):
 
@@ -89,10 +94,15 @@ class Expert:
                 mean_err[i] += self.error[j][i]
 
         for i in range(0, numParam):
-            for j in range(0, numError - self.smoothing):
+            for j in range(0, numError - self.window):
                 mean_err_0[i] += self.error[j][i]
 
-        return mean_err_0 - mean_err
+        learnProgress = [0]*numParam
+        for i in range(0, numParam):
+            mean_err[i] /= self.smoothing
+            mean_err_0[i] /= self.smoothing
+            learnProgress[i] = mean_err_0[i] - mean_err[i]
+        return learnProgress
 
 
 

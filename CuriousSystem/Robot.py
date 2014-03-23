@@ -36,7 +36,7 @@ class Robot(pygame.sprite.Sprite):
 
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
-        self.s2_predict = Sensor.Sensor()
+        #self.s2_predict = Sensor.Sensor()
 
         # instantiate the robot's memory
         self.memory = Memory.Memory()
@@ -52,9 +52,10 @@ class Robot(pygame.sprite.Sprite):
         self.__act()
         m = self.motor
 
-        if self.memory.getMemorySize() > (time_window + smoothing_parameter):
+        s2_predict = None
+        if self.memory.getMemorySize() > 2:
             # predict results
-            self.__consult()
+            s2_predict, expert = self.__consult()
 
         # perform action
         self.__move()
@@ -62,6 +63,11 @@ class Robot(pygame.sprite.Sprite):
         # check for actuation sensor inputs
         self.__sense(user)
         s2 = self.sensor
+
+        # Calculate prediction error
+        if s2_predict is not None:
+            self.__observe(expert, s2_predict, s2)
+
 
         self.memory.addExemplar(s1, m, s2)
 
@@ -110,8 +116,20 @@ class Robot(pygame.sprite.Sprite):
         self.motor.w = self.sensor.interest/0.2
     def __consult(self):
         # consulting regional expert for action
-        self.s2_predict = self.memory.getPrediction(self.sensor, self.motor)
-        print self.s2_predict.getParam()
+        s2_predict, expert = self.memory.getPrediction(self.sensor, self.motor)
+        #print s2_predict.getParam()
+        return s2_predict, expert #reference to expert who made the prediction
+
+
+    def __observe(self, expert, s2_predict, s2_actual):
+        # compute error in prediction
+        predict_error = expert.addPredictError(s2_actual, s2_predict)
+        print 'Prediction Error:', predict_error
+        #print len(expert.error)
+        # computer learning progress once sufficient sample is collected
+        if len(expert.error) >= (expert.window + expert.smoothing):
+            print 'Learning Progress: ', expert.calcLearningProgress()
+
 
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:

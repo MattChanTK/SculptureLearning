@@ -28,7 +28,7 @@ class Memory:
 
     def getPrediction(self, sensor, motor):
         expert = self.R.getExpert(sensor, motor)
-        return expert.predict(sensor, motor)
+        return expert.predict(sensor, motor), expert
 
     def getMemorySize(self):
         return len(self.exp)

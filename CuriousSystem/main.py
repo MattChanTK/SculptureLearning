@@ -51,7 +51,7 @@ while 1:
         # just average speed for now
         hrFea = robot.motor.v
         # distance to centre
-        skinFea = math.sqrt((robot.x - size[0]/2)**2 + (robot.y - size[1]/2)**2)
+        skinFea = math.sqrt((robot.x)**2 + (robot.y)**2)
         # average angular velocity
         interestFea = robot.motor.w
         num_robot += 1
