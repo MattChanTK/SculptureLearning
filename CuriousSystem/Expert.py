@@ -1,6 +1,7 @@
 from setup import*
 from sklearn import svm
 import Sensor
+import copy
 
 class Expert:
 
@@ -21,14 +22,16 @@ class Expert:
 
         if not self.model:
             #for each output dimension
-            for i in range(0, numXDim):
+            for i in range(0, numYDim):
                 # using Support Vector Regression (rbf)
                 self.model.append(svm.SVR())
 
 
         # constructing the training set
         x_train = []
-        y_train = [[0]*len(exemplars)]*3
+        y_train = []
+        for i in range(0, numYDim):
+            y_train.append([0]*len(exemplars))
         # for each exemplar
         for expId in range(0, len(exemplars)):
             x_train.append(exemplars[expId].getSM())
@@ -41,8 +44,8 @@ class Expert:
             try:
                 self.model[i].fit(x_train, y_train[i])
             except ValueError:
-                temp_x_train = x_train
-                temp_y_train = y_train[i]
+                temp_x_train = copy.copy(x_train)
+                temp_y_train = copy.copy(y_train[i])
                 temp_x_train.append([0]*len(x_train[0]))
                 temp_y_train.append(0)
                 self.model[i].fit(temp_x_train, temp_y_train)
@@ -54,11 +57,11 @@ class Expert:
         prediction = []
         sm = sensor.getParam() + motor.getParam()
 
-        for mod in self.model:
+        for i in range(0, len(self.model)):
             try:
-                p = mod.predict(sm)
-            except AttributeError: # if can't make a prediction
-                p = sensor.getParam() # just use the input value as best guess
+                p = self.model[i].predict(sm)[0]
+            except AttributeError:  # if can't make a prediction
+                p = (sensor.getParam())[i] # just use the input value as best guess
 
             prediction.append(p)
 

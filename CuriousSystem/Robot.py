@@ -65,7 +65,7 @@ class Robot(pygame.sprite.Sprite):
 
         self.memory.addExemplar(s1, m, s2)
 
-        self.printRegionPop()
+        # self.printRegionPop()
 
 
     def __move(self):
@@ -111,6 +111,7 @@ class Robot(pygame.sprite.Sprite):
     def __consult(self):
         # consulting regional expert for action
         self.s2_predict = self.memory.getPrediction(self.sensor, self.motor)
+        print self.s2_predict.getParam()
 
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:

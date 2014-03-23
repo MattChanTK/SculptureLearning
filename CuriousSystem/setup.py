@@ -55,10 +55,10 @@ size = (600, 400)
 robot_size = (20, 20)
 
 # Max number of exemplars before forgetting
-memory_size = 100
+memory_size = 5000
 
 #Criterion
-C1 = 25
+C1 = 250
 
 # Expert Setting
 time_window = 15

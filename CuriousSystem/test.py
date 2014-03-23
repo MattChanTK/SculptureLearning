@@ -1,5 +1,6 @@
 __author__ = 'Matthew'
 from sklearn import svm
+import copy
 
 class store:
     def __init__(self):
@@ -35,5 +36,19 @@ svr = svm.SVR()
 
 trainX = [[1,2,3,4], [3,4,5,6], [7,8,9,10]]
 trainY = [10, 60, 80]
-#svr.fit(trainX, trainY)
-print svr.predict([1,2,3,9])
+svr.fit(trainX, trainY)
+predict = svr.predict([[1,2,3,9], [7,8,9,10]])
+print predict
+
+set = []
+for i in range(3):
+    set.append([0]*2)
+
+print set
+set [0][0] = 2
+print set
+
+set2 = copy.copy(set)
+set2.append([12]*len(set[0]))
+print set
+print set2
