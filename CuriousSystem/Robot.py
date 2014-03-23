@@ -36,27 +36,36 @@ class Robot(pygame.sprite.Sprite):
 
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
+        self.s2_predict = Sensor.Sensor()
 
         # instantiate the robot's memory
         self.memory = Memory.Memory()
+
 
     def update(self, user):
 
         # Sense the user
         self.__sense(user)
         s1 = self.sensor
+
         # select action
         self.__act()
         m = self.motor
+
+        if self.memory.getMemorySize() > (time_window + smoothing_parameter):
+            # predict results
+            self.__consult()
+
         # perform action
         self.__move()
+
         # check for actuation sensor inputs
         self.__sense(user)
         s2 = self.sensor
 
         self.memory.addExemplar(s1, m, s2)
 
-        self.printRegionPop();
+        self.printRegionPop()
 
 
     def __move(self):
@@ -99,6 +108,9 @@ class Robot(pygame.sprite.Sprite):
     def __act(self):
         self.motor.v = self.sensor.hr/8
         self.motor.w = self.sensor.interest/0.2
+    def __consult(self):
+        # consulting regional expert for action
+        self.s2_predict = self.memory.getPrediction(self.sensor, self.motor)
 
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:

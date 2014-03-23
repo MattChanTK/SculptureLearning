@@ -3,9 +3,9 @@ from setup import *
 
 class Motor():
 
-    def __init__(self):
-        self.v = 0  # velocity
-        self.w = 0  # angular velocity
+    def __init__(self, default=[0, 0]):
+        self.v = default[0]  # velocity
+        self.w = default[1]  # angular velocity
 
     def getParam(self):
         return [self.v, self.w]

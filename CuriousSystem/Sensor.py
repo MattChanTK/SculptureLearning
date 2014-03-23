@@ -3,10 +3,10 @@ from setup import *
 
 class Sensor():
 
-    def __init__(self):
-        self.hr = 0
-        self.skin = 0
-        self.interest = 0
+    def __init__(self, default=[0]*3):
+        self.hr = default[0]
+        self.skin = default[1]
+        self.interest = default[2]
 
         # Maybe add these sensor
         #self.x = 0

@@ -26,8 +26,10 @@ class Memory:
 
         self.R.addExemplar(self.exp[len(self.exp)-1])
 
+    def getPrediction(self, sensor, motor):
+        expert = self.R.getExpert(sensor, motor)
+        return expert.predict(sensor, motor)
 
-
-
-
+    def getMemorySize(self):
+        return len(self.exp)
 

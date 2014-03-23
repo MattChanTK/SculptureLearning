@@ -1,19 +1,24 @@
 from setup import *
 import random
-
+import Expert
 
 
 class Region:
     def __init__(self, exemplars=None):
         self.left = None
         self.right = None
+        self.expert = Expert.Expert()
+
         if exemplars is None:
             self.exemplars = []
         else:
             self.exemplars = exemplars
+            self.expert.train(self.exemplars)
 
         self.cut_dim = None
         self.cut_val = None
+
+
 
     def getLeftChild(self):
         return self.left
@@ -41,6 +46,7 @@ class Region:
             # there's no right node, only left node
             if self.right is None:
                 #this node absorbs the right node
+                self.expert = self.left.expert
                 self.cut_dim = self.left.cut_dim
                 self.cut_val = self.left.cut_val
                 self.right = self.left.right
@@ -49,6 +55,7 @@ class Region:
             # there's no left node, only right node
             elif self.left is None:
                 #this node absorbs the left node
+                self.expert = self.right.expert
                 self.cut_dim = self.right.cut_dim
                 self.cut_val = self.right.cut_val
                 self.left = self.right.left
@@ -66,7 +73,9 @@ class Region:
         #check where it should add the exemplar to
         if self.left is None and self.right is None:
             # leave the exemplar here
-            pass
+            # training expert
+            if len(self.exemplars) > 1:
+                self.expert.train(self.exemplars)
         else:
             # determining to add the exemplar to left or right node
             if exemplar.getVal(self.cut_dim) < self.cut_val:
@@ -78,17 +87,6 @@ class Region:
                     self.right.addExemplar(exemplar)
                 else:
                     self.left.addExemplar(exemplar)
-
-
-            # check context (using closest average values
-            # leftContext = self.left.getContext()
-            # rightContext = self.right.getContext()
-            #
-            # # if the context is more similar to the left node than right node
-            # if abs(exemplar.S.hr - leftContext[0]) < abs(exemplar.S.hr - rightContext[0]):
-            #     self.left.addExemplar(exemplar)
-            # else:
-            #     self.right.addExemplar(exemplar)
 
     def forgetExemplar(self, exemplar):
         #self = self.updateRegions()
@@ -130,7 +128,6 @@ class Region:
 
         print numInLeft + numInRight
         return numInLeft + numInRight
-
 
     def split(self):
 
@@ -182,7 +179,10 @@ class Region:
 
     def getBestC2(self):
 
-        numDim, S2_index = self.exemplars[0].getNumOutputParams()
+        # getting the number of dimension in SM
+        numDim = len(self.exemplars[0].getSM())
+        SM_index = 0
+        #numDim, S2_index = self.exemplars[0].getNumOutputParams()
         numGuess = 30
         vj_guess = [0] * numGuess
 
@@ -190,7 +190,7 @@ class Region:
         bestC2 = [-1, -1, -1] #[j, vj, var]
 
         # for each dimension
-        for j in range(S2_index, S2_index + numDim):
+        for j in range(SM_index, SM_index + numDim):
 
             # finding bound in v_j
             valSet = Region.getExpValArray(self.exemplars, j)
@@ -260,5 +260,22 @@ class Region:
             avg[i] /= numExp
 
         return avg
+
+ #   def calcLearnRate(self):
+
+    def getExpert(self, sensor, motor):
+        sm = sensor.getParam() + motor.getParam()
+
+        if self.left == None and self.right == None:
+            return self.expert
+        else:
+             # determining to look for expert in the left or right node
+            if sm[self.cut_dim] < self.cut_val:
+                return self.left.getExpert(sensor, motor)
+            else:
+                return self.right.getExpert(sensor, motor)
+
+
+
 
 

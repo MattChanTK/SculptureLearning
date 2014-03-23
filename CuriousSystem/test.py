@@ -1,4 +1,5 @@
 __author__ = 'Matthew'
+from sklearn import svm
 
 class store:
     def __init__(self):
@@ -25,20 +26,14 @@ def showItems():
     print 'storeA: ', storeA.getItemsVal()
     print 'storeB: ', storeB.getItemsVal()
 
-storeA = store()
-storeB = store()
 
-storeA.addItems([item(1), item(2), item(3)])
 
-showItems()
+svr = svm.SVR()
 
-storeB.addItems(storeA.items)
 
-showItems()
 
-storeA.items[1] = item(23)
-showItems()
 
-storeB.items.remove(storeA.items[1])
-showItems()
-
+trainX = [[1,2,3,4], [3,4,5,6], [7,8,9,10]]
+trainY = [10, 60, 80]
+#svr.fit(trainX, trainY)
+print svr.predict([1,2,3,9])

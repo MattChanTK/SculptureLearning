@@ -16,7 +16,13 @@ class Exemplar:
     def getVal(self, dim):
 
         vals = self.S.getParam() + self.M.getParam() + self.S2.getParam()
-
         return vals[dim]
 
+    def getSM(self):
+
+        return self.S.getParam() + self.M.getParam()
+
+    def getS2(self):
+
+        return self.S2.getParam()
 
