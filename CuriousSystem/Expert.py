@@ -1,7 +1,6 @@
 from setup import*
 from sklearn import svm
 import Sensor
-import copy
 
 class Expert:
 
@@ -49,8 +48,10 @@ class Expert:
             except ValueError:
                 temp_x_train = copy.copy(x_train)
                 temp_y_train = copy.copy(y_train[i])
-                temp_x_train.append([0]*len(x_train[0]))
-                temp_y_train.append(0)
+                x_append = [x + 0.1 for x in temp_x_train[0]]
+                y_append = temp_y_train[0] + 0.1
+                temp_x_train.append(x_append)
+                temp_y_train.append(y_append)
                 self.model[i].fit(temp_x_train, temp_y_train)
 
     def predict(self, sensor, motor):
@@ -64,7 +65,7 @@ class Expert:
             except AttributeError:  # if can't make a prediction
                 p = (sensor.getParam())[i] # just use the input value as best guess
 
-            prediction.append(p)
+            prediction.append(copy.copy(p))
 
         return Sensor.Sensor(prediction)
 

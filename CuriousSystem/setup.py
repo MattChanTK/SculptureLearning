@@ -3,6 +3,7 @@ import sys
 import pygame
 import math
 import datetime
+import copy
 
 
 
@@ -71,12 +72,8 @@ memory_size = 5000
 C1 = 250
 
 # Expert Setting
-time_window = 15
-smoothing_parameter = 25
-
-candy_up_size = (60, 60)
-candy_down_size = (40, 40)
-candy_factor_rate = 0.002
+time_window = 3
+smoothing_parameter = 5
 
 
 

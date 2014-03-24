@@ -5,7 +5,7 @@ import Sensor
 import Memory
 import Exemplar
 import Q_learning
-import copy
+
 
 random.seed()
 
@@ -46,7 +46,10 @@ class Robot(pygame.sprite.Sprite):
         self.Q = Q_learning.Q_learning()
 
         # Prediction Error history
-        self.history = []
+        self.predict_history = []
+
+        # Action History
+        self.action_history = []
 
 
     def update(self, user):
@@ -57,6 +60,7 @@ class Robot(pygame.sprite.Sprite):
 
         # select action
         sm_q = self.__act()
+        self.action_history.append(Q_learning.Q_learning.discretize(copy.copy(self.motor)))
         m = copy.copy(self.motor)
 
         # predict results
@@ -143,7 +147,7 @@ class Robot(pygame.sprite.Sprite):
         # compute error in prediction
         predict_error = expert.addPredictError(s2_actual, s2_predict)
         print 'Prediction Error:', predict_error
-        self.history.append(predict_error)
+        self.predict_history.append(predict_error)
         #print len(expert.error)
         # computer learning progress once sufficient sample is collected
         if len(expert.error) >= (expert.window + expert.smoothing):
@@ -161,7 +165,7 @@ class Robot(pygame.sprite.Sprite):
         reward = 0
         for comp in lp:
             reward += comp
-        reward /= len(lp)
+        reward /= float(len(lp))
 
         q = q0 + alpha*(reward + gamma*(self.Q.getBestMotor(self.sensor))[1] - q0)
 
