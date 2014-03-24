@@ -13,6 +13,8 @@ class Expert:
 
         # knowledge by training
         self.model = []  # set of trained knowledge
+        # weight for action selection
+        self.Q = []
 
     def train(self, exemplars):
 
@@ -66,7 +68,6 @@ class Expert:
 
         return Sensor.Sensor(prediction)
 
-
     def addPredictError(self, s_actual, s_prediction):
 
         if len(self.error)+1 > (self.smoothing+self.window):
@@ -103,6 +104,7 @@ class Expert:
             mean_err_0[i] /= self.smoothing
             learnProgress[i] = mean_err_0[i] - mean_err[i]
         return learnProgress
+
 
 
 

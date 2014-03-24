@@ -36,7 +36,6 @@ class Robot(pygame.sprite.Sprite):
 
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
-        #self.s2_predict = Sensor.Sensor()
 
         # instantiate the robot's memory
         self.memory = Memory.Memory()
@@ -52,9 +51,9 @@ class Robot(pygame.sprite.Sprite):
         self.__act()
         m = self.motor
 
+        # predict results
         s2_predict = None
         if self.memory.getMemorySize() > 2:
-            # predict results
             s2_predict, expert = self.__consult()
 
         # perform action
@@ -112,6 +111,8 @@ class Robot(pygame.sprite.Sprite):
         self.sensor.interest = user.interest
 
     def __act(self):
+
+
         self.motor.v = self.sensor.hr/8
         self.motor.w = self.sensor.interest/0.2
     def __consult(self):
@@ -130,6 +131,8 @@ class Robot(pygame.sprite.Sprite):
         if len(expert.error) >= (expert.window + expert.smoothing):
             print 'Learning Progress: ', expert.calcLearningProgress()
 
+    def __learn(self):
+        pass
 
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:

@@ -44,6 +44,18 @@ def calcVariance(data):
         sumDiff += (val - mean)**2
     return sumDiff/(len(data))
 
+def frange(x, y, jump):
+
+    list = []
+    while x < y:
+        list.append(x)
+        x += jump
+    return list
+
+
+
+
+
 num_robot = 1
 
 bg_colour = (230, 240, 250)
