@@ -41,7 +41,7 @@ class Expert:
             for i in range(0, len(s2)):
                 y_train[i][expId] = s2[i]
 
-        print len(y_train[0])
+        # print len(y_train[0])
         # train for each output dimension
         for i in range(0, numYDim):
             try:

@@ -22,7 +22,7 @@ class Memory:
 
         newExemplar = Exemplar.Exemplar(s1, m, s2)
         self.exp.append(newExemplar)
-        print 'SM: ', newExemplar.getSM()
+        #print 'SM: ', newExemplar.getSM()
         self.R.addExemplar(self.exp[len(self.exp)-1])
 
     def getPrediction(self, sensor, motor):

@@ -2,6 +2,7 @@ import os
 import sys
 import pygame
 import math
+import datetime
 
 
 
@@ -51,9 +52,6 @@ def frange(x, y, jump):
         list.append(x)
         x += jump
     return list
-
-
-
 
 
 num_robot = 1

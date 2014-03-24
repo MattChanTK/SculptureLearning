@@ -42,7 +42,12 @@ class Robot(pygame.sprite.Sprite):
         # instantiate the robot's memory
         self.memory = Memory.Memory()
 
+        # Q-Learning engine
         self.Q = Q_learning.Q_learning()
+
+        # Prediction Error history
+        self.history = []
+
 
     def update(self, user):
 
@@ -137,11 +142,14 @@ class Robot(pygame.sprite.Sprite):
     def __observe(self, expert, s2_predict, s2_actual):
         # compute error in prediction
         predict_error = expert.addPredictError(s2_actual, s2_predict)
-        # print 'Prediction Error:', predict_error
+        print 'Prediction Error:', predict_error
+        self.history.append(predict_error)
         #print len(expert.error)
         # computer learning progress once sufficient sample is collected
         if len(expert.error) >= (expert.window + expert.smoothing):
-            return expert.calcLearningProgress()
+            LP = expert.calcLearningProgress()
+            #print LP
+            return LP
         else:
             return [0]*self.motor.getNumParam()
 

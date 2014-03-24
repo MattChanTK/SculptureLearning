@@ -2,7 +2,7 @@ from setup import *
 import Robot
 import Simson
 import Slider
-
+import datetime
 
 # pygame set up
 pygame.init()
@@ -39,6 +39,19 @@ while 1:
     # pygame update
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+
+            # output to file
+            current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+            file = open(os.path.join('outputs', 'prediction_error_'+current_datetime+'.csv'), 'a+') # append mode
+            for robot in pygame.sprite.Group.sprites(allRobots):
+                numSample = len(robot.history)
+                numDim = len(robot.history[0])
+                for sample in robot.history:
+                    for dataPt in sample:
+                        file.write(str(dataPt))
+                        file.write(',')
+                    file.write('\n')
+            file.close()
             sys.exit()
 
 
