@@ -49,11 +49,11 @@ while 1:
     num_robot = 0
     for robot in pygame.sprite.Group.sprites(allRobots):
         # just average speed for now
-        hrFea = robot.motor.v
+        hrFea = abs(robot.motor.v)
         # distance to centre
-        skinFea = math.sqrt((robot.x)**2 + (robot.y)**2)
+        skinFea = abs(robot.motor.v*robot.motor.w)
         # average angular velocity
-        interestFea = robot.motor.w
+        interestFea = abs(robot.motor.w/(math.pi/4))
         num_robot += 1
         #print robot.memory.R.getNumRegion()
     fea = [hrFea/num_robot, skinFea/num_robot, interestFea/num_robot]

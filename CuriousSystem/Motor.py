@@ -4,8 +4,8 @@ from setup import *
 class Motor(object):
 
     # lower nad upper bound of the motor values
-    vBound = [-200.0, 200.0]
-    wBound = [-math.pi, math.pi]
+    vBound = [0.0, 50.0]
+    wBound = [0, math.pi/4]
 
     def __init__(self, default=[0, 0]):
         self.v = default[0]  # velocity

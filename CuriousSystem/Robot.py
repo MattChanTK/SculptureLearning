@@ -4,6 +4,8 @@ import Motor
 import Sensor
 import Memory
 import Exemplar
+import Q_learning
+import copy
 
 random.seed()
 
@@ -40,16 +42,17 @@ class Robot(pygame.sprite.Sprite):
         # instantiate the robot's memory
         self.memory = Memory.Memory()
 
+        self.Q = Q_learning.Q_learning()
 
     def update(self, user):
 
         # Sense the user
         self.__sense(user)
-        s1 = self.sensor
+        s1 = copy.copy(self.sensor)
 
         # select action
-        self.__act()
-        m = self.motor
+        sm_q = self.__act()
+        m = copy.copy(self.motor)
 
         # predict results
         s2_predict = None
@@ -61,12 +64,15 @@ class Robot(pygame.sprite.Sprite):
 
         # check for actuation sensor inputs
         self.__sense(user)
-        s2 = self.sensor
+        s2 = copy.copy(self.sensor)
 
         # Calculate prediction error
+        lp = [0]*s2.getNumParam()
         if s2_predict is not None:
-            self.__observe(expert, s2_predict, s2)
+            lp = self.__observe(expert, s2_predict, s2)
 
+        # Learn the consequence of the action
+        self.__learn(sm_q, lp)
 
         self.memory.addExemplar(s1, m, s2)
 
@@ -105,6 +111,8 @@ class Robot(pygame.sprite.Sprite):
         # calculate new direction (will change if it hits wall)
         self.dir = math.atan2(move_y, move_x)
 
+
+
     def __sense(self, user):
         self.sensor.hr = user.hr
         self.sensor.skin = user.skin
@@ -112,9 +120,13 @@ class Robot(pygame.sprite.Sprite):
 
     def __act(self):
 
+        self.motor, sm_q = self.Q.getBestMotor(self.sensor)
 
-        self.motor.v = self.sensor.hr/8
-        self.motor.w = self.sensor.interest/0.2
+        #self.motor.v = self.sensor.hr/8
+        #self.motor.w = self.sensor.interest/0.2
+
+        return sm_q
+
     def __consult(self):
         # consulting regional expert for action
         s2_predict, expert = self.memory.getPrediction(self.sensor, self.motor)
@@ -125,14 +137,27 @@ class Robot(pygame.sprite.Sprite):
     def __observe(self, expert, s2_predict, s2_actual):
         # compute error in prediction
         predict_error = expert.addPredictError(s2_actual, s2_predict)
-        print 'Prediction Error:', predict_error
+        # print 'Prediction Error:', predict_error
         #print len(expert.error)
         # computer learning progress once sufficient sample is collected
         if len(expert.error) >= (expert.window + expert.smoothing):
-            print 'Learning Progress: ', expert.calcLearningProgress()
+            return expert.calcLearningProgress()
+        else:
+            return [0]*self.motor.getNumParam()
 
-    def __learn(self):
-        pass
+    def __learn(self, q0, lp):
+
+        alpha = Q_learning.Q_learning.learnRate
+        gamma = Q_learning.Q_learning.gamma
+        #q0 = self.Q.getQ(self.sensor, self.motor)
+        reward = 0
+        for comp in lp:
+            reward += comp
+        reward /= len(lp)
+
+        q = q0 + alpha*(reward + gamma*(self.Q.getBestMotor(self.sensor))[1] - q0)
+
+        self.Q.addQ(self.sensor, self.motor, q)
 
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:

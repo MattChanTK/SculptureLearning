@@ -14,7 +14,6 @@ class Memory:
 
 
     def addExemplar(self, s1, m, s2):
-
         # check if memory is full first
         if len(self.exp)+1 > memory_size:
             # forget oldest one if full
@@ -23,7 +22,7 @@ class Memory:
 
         newExemplar = Exemplar.Exemplar(s1, m, s2)
         self.exp.append(newExemplar)
-
+        print 'SM: ', newExemplar.getSM()
         self.R.addExemplar(self.exp[len(self.exp)-1])
 
     def getPrediction(self, sensor, motor):
