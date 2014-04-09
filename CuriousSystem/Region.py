@@ -139,7 +139,7 @@ class Region:
         if j < 0 or vj < 0:
             print ('ERROR: j and vj cannot be less than 0!')
 
-        r1, r2 = self.applyC2(j,vj)
+        r1, r2 = self.applyC2(j)
 
         # instantiate the new sub regions
         self.left = Region(exemplars=r1)
@@ -150,27 +150,15 @@ class Region:
         self.cut_dim = j
         self.cut_val = vj
 
-    def applyC2(self, j, vj):
+    def applyC2(self, j):
 
-        r1 = []
-        r2 = []
-        # for each exemplar
-        for exp in self.exemplars:
-            # splitting to two set according to vj
-            if exp.getVal(j) < vj:
-                r1.append(exp)
-            elif exp.getVal(j) > vj:
-                r2.append(exp)
-            else:
-                # either one is fine
-                if len(r1) > len(r2):
-                    r2.append(exp)
-                else:
-                    r1.append(exp)
+        sortedExp = sorted(self.exemplars, key=lambda exp: exp.getVal(j))
+        r1 = sortedExp[0:int(len(sortedExp)/2)]
+        r2 = sortedExp[int(len(sortedExp)/2):int(len(sortedExp))]
 
         return r1, r2
 
-    def getExpValArray(expSet, dim):
+    def getExpValArray(expSet, dim=-1):
         data = []
         for exp in expSet:
             data.append(exp.getVal(dim)) # all the val in i-th dimension
@@ -178,13 +166,12 @@ class Region:
     getExpValArray = staticmethod(getExpValArray)
 
     def getBestC2(self):
-
+        start = time.clock()
+        print "Start Time: " + str(start)
         # getting the number of dimension in SM
         numDim = len(self.exemplars[0].getSM())
         SM_index = 0
         #numDim, S2_index = self.exemplars[0].getNumOutputParams()
-        numGuess = 30
-        vj_guess = [0] * numGuess
 
         # keeping tracking of the best C2
         bestC2 = [-1, -1, -1] #[j, vj, var]
@@ -192,40 +179,35 @@ class Region:
         # for each dimension
         for j in range(SM_index, SM_index + numDim):
 
-            # finding bound in v_j
-            valSet = Region.getExpValArray(self.exemplars, j)
-            upBound = max(valSet)
-            lowBound = min(valSet)
+            dimStart = time.clock()
 
-            # generate guesses for v_j (random C2)
-            for i in range(0, numGuess):
-                vj_guess[i] = random.random() * (upBound - lowBound) + lowBound
+            # split set equally, sorted
+            applyC2Start = time.clock()
+            set1, set2 = self.applyC2(j)
+            vj = (set1[-1].getVal(j) + set2[0].getVal(j))/2.0
+            print "         # Set1: " + str("# Set1: " + str(len(set1))) + "# Set2: " + str(len(set2))
+            print "     Apply C2(" +str(j) +","+str(vj)+"" "): " + str(time.clock()-applyC2Start)
 
-            # split set accordingly
-            for vj in vj_guess:
+            # calculate the sum of (sum of dimensional variances) in each set
+            if not set1 or not set2: # if of the set is empty
+                pass
+            else:
+                calcVarStart = time.clock()
+                var1 = calcVariance(Region.getExpValArray(set1))
+                var2 = calcVariance(Region.getExpValArray(set2))
 
-                set1, set2 = self.applyC2(j, vj)
+                # sum of total variance
+                var = var1 + var2
 
-                # calculate the sum of (sum of dimensional variances) in each set
-                if not set1 or not set2: # if of the set is empty
-                    pass
-                else:
-                    var1 = [0] * numDim # variance in each dimension in set 1
-                    var2 = [0] * numDim # variance in each dimension in set 2
-                    # for each S(t+1) component in each set
-                    for i in range(0, numDim):
-                        var1[i] = calcVariance(Region.getExpValArray(set1, i))
-                        var2[i] = calcVariance(Region.getExpValArray(set2, i))
+                # update best C2 is better than current best
+                if bestC2[2] < 0 or bestC2[2] < var:
+                    bestC2[2] = var
+                    bestC2[1] = vj
+                    bestC2[0] = j
+                print "     Calc Var(" +str(j) +","+str(vj)+"" "): " + str(time.clock()-calcVarStart)
 
-                    # sum of total variance
-                    var = sum(var1) + sum(var2)
-
-                    # update best C2 is better than current best
-                    if bestC2[2] < 0 or bestC2[2] > var:
-                        bestC2[2] = var
-                        bestC2[1] = vj
-                        bestC2[0] = j
-
+            print "   dimension Loop(" +str(j) + "): " + str(time.clock() - dimStart)
+        print "  -->Duration: " + str(time.clock()-start)
         return bestC2
 
     def getNumRegion(self):

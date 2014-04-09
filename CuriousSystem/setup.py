@@ -4,6 +4,8 @@ import pygame
 import math
 import datetime
 import copy
+import numpy as np
+import time
 
 
 
@@ -39,12 +41,15 @@ def load_sound(name):
         raise SystemExit, message
     return sound
 
-def calcVariance(data):
-    mean = sum(data)/len(data)
-    sumDiff = 0
-    for val in data:
-        sumDiff += (val - mean)**2
-    return sumDiff/(len(data))
+def calcVariance(dataRaw):
+    data = np.array(dataRaw, dtype=float)
+    cardinalS, dimS = data.shape
+    mean = np.mean(data, axis=0)
+    diff = [0]*cardinalS
+    for i in range(0, cardinalS):
+        diff[i] = np.linalg.norm((data[i, :] - mean), 1)**2 # find difference from mean
+
+    return sum(diff)/cardinalS
 
 def frange(x, y, jump):
 

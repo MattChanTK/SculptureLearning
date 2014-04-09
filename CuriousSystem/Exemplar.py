@@ -13,9 +13,11 @@ class Exemplar:
     def getNumOutputParams(self):
         return self.S2.getNumParam(), self.S.getNumParam() + self.M.getNumParam()
 
-    def getVal(self, dim):
+    def getVal(self, dim=-1):
 
         vals = self.S.getParam() + self.M.getParam() + self.S2.getParam()
+        if dim == -1:
+            return vals
         return vals[dim]
 
     def getSM(self):

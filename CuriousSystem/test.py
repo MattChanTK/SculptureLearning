@@ -6,6 +6,12 @@ class store:
     def __init__(self):
 
         self.items = []
+        self.a = 0
+        self.b = 0
+
+    def __repr__(self):
+
+        return repr((self.a, self.b))
 
     def addItems(self, items):
         for item in items:
@@ -28,12 +34,31 @@ def showItems():
     print 'storeB: ', storeB.getItemsVal()
 
 
+storeA = store()
+storeB = store()
+storeA.a = 10
+storeA.b = 100
+
+stores = [storeA, storeB]
+print stores
+sortedStores = sorted(stores, key=lambda store: store.a)
+print sortedStores
+
+'''
 
 svr = svm.SVR()
 
 
+storeA = [1.0,2.0,item(5),4]
+storeB = storeA
+print storeA
+print storeB
+storeB[1] = storeB[1]/10
+print storeA
+print storeB[2].val
 
-
+'''
+'''
 trainX = [[1,2,3,4], [3,4,5,6], [7,8,9,10]]
 trainY = [10, 60, 80]
 svr.fit(trainX, trainY)
@@ -52,3 +77,4 @@ set2 = copy.copy(set)
 set2.append([12]*len(set[0]))
 print set
 print set2
+'''

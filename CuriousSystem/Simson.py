@@ -8,8 +8,8 @@ class Simson:
         self.skin = 1.2
         self.interest = 0.5
 
-        self.k_hr = 2
-        self.k_skin = 0.005
+        self.k_hr = 1 #2
+        self.k_skin = 1 #0.005
         self.k_interest = 1
 
     def react(self, feature):

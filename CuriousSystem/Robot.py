@@ -146,7 +146,7 @@ class Robot(pygame.sprite.Sprite):
     def __observe(self, expert, s2_predict, s2_actual):
         # compute error in prediction
         predict_error = expert.addPredictError(s2_actual, s2_predict)
-        print 'Prediction Error:', predict_error
+       # print 'Prediction Error:', predict_error
         self.predict_history.append(predict_error)
         #print len(expert.error)
         # computer learning progress once sufficient sample is collected
