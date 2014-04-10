@@ -9,7 +9,7 @@ if len(sys.argv) > 1:
     filename_action = str(sys.argv[1]) + '_action_error.csv'
 else:
     #filename = '2014_03_24_13_36_16_prediction_error.csv'
-    time = '2014_04_09_23_59_19'
+    time = '2014_04_10_00_39_08'
     filename_predictErr = time +'_prediction_error.csv'
     filename_action = time + '_action_error.csv'
 
@@ -52,7 +52,7 @@ with open(filename_action, 'rb') as csvfile:
         bounds = (int(min(row)), int(max(row)))
 
         actData_comp = []
-        for type in range(bounds[0], bounds[1]-6):
+        for type in range(bounds[0], bounds[1]):
 
             percentAct = []
             for i in range(window, len(row)):

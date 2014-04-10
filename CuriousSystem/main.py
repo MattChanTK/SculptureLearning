@@ -86,36 +86,24 @@ while 1:
             skinFea = 0.5 #2.5
             # average angular velocity
             interestFea = 0.5
-            '''
-            # just average speed for now
-            hrFea = abs(robot.motor.v)
-            # distance to centre
-            skinFea = abs(robot.motor.v)/1.2
-            # average angular velocity
-            interestFea = abs(robot.motor.v)/50#abs(robot.motor.w/(math.pi/4.0))
 
 
-        elif Q_learning.Q_learning.discretize(robot.motor)[0] < 0:
-             # just average speed for now
-            hrFea = abs(math.sin(robot.motor.v))*50.0
-            # distance to centre
-            skinFea = abs(math.cos(robot.motor.v))*50.0
-            # average angular velocity
-            interestFea = abs(math.log(abs(robot.motor.w)+0.001)/math.log(abs(math.pi/4.0))+0.001)
-            '''
-        else:
-            '''
-            bounds = Sensor.Sensor.getBound()
-            hrFea = random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
-            skinFea = random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
-            interestFea = random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
-            '''
+        elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
              # just average speed for now
             hrFea = abs(robot.v)
             # distance to centre
             skinFea = abs(robot.v)**2
             # average angular velocity
-            interestFea = abs(robot.v)**2#abs(robot.motor.w/(math.pi/4.0))
+            interestFea = abs(robot.v)**2
+
+        else:
+
+            bounds = Sensor.Sensor.getBound()
+            hrFea = random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
+            skinFea = random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
+            interestFea = random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
+
+
 
 
 

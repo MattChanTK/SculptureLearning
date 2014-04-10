@@ -4,9 +4,9 @@ import Sensor
 
 class Simson:
     def __init__(self):
-        self.hr = 80
-        self.skin = 1.2
-        self.interest = 0.5
+        self.hr = 0.8
+        self.skin = 0.5
+        self.interest = 0.0
 
         self.k_hr = 1 #2
         self.k_skin = 1 #0.005

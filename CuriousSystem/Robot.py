@@ -41,7 +41,7 @@ class Robot(pygame.sprite.Sprite):
         self.rect.y = self.area.bottom - self.y
 
         self.v = -10
-        self.w = 0
+        self.w = -0.01
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
 
