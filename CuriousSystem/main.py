@@ -35,9 +35,14 @@ for i in range(0, num_robot):
 #timing
 clock = pygame.time.Clock()
 
+#slider
+sliderPos = 0
+sliderPosInc = 0.0
+
 while 1:
 
     clock.tick(fps)
+    pygame.event.pump()
 
     # pygame update
     for event in pygame.event.get():
@@ -71,6 +76,15 @@ while 1:
             file.close()
             sys.exit()
 
+        elif event.type == KEYDOWN and event.key == K_DOWN:
+            sliderPosInc = -0.05
+        elif event.type == KEYDOWN and event.key == K_UP:
+            sliderPosInc = 0.05
+        elif event.type == KEYUP:
+            sliderPosInc = 0.0
+            print "Interest Level = " + str(sigmoid(sliderPos))
+
+    sliderPos += sliderPosInc
 
     # robots move
     allRobots.update(user)
@@ -79,41 +93,23 @@ while 1:
     num_robot = 0
     hrFea = 0.0
     skinFea = 0.0
-    interestFea = 0.0
+    #interestFea = 0.0
     avgState = np.array([0.0, 0.0])
 
     for robot in pygame.sprite.Group.sprites(allRobots):
 
-        if Q_learning.Q_learning.discretize(robot.motor)[0] < 1 & Q_learning.Q_learning.discretize(robot.motor)[1] < 1:
+        hrFea += abs(robot.v)
+        skinFea += abs(robot.v)**2
+        #interestFea += abs(robot.v)**2
 
-            hrFea += 0.5
-            # distance to centre
-            skinFea += 0.5
-            # average angular velocity
-            interestFea += 0.5
-
-
-        elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
-             # just average speed for now
-            hrFea += abs(robot.v)
-            # distance to centre
-            skinFea += abs(robot.v)**2
-            # average angular velocity
-            interestFea += abs(robot.v)**2
-
-        else:
-
-            bounds = Sensor.Sensor.getBound()
-            hrFea += random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
-            skinFea += random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
-            interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
-
+        # use for updating the sync_state with average state
         avgState += np.array(robot.getState())
         num_robot += 1
 
         #print robot.memory.R.getNumRegion()
     avgState /= num_robot
-    fea = [hrFea/num_robot, skinFea/num_robot, interestFea/num_robot]
+    fea = [hrFea/num_robot, skinFea/num_robot, sigmoid(sliderPos)]
+    #print "---- Interest Level = " + str(fea[2])
     user.react(fea)
 
     # update the synchronous state
@@ -128,3 +124,33 @@ while 1:
     pygame.display.flip()
 
 
+
+
+'''
+Might be useful later codes
+---------------------------
+if Q_learning.Q_learning.discretize(robot.motor)[0] < 1 & Q_learning.Q_learning.discretize(robot.motor)[1] < 1:
+
+    hrFea += 0.5
+    # distance to centre
+    skinFea += 0.5
+    # average angular velocity
+    interestFea += 0.5
+
+
+elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
+     # just average speed for now
+    hrFea += abs(robot.v)
+    # distance to centre
+    skinFea += abs(robot.v)**2
+    # average angular velocity
+    interestFea += abs(robot.v)**2
+
+else:
+
+    bounds = Sensor.Sensor.getBound()
+    hrFea += random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
+    skinFea += random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
+    interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
+
+'''

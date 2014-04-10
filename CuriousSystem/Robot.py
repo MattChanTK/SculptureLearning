@@ -11,9 +11,6 @@ random.seed()
 
 class Robot(pygame.sprite.Sprite):
 
-    maxV = 50.0
-    maxW = math.pi/4
-
 
     def __init__(self, this_robot_size=robot_size):
 
@@ -98,7 +95,7 @@ class Robot(pygame.sprite.Sprite):
         self.memory.addExemplar(s1, m, s2)
 
         # self.printRegionPop()
-        print self.getSyncState()
+        # print self.getSyncState()
 
     def __move(self):
 
@@ -151,6 +148,9 @@ class Robot(pygame.sprite.Sprite):
         self.sensor.hr = user.hr
         self.sensor.skin = user.skin
         self.sensor.interest = user.interest
+
+        self.__updateEngage()
+        # print "Level of Engagement = " + str(self.engage)
 
     def __act(self):
 
@@ -223,3 +223,7 @@ class Robot(pygame.sprite.Sprite):
     def setSyncState(self, state):
         self.v_sync = state[0]
         self.w_sync = state[1]
+
+    def __updateEngage(self):
+        sensorInputs = self.sensor.getParam()
+        self.engage = 0.05*sensorInputs[0] + 0.05*sensorInputs[1] + 0.9*sensorInputs[2]

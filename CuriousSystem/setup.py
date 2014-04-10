@@ -65,7 +65,7 @@ def frange(x, y, div):
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
 
-num_robot = 2
+num_robot = 4
 
 bg_colour = (230, 240, 250)
 
