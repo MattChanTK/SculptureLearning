@@ -65,14 +65,14 @@ def frange(x, y, div):
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
 
-num_robot = 1
+num_robot = 2
 
 bg_colour = (230, 240, 250)
 
 fps = 30
 sim_time = 10  # in second
 
-size = (600, 400)
+size = (900, 600)
 robot_size = (20, 20)
 
 # Max number of exemplars before forgetting

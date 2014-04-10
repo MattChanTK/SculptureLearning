@@ -136,8 +136,8 @@ class Region:
         j = c2[0]
         vj = c2[1]
 
-        if j < 0 or vj < 0:
-            print ('ERROR: j and vj cannot be less than 0!')
+        if j < 0:
+            print ('ERROR: j cannot be less than 0!')
 
         r1, r2 = self.applyC2(j)
 
@@ -166,8 +166,8 @@ class Region:
     getExpValArray = staticmethod(getExpValArray)
 
     def getBestC2(self):
-        start = time.clock()
-        print "Start Time: " + str(start)
+        #start = time.clock()
+        #print "Start Time: " + str(start)
         # getting the number of dimension in SM
         numDim = len(self.exemplars[0].getSM())
         SM_index = 0
@@ -179,15 +179,15 @@ class Region:
         # for each dimension
         for j in range(SM_index, SM_index + numDim):
 
-            dimStart = time.clock()
+            #dimStart = time.clock()
 
             # split set equally, sorted
-            applyC2Start = time.clock()
+            #applyC2Start = time.clock()
             set1, set2 = self.applyC2(j)
             vj = (set1[-1].getVal(j) + set2[0].getVal(j))/2.0
 
             # print "         # Set1: " +  str(len(set1)) + "    # Set2: " + str(len(set2))
-            print "     Apply C2(" +str(j) +","+str(vj)+"" "): " + str(time.clock()-applyC2Start)
+            #print "     Apply C2(" +str(j) +","+str(vj)+"" "): " + str(time.clock()-applyC2Start)
 
             # calculate the sum of (sum of dimensional variances) in each set
             if not set1 or not set2: # if of the set is empty
@@ -208,10 +208,10 @@ class Region:
                     bestC2[2] = var
                     bestC2[1] = vj
                     bestC2[0] = j
-                print "     Calc Var(" +str(j) +","+str(vj)+"" "): " + str(time.clock()-calcVarStart)
+              #  print "     Calc Var(" +str(j) +","+str(vj)+"" "): " + str(time.clock()-calcVarStart)
 
-            print "   dimension Loop(" +str(j) + "): " + str(time.clock() - dimStart)
-        print "  -->Duration: " + str(time.clock()-start)
+           # print "   dimension Loop(" +str(j) + "): " + str(time.clock() - dimStart)
+       # print "  -->Duration: " + str(time.clock()-start)
         return bestC2
 
     def getNumRegion(self):

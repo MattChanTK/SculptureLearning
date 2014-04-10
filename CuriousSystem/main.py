@@ -77,41 +77,49 @@ while 1:
 
     # user reacts to the animation
     num_robot = 0
+    hrFea = 0.0
+    skinFea = 0.0
+    interestFea = 0.0
+    avgState = np.array([0.0, 0.0])
+
     for robot in pygame.sprite.Group.sprites(allRobots):
 
         if Q_learning.Q_learning.discretize(robot.motor)[0] < 1 & Q_learning.Q_learning.discretize(robot.motor)[1] < 1:
 
-            hrFea = 0.5 #100
+            hrFea += 0.5
             # distance to centre
-            skinFea = 0.5 #2.5
+            skinFea += 0.5
             # average angular velocity
-            interestFea = 0.5
+            interestFea += 0.5
 
 
         elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
              # just average speed for now
-            hrFea = abs(robot.v)
+            hrFea += abs(robot.v)
             # distance to centre
-            skinFea = abs(robot.v)**2
+            skinFea += abs(robot.v)**2
             # average angular velocity
-            interestFea = abs(robot.v)**2
+            interestFea += abs(robot.v)**2
 
         else:
 
             bounds = Sensor.Sensor.getBound()
-            hrFea = random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
-            skinFea = random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
-            interestFea = random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
+            hrFea += random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
+            skinFea += random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
+            interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
 
-
-
-
-
+        avgState += np.array(robot.getState())
         num_robot += 1
-        #print robot.memory.R.getNumRegion()
-    fea = [hrFea/num_robot, skinFea/num_robot, interestFea/num_robot]
 
+        #print robot.memory.R.getNumRegion()
+    avgState /= num_robot
+    fea = [hrFea/num_robot, skinFea/num_robot, interestFea/num_robot]
     user.react(fea)
+
+    # update the synchronous state
+
+    for robot in pygame.sprite.Group.sprites(allRobots):
+        robot.setSyncState(avgState.tolist())
 
 
     screen.blit(background, (0, 0))

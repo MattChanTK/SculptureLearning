@@ -40,10 +40,16 @@ class Robot(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.area.bottom - self.y
 
+        # independent state variables
         self.v = -10
-        self.w = -0.01
+        self.w = -0.05
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
+
+        # synchronous state variables
+        self.v_sync = copy.copy(self.v)
+        self.w_sync = copy.copy(self.w)
+        self.engage = 0.0  # level of engagement
 
         # instantiate the robot's memory
         self.memory = Memory.Memory()
@@ -92,21 +98,21 @@ class Robot(pygame.sprite.Sprite):
         self.memory.addExemplar(s1, m, s2)
 
         # self.printRegionPop()
-
+        print self.getSyncState()
 
     def __move(self):
 
         # calculate robot direction
         self.w += self.motor.getParam()[1]
 
-        self.dir += self.w
+        self.dir += (1-self.engage)*self.w + self.engage*self.w_sync
 
         # computing the new position
         self.v += self.motor.getParam()[0]
 
-        dx = self.v*math.cos(self.dir)
-        dy = self.v*math.sin(self.dir)
-        print "v  = " + str(self.v) + "    w = " + str(self.w) + "    dir = " + str(self.dir)
+        dx = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.cos(self.dir)
+        dy = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.sin(self.dir)
+        #print "v  = " + str(self.v) + "    w = " + str(self.w) + "    dir = " + str(self.dir)
         # updating pygame rect position
         newpos = self.rect.move(dx, -dy)
 
@@ -190,6 +196,9 @@ class Robot(pygame.sprite.Sprite):
 
         self.Q.addQ(self.sensor, self.motor, q)
 
+    def getState(self):
+        return [self.v, self.w]
+
     def setState(self, new_x=None, new_y=None, new_dir=None):
         if new_x is not None:
             self.x = new_x
@@ -207,3 +216,10 @@ class Robot(pygame.sprite.Sprite):
         print len(self.memory.exp), '-->'
         self.memory.R.getNumExemplarRecursive()
         print('-----------')
+
+    def getSyncState(self):
+        return [self.v_sync, self.w_sync]
+
+    def setSyncState(self, state):
+        self.v_sync = state[0]
+        self.w_sync = state[1]
