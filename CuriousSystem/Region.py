@@ -185,7 +185,8 @@ class Region:
             applyC2Start = time.clock()
             set1, set2 = self.applyC2(j)
             vj = (set1[-1].getVal(j) + set2[0].getVal(j))/2.0
-            print "         # Set1: " + str("# Set1: " + str(len(set1))) + "# Set2: " + str(len(set2))
+
+            # print "         # Set1: " +  str(len(set1)) + "    # Set2: " + str(len(set2))
             print "     Apply C2(" +str(j) +","+str(vj)+"" "): " + str(time.clock()-applyC2Start)
 
             # calculate the sum of (sum of dimensional variances) in each set
@@ -193,8 +194,11 @@ class Region:
                 pass
             else:
                 calcVarStart = time.clock()
-                var1 = calcVariance(Region.getExpValArray(set1))
-                var2 = calcVariance(Region.getExpValArray(set2))
+                set1Array = Region.getExpValArray(set1)
+                set2Array = Region.getExpValArray(set2)
+
+                var1 = calcVariance(set1Array)
+                var2 = calcVariance(set2Array)
 
                 # sum of total variance
                 var = var1 + var2

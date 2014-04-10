@@ -11,6 +11,10 @@ random.seed()
 
 class Robot(pygame.sprite.Sprite):
 
+    maxV = 50.0
+    maxW = math.pi/4
+
+
     def __init__(self, this_robot_size=robot_size):
 
         # pygame parameters
@@ -29,13 +33,15 @@ class Robot(pygame.sprite.Sprite):
 
         # state of the robot
         self.x = random.randint(self.area.left, self.area.right)
-        self.y = random.randint(self.area.top, self.area.bottom)
+        self.y = self.area.bottom - random.randint(self.area.top, self.area.bottom)
         self.dir = random.random()*math.pi*2
 
         # randomize the initial location of the dot
         self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect.y = self.area.bottom - self.y
 
+        self.v = -10
+        self.w = 0
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
 
@@ -91,14 +97,18 @@ class Robot(pygame.sprite.Sprite):
     def __move(self):
 
         # calculate robot direction
-        self.dir += self.motor.w
+        self.w += self.motor.getParam()[1]
+
+        self.dir += self.w
 
         # computing the new position
-        dx = self.motor.v*math.cos(self.dir)
-        dy = self.motor.v*math.sin(self.dir)
+        self.v += self.motor.getParam()[0]
 
+        dx = self.v*math.cos(self.dir)
+        dy = self.v*math.sin(self.dir)
+        print "v  = " + str(self.v) + "    w = " + str(self.w) + "    dir = " + str(self.dir)
         # updating pygame rect position
-        newpos = self.rect.move(dx, dy)
+        newpos = self.rect.move(dx, -dy)
 
         # check if it hits hall
         move_x = dx
@@ -107,11 +117,16 @@ class Robot(pygame.sprite.Sprite):
             # change direction if it does
             if newpos.left < self.area.left or newpos.right > self.area.right:
                 move_x = -dx
-            if newpos.top > self.area.top or newpos.bottom < self.area.bottom:
+            if newpos.top < self.area.top or newpos.bottom > self.area.bottom:
                 move_y = -dy
 
-            newpos = self.rect.move(move_x, move_y)
+            newpos = self.rect.move(move_x, -move_y)
         self.rect = newpos
+
+        # remembering the state before to calculate velocity
+        self.x0 = self.x
+        self.y0 = self.y
+        self.dir0 = self.dir
 
         # updating state
         self.x += move_x
@@ -119,6 +134,10 @@ class Robot(pygame.sprite.Sprite):
 
         # calculate new direction (will change if it hits wall)
         self.dir = math.atan2(move_y, move_x)
+
+        # calculate new velocity
+        self.v = math.sqrt((self.x-self.x0)**2 + (self.y-self.y0)**2)
+        #self.w = self.dir-self.dir0
 
 
 

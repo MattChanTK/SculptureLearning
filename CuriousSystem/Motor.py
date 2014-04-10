@@ -3,20 +3,20 @@ from setup import *
 
 class Motor(object):
 
-    # lower nad upper bound of the motor values
-    vBound = [0.0, 50.0]
-    wBound = [0, math.pi/4]
+    # lower nad upper bound of the motor accelerates
+    accelBound = [-1.0, 1.0]
+    angAccelBound = [-math.pi/5000, math.pi/5000]
 
     def __init__(self, default=[0, 0]):
-        self.v = default[0]  # velocity
-        self.w = default[1]  # angular velocity
+        self.accel = default[0]  # velocity
+        self.angAccel = default[1]  # angular velocity
 
     def getParam(self):
-        return [self.v, self.w]
+        return [self.accel, self.angAccel]
 
     def getNumParam(self):
         return len(self.getParam())
 
     def getBound():
-        return [Motor.vBound, Motor.wBound]
+        return [Motor.accelBound, Motor.angAccelBound]
     getBound = staticmethod(getBound)

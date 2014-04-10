@@ -42,23 +42,28 @@ def load_sound(name):
     return sound
 
 def calcVariance(dataRaw):
+    # calcVarStart = time.clock()
+
     data = np.array(dataRaw, dtype=float)
     cardinalS, dimS = data.shape
     mean = np.mean(data, axis=0)
     diff = [0]*cardinalS
+
     for i in range(0, cardinalS):
         diff[i] = np.linalg.norm((data[i, :] - mean), 1)**2 # find difference from mean
-
+   # print "   --> inside calc var: " + str(time.clock()-calcVarStart)
     return sum(diff)/cardinalS
 
-def frange(x, y, jump):
+def frange(x, y, div):
 
     list = []
-    while x < y:
-        list.append(x)
-        x += jump
+    jump = (y - x)/float(div)
+    for i in range(0, div):
+        list.append(x + i*jump)
     return list
 
+def sigmoid(x):
+  return 1 / (1 + math.exp(-x))
 
 num_robot = 1
 

@@ -9,7 +9,7 @@ if len(sys.argv) > 1:
     filename_action = str(sys.argv[1]) + '_action_error.csv'
 else:
     #filename = '2014_03_24_13_36_16_prediction_error.csv'
-    time = '2014_04_09_11_21_44'
+    time = '2014_04_09_23_59_19'
     filename_predictErr = time +'_prediction_error.csv'
     filename_action = time + '_action_error.csv'
 
@@ -32,7 +32,7 @@ with open(filename_predictErr, 'rb') as csvfile:
 
 
 # outputting action history graph
-window = 100
+window = 300
 with open(filename_action, 'rb') as csvfile:
     data = csv.reader(csvfile, delimiter=',') #import the data
     data = map(list, zip(*data))  #transpose the data
@@ -52,7 +52,7 @@ with open(filename_action, 'rb') as csvfile:
         bounds = (int(min(row)), int(max(row)))
 
         actData_comp = []
-        for type in range(bounds[0], bounds[1]-1):
+        for type in range(bounds[0], bounds[1]-6):
 
             percentAct = []
             for i in range(window, len(row)):

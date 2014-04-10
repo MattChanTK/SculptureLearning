@@ -111,11 +111,11 @@ while 1:
             interestFea = random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
             '''
              # just average speed for now
-            hrFea = abs(robot.motor.v)
+            hrFea = abs(robot.v)
             # distance to centre
-            skinFea = abs(robot.motor.v)**2
+            skinFea = abs(robot.v)**2
             # average angular velocity
-            interestFea = abs(robot.motor.v)**2#abs(robot.motor.w/(math.pi/4.0))
+            interestFea = abs(robot.v)**2#abs(robot.motor.w/(math.pi/4.0))
 
 
 
