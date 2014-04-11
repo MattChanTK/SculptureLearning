@@ -2,6 +2,9 @@
 Bradon_IRtracking/
 serial_output*.txt
 serial_output*.csv
+CuriousSystem/outputs/*.csv
+CuriousSystem/outputs/*.png
+
 
 # Compiled source #
 ###################
