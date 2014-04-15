@@ -2,10 +2,13 @@ const int gsr = A0;
 const int pulse = A1;
 
 // heart rate parameters
-const unsigned int hrTimeSize = 10; //# of pulses
+const unsigned int hrTimeSize = 5; //# of pulses
 unsigned long hrTime[hrTimeSize]; 
 unsigned int hrTimeId = 0;
-unsigned int hr = 0;
+unsigned long hr = 0;
+const unsigned int hrSmooth = 10; // # of data point to take average
+unsigned int oldHr[hrSmooth];
+unsigned int oldHrId = 0;
 int pulseHigh = 0;
 boolean pulseEdgeUp = false;
 boolean startOutput = false;
@@ -30,16 +33,19 @@ void setup()
   //set up pulse sensor input
   ground(pulse);
   pinMode(pulse, INPUT);  
+  for (int i=0; i<hrSmooth; ++i)
+   oldHr[i] = 0;
   
   //set up GSR sensor input
   ground(gsr);
   pinMode(gsr, INPUT);  
   
+  
   //calibrating GSR Sensor
   Serial.println("Calibrating GSR Sensor...");
   Serial.println("Adjust knob until the input becomes 2.5V.");
   int gsrVal = 0;
-  while (abs(gsrVal - initGSRInput) > 10)
+  while (abs(gsrVal - initGSRInput) > 50)
   {
     gsrVal = analogRead(gsr);    
   }
@@ -82,9 +88,21 @@ void loop()
   unsigned int oldTimeId = hrTimeId+1;
   if (oldTimeId >= hrTimeSize)
     oldTimeId = 0;
- //calculate heart rate in beat per minute
-  hr = ((unsigned long)(hrTimeSize-1)*1000*60)/(hrTime[hrTimeId] - hrTime[oldTimeId]);
-
+ //calculate heart rate in beat per 1/10 minute
+  unsigned int tempHr = ((unsigned long)(hrTimeSize-1)*1000*600)/(hrTime[hrTimeId] - hrTime[oldTimeId]);
+  if (abs((int)tempHr - (int)oldHr[oldHrId]) < 20 || oldHr[oldHrId] == 0)
+  {
+    oldHr[oldHrId] = tempHr;
+    ++oldHrId;
+    if (oldHrId >= hrSmooth)
+      oldHrId = 0;
+  }
+  //average of old Hr to get hr
+  unsigned long sumHr = 0;
+  for (int i = 0; i<hrSmooth; ++i)
+    sumHr += oldHr[i];
+  hr = (unsigned long)sumHr/(unsigned long) hrSmooth;
+  
   //Detecting pulses
   int val = analogRead(pulse);
   if (val > pulseHigh && pulseEdgeUp == false)
