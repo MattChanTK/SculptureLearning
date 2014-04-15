@@ -2,10 +2,11 @@ const int gsr = A0;
 const int pulse = A1;
 
 // heart rate parameters
-const int hrWindow = 10000;
-unsigned int pulseCount = 0;
-unsigned long hrTime = 0;
-double hr = millis();
+const unsigned int hrTimeSize = 5; //# of pulses
+unsigned long hrTime[hrTimeSize]; 
+unsigned int hrTimeId = 0;
+unsigned long hr = 0;
+
 int pulseHigh = 0;
 boolean pulseEdgeUp = false;
 
@@ -25,8 +26,24 @@ void setup()
   //set up pulse sensor input
   ground(pulse);
   pinMode(pulse, INPUT);  
+
+  //set up GSR sensor input
+  ground(gsr);
+  pinMode(gsr, INPUT);  
   
-  //calibrating
+  
+  //calibrating GSR Sensor
+  Serial.println("Calibrating GSR Sensor...");
+  Serial.println("Adjust knob until the input becomes 2.5V.");
+  int gsrVal = 0;
+  while (abs(gsrVal - initGSRInput) > 50)
+  {
+    gsrVal = analogRead(gsr);    
+  }
+  Serial.println("Initial GSR input: " + String(gsrVal));
+  
+  
+  //calibrating Pulse sensor
   Serial.println("Calibrating Pulse Sensor...");
   unsigned long sum = 0;
   unsigned int maxVal = 0;
@@ -54,14 +71,16 @@ void loop()
 {
   currTime = millis();
   
-  // updating hr every (hrWindow) seconds
-  if (currTime - hrTime > hrWindow)
-  {
-    Serial.println(pulseCount);
-    hr = (double)pulseCount/((double)(currTime - hrTime)*1000);
-    hrTime = millis();
-    pulseCount = 0; //reset count
-  }
+
+	
+  //timing of the oldest pulse
+	  unsigned int oldTimeId = hrTimeId+1;
+	  if (oldTimeId >= hrTimeSize)
+	    oldTimeId = 0;
+	 //calculate heart rate in beat per minute
+hr = ((unsigned long)(hrTimeSize-1)*1000*60)/(hrTime[hrTimeId] - hrTime[oldTimeId]);
+
+
   
   //Detecting pulses
   int val = analogRead(pulse);
@@ -75,11 +94,6 @@ void loop()
     ++pulseCount;
   }
   //Serial.println(hr);
-  
-  
-  
-  
-  
-    
+
   
 }
