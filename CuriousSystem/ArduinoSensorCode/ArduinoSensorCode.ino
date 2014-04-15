@@ -2,6 +2,7 @@ const int gsr = A0;
 const int pulse = A1;
 
 // heart rate parameters
+<<<<<<< HEAD
 const unsigned int hrTimeSize = 5; //# of pulses
 unsigned long hrTime[hrTimeSize]; 
 unsigned int hrTimeId = 0;
@@ -9,16 +10,17 @@ unsigned long hr = 0;
 const unsigned int hrSmooth = 10; // # of data point to take average
 unsigned int oldHr[hrSmooth];
 unsigned int oldHrId = 0;
+=======
+const int hrWindow = 10000;
+unsigned int pulseCount = 0;
+unsigned long hrTime = 0;
+double hr = millis();
+>>>>>>> parent of 12948ab... Ardunio new way to o heart rate
 int pulseHigh = 0;
 boolean pulseEdgeUp = false;
-boolean startOutput = false;
-
-//gsr sensor parameters
-const int initGSRInput = 512;
-unsigned long skin = 0;
 
 // current time
-unsigned int currTime = 0;
+unsigned long currTime = 0;
 
 // Sets pin to output and grounds it
 void ground(const byte pin) {
@@ -36,6 +38,7 @@ void setup()
   for (int i=0; i<hrSmooth; ++i)
    oldHr[i] = 0;
   
+<<<<<<< HEAD
   //set up GSR sensor input
   ground(gsr);
   pinMode(gsr, INPUT);  
@@ -53,6 +56,9 @@ void setup()
   
   
   //calibrating Pulse sensor
+=======
+  //calibrating
+>>>>>>> parent of 12948ab... Ardunio new way to o heart rate
   Serial.println("Calibrating Pulse Sensor...");
   unsigned long sum = 0;
   unsigned int maxVal = 0;
@@ -72,9 +78,6 @@ void setup()
   Serial.println("Max: " + String(maxVal));
   pulseHigh = (maxVal + avgVal)>>1;
   Serial.println("Pulse Threshold " + String(pulseHigh));
-  
- 
-  Serial.println("Calibration Completed");  
     
   
 }
@@ -83,6 +86,7 @@ void loop()
 {
   currTime = millis();
   
+<<<<<<< HEAD
 
   //timing of the oldest pulse
   unsigned int oldTimeId = hrTimeId+1;
@@ -102,6 +106,16 @@ void loop()
   for (int i = 0; i<hrSmooth; ++i)
     sumHr += oldHr[i];
   hr = (unsigned long)sumHr/(unsigned long) hrSmooth;
+=======
+  // updating hr every (hrWindow) seconds
+  if (currTime - hrTime > hrWindow)
+  {
+    Serial.println(pulseCount);
+    hr = (double)pulseCount/((double)(currTime - hrTime)*1000);
+    hrTime = millis();
+    pulseCount = 0; //reset count
+  }
+>>>>>>> parent of 12948ab... Ardunio new way to o heart rate
   
   //Detecting pulses
   int val = analogRead(pulse);
@@ -112,21 +126,14 @@ void loop()
   else if (val < pulseHigh && pulseEdgeUp == true)
   {
     pulseEdgeUp = false;
-    // save pulse time in the buffer
-    ++hrTimeId;
-    if (hrTimeId >= hrTimeSize)
-    {
-      hrTimeId = 0;
-      startOutput = true;
-    }
-    hrTime[hrTimeId] = millis();
+    ++pulseCount;
   }
+  //Serial.println(hr);
   
-  // Measure GSR level
-  skin = analogRead(gsr);
   
-  //outputting to Serial bus
-  if (startOutput)
-    Serial.print(String(currTime) + "," + String(hr) + "," + String(skin) + "\n");
+  
+  
+  
+    
   
 }

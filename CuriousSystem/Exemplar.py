@@ -8,23 +8,23 @@ class Exemplar:
 
 
     def getNumParams(self):
-        return self.S.getNumParam + self.M.getNumParam + self.S2.getNumParam
+        return self.S.getNumParam() + self.M.getNumParam() + self.S2.getNumParam()
 
     def getNumOutputParams(self):
-        return self.S2.getNumParam, self.S.getNumParam + self.M.getNumParam
+        return self.S2.getNumParam(), self.S.getNumParam() + self.M.getNumParam()
 
     def getVal(self, dim=-1):
 
-        vals = self.S.getParam + self.M.getParam + self.S2.getParam
+        vals = self.S.getParam() + self.M.getParam() + self.S2.getParam()
         if dim == -1:
             return vals
         return vals[dim]
 
     def getSM(self):
 
-        return self.S.getParam + self.M.getParam
+        return self.S.getParam() + self.M.getParam()
 
     def getS2(self):
 
-        return self.S2.getParam
+        return self.S2.getParam()
 

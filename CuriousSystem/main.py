@@ -1,11 +1,11 @@
 from setup import *
 import Robot
 import Simson
-#import Slider
+import Slider
 import datetime
-#import random
-#import Q_learning
-#import Sensor
+import random
+import Q_learning
+import Sensor
 
 # pygame set up
 pygame.init()
@@ -52,7 +52,7 @@ while 1:
             current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
             #prediction history
-            file = open(os.path.join('outputs', current_datetime + '_prediction_error'+'.csv'), 'a+')  # append mode
+            file = open(os.path.join('outputs', current_datetime + '_prediction_error'+'.csv'), 'a+') # append mode
             for robot in pygame.sprite.Group.sprites(allRobots):
                 numSample = len(robot.predict_history)
                 numDim = len(robot.predict_history[0])
@@ -64,7 +64,7 @@ while 1:
             file.close()
 
             # action history
-            file = open(os.path.join('outputs', current_datetime + '_action_error'+'.csv'), 'a+')  # append mode
+            file = open(os.path.join('outputs', current_datetime + '_action_error'+'.csv'), 'a+') # append mode
             for robot in pygame.sprite.Group.sprites(allRobots):
                 numSample = len(robot.action_history)
                 numDim = len(robot.action_history[0])
@@ -126,31 +126,31 @@ while 1:
 
 
 
+'''
+Might be useful later codes
+---------------------------
+if Q_learning.Q_learning.discretize(robot.motor)[0] < 1 & Q_learning.Q_learning.discretize(robot.motor)[1] < 1:
 
-# Might be useful later codes
-# ---------------------------
-# if Q_learning.Q_learning.discretize(robot.motor)[0] < 1 & Q_learning.Q_learning.discretize(robot.motor)[1] < 1:
-#
-#     hrFea += 0.5
-#     # distance to centre
-#     skinFea += 0.5
-#     # average angular velocity
-#     interestFea += 0.5
-#
-#
-# elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
-#      # just average speed for now
-#     hrFea += abs(robot.v)
-#     # distance to centre
-#     skinFea += abs(robot.v)**2
-#     # average angular velocity
-#     interestFea += abs(robot.v)**2
-#
-# else:
-#
-#     bounds = Sensor.Sensor.getBound()
-#     hrFea += random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
-#     skinFea += random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
-#     interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
-#
-#
+    hrFea += 0.5
+    # distance to centre
+    skinFea += 0.5
+    # average angular velocity
+    interestFea += 0.5
+
+
+elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
+     # just average speed for now
+    hrFea += abs(robot.v)
+    # distance to centre
+    skinFea += abs(robot.v)**2
+    # average angular velocity
+    interestFea += abs(robot.v)**2
+
+else:
+
+    bounds = Sensor.Sensor.getBound()
+    hrFea += random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
+    skinFea += random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
+    interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
+
+'''

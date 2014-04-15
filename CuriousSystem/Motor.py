@@ -11,13 +11,11 @@ class Motor(object):
         self.accel = default[0]  # velocity
         self.angAccel = default[1]  # angular velocity
 
-    @property
     def getParam(self):
         return [self.accel, self.angAccel]
 
-    @property
     def getNumParam(self):
-        return len(self.getParam)
+        return len(self.getParam())
 
     def getBound():
         return [Motor.accelBound, Motor.angAccelBound]

@@ -1,5 +1,5 @@
 from setup import *
-#import random
+import random
 import Expert
 
 
@@ -193,7 +193,7 @@ class Region:
             if not set1 or not set2: # if of the set is empty
                 pass
             else:
-                #calcVarStart = time.clock()
+                calcVarStart = time.clock()
                 set1Array = Region.getExpValArray(set1)
                 set2Array = Region.getExpValArray(set2)
 
@@ -223,22 +223,22 @@ class Region:
 
     def getContext(self):
 
-        numSParam = self.exemplars[0].S.getNumParam
-        numMParam = self.exemplars[0].M.getNumParam
-        numS2Param = self.exemplars[0].S2.getNumParam
+        numSParam = self.exemplars[0].S.getNumParam()
+        numMParam = self.exemplars[0].M.getNumParam()
+        numS2Param = self.exemplars[0].S2.getNumParam()
 
         avg = [0]*(numSParam + numMParam + numS2Param)
         for exp in self.exemplars:
 
             # Sensor parameters
             for i in range(0, numSParam):
-                avg[i] += exp.S.getParam[i]
+                avg[i] += exp.S.getParam()[i]
             # Motor parameters
             for i in range(numSParam, numSParam + numMParam):
-                avg[i] += exp.M.getParam[i - numSParam]
+                avg[i] += exp.M.getParam()[i - numSParam]
             # Sensor(t+1) parameters
             for i in range(numSParam + numMParam, numSParam + numMParam + numS2Param):
-                avg[i] += exp.S2.getParam[i - numSParam - numMParam]
+                avg[i] += exp.S2.getParam()[i - numSParam - numMParam]
 
         # divide by total number of exemplar one by one
         numExp = self.getNumExemplar()
@@ -250,7 +250,7 @@ class Region:
  #   def calcLearnRate(self):
 
     def getExpert(self, sensor, motor):
-        sm = sensor.getParam + motor.getParam
+        sm = sensor.getParam() + motor.getParam()
 
         if self.left == None and self.right == None:
             return self.expert

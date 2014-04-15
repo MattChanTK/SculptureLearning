@@ -31,7 +31,7 @@ class Q_learning():
 
     def discretize(input):
         # sensor/motor state per dimension
-        s = [0]*input.getNumParam
+        s = [0]*input.getNumParam()
 
         # check if it's a sensor input or motor input
         if type(input) is Sensor.Sensor:
@@ -41,7 +41,7 @@ class Q_learning():
 
         # mapping value into discrete set of states
         for i in range(0, len(s)):
-            s_raw = input.getParam[i]
+            s_raw = input.getParam()[i]
             for label in range(0, len(state[i])):
                 if s_raw < state[i][label]:
                     s[i] = label
@@ -86,7 +86,7 @@ class Q_learning():
             return motor, self.getQ(sensor, motor)
 
         key_list = self.q_table.keys()
-        numSParam = sensor.getNumParam
+        numSParam = sensor.getNumParam()
         s = Q_learning.discretize(sensor)
         matchingKey = []
         for key in key_list:

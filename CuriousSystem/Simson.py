@@ -1,5 +1,5 @@
 from setup import *
-#import random
+import random
 import Sensor
 
 class Simson:
