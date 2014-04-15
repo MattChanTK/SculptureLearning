@@ -3,14 +3,14 @@ import random
 import Motor
 import Sensor
 import Memory
-import Exemplar
+#import Exemplar
 import Q_learning
 
 
 random.seed()
 
-class Robot(pygame.sprite.Sprite):
 
+class Robot(pygame.sprite.Sprite):
 
     def __init__(self, this_robot_size=robot_size):
 
@@ -74,6 +74,7 @@ class Robot(pygame.sprite.Sprite):
 
         # predict results
         s2_predict = None
+        expert = None
         if self.memory.getMemorySize() > 2:
             s2_predict, expert = self.__consult()
 
@@ -85,8 +86,8 @@ class Robot(pygame.sprite.Sprite):
         s2 = copy.copy(self.sensor)
 
         # Calculate prediction error
-        lp = [0]*s2.getNumParam()
-        if s2_predict is not None:
+        lp = [0]*s2.getNumParam
+        if s2_predict is not None and expert is not None:
             lp = self.__observe(expert, s2_predict, s2)
 
         # Learn the consequence of the action
@@ -100,12 +101,12 @@ class Robot(pygame.sprite.Sprite):
     def __move(self):
 
         # calculate robot direction
-        self.w += self.motor.getParam()[1]
+        self.w += self.motor.getParam[1]
 
         self.dir += (1-self.engage)*self.w + self.engage*self.w_sync
 
         # computing the new position
-        self.v += self.motor.getParam()[0]
+        self.v += self.motor.getParam[0]
 
         dx = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.cos(self.dir)
         dy = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.sin(self.dir)
@@ -180,7 +181,7 @@ class Robot(pygame.sprite.Sprite):
             #print LP
             return LP
         else:
-            return [0]*self.motor.getNumParam()
+            return [0]*self.motor.getNumParam
 
     def __learn(self, q0, lp):
 

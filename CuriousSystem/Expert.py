@@ -19,7 +19,7 @@ class Expert:
 
         # get the number of dimensions
         numYDim, yIndex = exemplars[0].getNumOutputParams()
-        numXDim = exemplars[0].getNumParams() - numYDim
+        #numXDim = exemplars[0].getNumParams() - numYDim
 
         if not self.model:
             #for each output dimension
@@ -57,13 +57,13 @@ class Expert:
     def predict(self, sensor, motor):
 
         prediction = []
-        sm = sensor.getParam() + motor.getParam()
+        sm = sensor.getParam + motor.getParam
 
         for i in range(0, len(self.model)):
             try:
                 p = self.model[i].predict(sm)[0]
             except AttributeError:  # if can't make a prediction
-                p = (sensor.getParam())[i] # just use the input value as best guess
+                p = (sensor.getParam)[i] # just use the input value as best guess
 
             prediction.append(copy.copy(p))
 
@@ -75,8 +75,8 @@ class Expert:
             # forget oldest one if full
             self.error.pop(0)
 
-        actual = s_actual.getParam()
-        prediction = s_prediction.getParam()
+        actual = s_actual.getParam
+        prediction = s_prediction.getParam
 
         error = [0]*len(actual)
         for i in range(0, len(error)):

@@ -2,15 +2,20 @@ const int gsr = A0;
 const int pulse = A1;
 
 // heart rate parameters
-const int hrWindow = 10000;
-unsigned int pulseCount = 0;
-unsigned long hrTime = 0;
-double hr = millis();
+const unsigned int hrTimeSize = 10; //# of pulses
+unsigned long hrTime[hrTimeSize]; 
+unsigned int hrTimeId = 0;
+unsigned int hr = 0;
 int pulseHigh = 0;
 boolean pulseEdgeUp = false;
+boolean startOutput = false;
+
+//gsr sensor parameters
+const int initGSRInput = 512;
+unsigned long skin = 0;
 
 // current time
-unsigned long currTime = 0;
+unsigned int currTime = 0;
 
 // Sets pin to output and grounds it
 void ground(const byte pin) {
@@ -26,7 +31,22 @@ void setup()
   ground(pulse);
   pinMode(pulse, INPUT);  
   
-  //calibrating
+  //set up GSR sensor input
+  ground(gsr);
+  pinMode(gsr, INPUT);  
+  
+  //calibrating GSR Sensor
+  Serial.println("Calibrating GSR Sensor...");
+  Serial.println("Adjust knob until the input becomes 2.5V.");
+  int gsrVal = 0;
+  while (abs(gsrVal - initGSRInput) > 10)
+  {
+    gsrVal = analogRead(gsr);    
+  }
+  Serial.println("Initial GSR input: " + String(gsrVal));
+  
+  
+  //calibrating Pulse sensor
   Serial.println("Calibrating Pulse Sensor...");
   unsigned long sum = 0;
   unsigned int maxVal = 0;
@@ -46,6 +66,9 @@ void setup()
   Serial.println("Max: " + String(maxVal));
   pulseHigh = (maxVal + avgVal)>>1;
   Serial.println("Pulse Threshold " + String(pulseHigh));
+  
+ 
+  Serial.println("Calibration Completed");  
     
   
 }
@@ -54,15 +77,14 @@ void loop()
 {
   currTime = millis();
   
-  // updating hr every (hrWindow) seconds
-  if (currTime - hrTime > hrWindow)
-  {
-    Serial.println(pulseCount);
-    hr = (double)pulseCount/((double)(currTime - hrTime)*1000);
-    hrTime = millis();
-    pulseCount = 0; //reset count
-  }
-  
+
+  //timing of the oldest pulse
+  unsigned int oldTimeId = hrTimeId+1;
+  if (oldTimeId >= hrTimeSize)
+    oldTimeId = 0;
+ //calculate heart rate in beat per minute
+  hr = ((unsigned long)(hrTimeSize-1)*1000*60)/(hrTime[hrTimeId] - hrTime[oldTimeId]);
+
   //Detecting pulses
   int val = analogRead(pulse);
   if (val > pulseHigh && pulseEdgeUp == false)
@@ -72,14 +94,21 @@ void loop()
   else if (val < pulseHigh && pulseEdgeUp == true)
   {
     pulseEdgeUp = false;
-    ++pulseCount;
+    // save pulse time in the buffer
+    ++hrTimeId;
+    if (hrTimeId >= hrTimeSize)
+    {
+      hrTimeId = 0;
+      startOutput = true;
+    }
+    hrTime[hrTimeId] = millis();
   }
-  //Serial.println(hr);
   
+  // Measure GSR level
+  skin = analogRead(gsr);
   
-  
-  
-  
-    
+  //outputting to Serial bus
+  if (startOutput)
+    Serial.print(String(currTime) + "," + String(hr) + "," + String(skin) + "\n");
   
 }

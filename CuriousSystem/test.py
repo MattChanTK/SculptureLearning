@@ -44,37 +44,37 @@ print stores
 sortedStores = sorted(stores, key=lambda store: store.a)
 print sortedStores
 
-'''
-
-svr = svm.SVR()
-
-
-storeA = [1.0,2.0,item(5),4]
-storeB = storeA
-print storeA
-print storeB
-storeB[1] = storeB[1]/10
-print storeA
-print storeB[2].val
-
-'''
-'''
-trainX = [[1,2,3,4], [3,4,5,6], [7,8,9,10]]
-trainY = [10, 60, 80]
-svr.fit(trainX, trainY)
-predict = svr.predict([[1,2,3,9], [7,8,9,10]])
-print predict
-
-set = []
-for i in range(3):
-    set.append([0]*2)
-
-print set
-set [0][0] = 2
-print set
-
-set2 = copy.copy(set)
-set2.append([12]*len(set[0]))
-print set
-print set2
-'''
+#
+#
+# svr = svm.SVR()
+#
+#
+# storeA = [1.0,2.0,item(5),4]
+# storeB = storeA
+# print storeA
+# print storeB
+# storeB[1] = storeB[1]/10
+# print storeA
+# print storeB[2].val
+#
+# '''
+# '''
+# trainX = [[1,2,3,4], [3,4,5,6], [7,8,9,10]]
+# trainY = [10, 60, 80]
+# svr.fit(trainX, trainY)
+# predict = svr.predict([[1,2,3,9], [7,8,9,10]])
+# print predict
+#
+# set = []
+# for i in range(3):
+#     set.append([0]*2)
+#
+# print set
+# set [0][0] = 2
+# print set
+#
+# set2 = copy.copy(set)
+# set2.append([12]*len(set[0]))
+# print set
+# print set2
+#
