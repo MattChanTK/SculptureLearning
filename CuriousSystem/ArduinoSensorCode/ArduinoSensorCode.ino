@@ -83,7 +83,7 @@ void loop()
   if (oldTimeId >= hrTimeSize)
     oldTimeId = 0;
  //calculate heart rate in beat per minute
-  hr = ((unsigned long)(hrTimeSize-1)*1000*60)/(hrTime[hrTimeId] - hrTime[oldTimeId]);
+  hr = ((unsigned long)(hrTimeSize-1)*1000*600)/(hrTime[hrTimeId] - hrTime[oldTimeId]);
 
   //Detecting pulses
   int val = analogRead(pulse);

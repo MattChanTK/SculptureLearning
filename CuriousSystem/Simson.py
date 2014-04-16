@@ -8,8 +8,8 @@ class Simson:
         self.skin = 0.5
         self.interest = 0.0
 
-        self.k_hr = 1 #2
-        self.k_skin = 1 #0.005
+        self.k_hr = 1
+        self.k_skin = 1
         self.k_interest = 1
 
     def react(self, feature):
@@ -17,3 +17,7 @@ class Simson:
         self.hr = max(bounds[0][0], min(bounds[0][1], self.k_hr*feature[0])) #+ random.random() * 60 - 30
         self.skin = max(bounds[1][0], min(bounds[1][1], self.k_skin*feature[1])) #+ random.random() * 1 - 0.5
         self.interest = max(bounds[2][0], min(bounds[2][1], self.k_interest*feature[2])) # + random.random() * 0.8 -0.4
+    def setFea(self, feature):
+        self.hr = feature[0]
+        self.skin = feature[1]
+        self.interest = feature[2]

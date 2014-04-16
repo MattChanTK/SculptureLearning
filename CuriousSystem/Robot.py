@@ -226,4 +226,4 @@ class Robot(pygame.sprite.Sprite):
 
     def __updateEngage(self):
         sensorInputs = self.sensor.getParam()
-        self.engage = 0.05*sensorInputs[0] + 0.05*sensorInputs[1] + 0.9*sensorInputs[2]
+        self.engage = 0.33*sensorInputs[0] + 0.33*sensorInputs[1] + 0.34*sensorInputs[2]

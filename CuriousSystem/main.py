@@ -6,6 +6,8 @@ import datetime
 import random
 import Q_learning
 import Sensor
+import threading
+import Interface
 
 # pygame set up
 pygame.init()
@@ -39,6 +41,30 @@ clock = pygame.time.Clock()
 sliderPos = 0
 sliderPosInc = 0.0
 
+# initialize sensor interface
+class readSensorThread(threading.Thread):
+    def __init__(self, com_port='COM8', baud_rate=9600):
+        threading.Thread.__init__(self)
+        self.sx = Interface.Interface()
+        self.sx.initSensor(com_port=com_port, baud_rate=baud_rate)
+        self.running = False
+
+    def run(self):
+        self.running = True
+        while self.running:
+            self.sx.updateSensor()
+
+    def exitThread(self):
+        self.running = False
+        self.sx.closeSensor()
+
+    def pollSensor(self):
+        return self.sx.getSensorState()
+
+# start sensor thread
+sxThread = readSensorThread(com_port='COM8', baud_rate=9600)
+sxThread.start()
+
 while 1:
 
     clock.tick(fps)
@@ -47,6 +73,7 @@ while 1:
     # pygame update
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
+
 
             # output to file
             current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -74,6 +101,8 @@ while 1:
                         file.write(',')
                     file.write('\n')
             file.close()
+
+            sxThread.exitThread()
             sys.exit()
 
         elif event.type == KEYDOWN and event.key == K_DOWN:
@@ -90,30 +119,41 @@ while 1:
     allRobots.update(user)
 
     # user reacts to the animation
-    num_robot = 0
-    hrFea = 0.0
-    skinFea = 0.0
-    #interestFea = 0.0
+
+    # poll the sensor value from interface
+
+    sxVal = sxThread.pollSensor()
+    if sxVal is not None:
+        fea = [sigmoid(0.005*(sxVal[0]-600)), sigmoid(0.02*(sxVal[1]-512)), sigmoid(sliderPos)]
+        print("Sensor Readings")
+        print("---- Heart Rate = " + str(fea[0]) + "  (" + str(sxVal[0]) + ")" )
+        print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(sxVal[1]) + ")")
+        print("---- Interest Level = " + str(fea[2]))
+
+        # user reacts to the animation
+        user.setFea(fea)
+
+    # num_robot = 0
+    # hrFea = 0.0
+    # skinFea = 0.0
+    # #interestFea = 0.0
     avgState = np.array([0.0, 0.0])
-
     for robot in pygame.sprite.Group.sprites(allRobots):
-
-        hrFea += abs(robot.v)
-        skinFea += abs(robot.v)**2
-        #interestFea += abs(robot.v)**2
-
-        # use for updating the sync_state with average state
-        avgState += np.array(robot.getState())
-        num_robot += 1
-
-        #print robot.memory.R.getNumRegion()
+    #
+    #     hrFea += abs(robot.v)
+    #     skinFea += abs(robot.v)**2
+    #     #interestFea += abs(robot.v)**2
+    #
+         # use for updating the sync_state with average state
+         avgState += np.array(robot.getState())
+    #     num_robot += 1
+    #
+    #     #print robot.memory.R.getNumRegion()
     avgState /= num_robot
-    fea = [hrFea/num_robot, skinFea/num_robot, sigmoid(sliderPos)]
-    #print "---- Interest Level = " + str(fea[2])
-    user.react(fea)
+    #fea = [hrFea/num_robot, skinFea/num_robot, sigmoid(sliderPos)]
+
 
     # update the synchronous state
-
     for robot in pygame.sprite.Group.sprites(allRobots):
         robot.setSyncState(avgState.tolist())
 
@@ -154,3 +194,4 @@ else:
     interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
 
 '''
+
