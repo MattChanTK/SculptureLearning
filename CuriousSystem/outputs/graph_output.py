@@ -9,7 +9,7 @@ if len(sys.argv) > 1:
     filename_action = str(sys.argv[1]) + '_action_error.csv'
 else:
     #filename = '2014_03_24_13_36_16_prediction_error.csv'
-    time = '2014_04_17_09_18_41'
+    time = '2014_04_17_13_26_41'
     filename_predictErr = time +'_prediction_error.csv'
     filename_action = time + '_action_error.csv'
 

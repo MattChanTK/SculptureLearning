@@ -65,25 +65,40 @@ def frange(x, y, div):
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
 
+# number of blue dots
 num_robot = 4
 
-bg_colour = (230, 240, 250)
-
+# number of updates per second
 fps = 30
-sim_time = 10  # in second
 
+# ==== simulation setting ====
+# simulation mode on or off
+simMode = False
+
+# ==== sensor interface setting ====
+sensor_com_port = 'COM8'
+sensor_baud_rate = 9600
+
+# ==== graphical interface settings ====
+bg_colour = (230, 240, 250)
 size = (900, 600)
 robot_size = (20, 20)
 
+# ===== Learning algorithm settings =====
 # Max number of exemplars before forgetting
-memory_size = 5000
+memory_size = 50000
 
-#Criterion
-C1 = 250
+# Criterion 1
+C1 = 500
 
 # Expert Setting
 time_window = 3
 smoothing_parameter = 5
+
+
+# ==== data collection settings
+output_folder = 'outputs'
+export_data = False
 
 
 

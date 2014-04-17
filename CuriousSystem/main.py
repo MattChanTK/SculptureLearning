@@ -34,8 +34,11 @@ allRobots = pygame.sprite.Group()
 for i in range(0, num_robot):
     allRobots.add(robots[i])
 
-#timing
+# timing
 clock = pygame.time.Clock()
+
+# start animation flag
+startFlag = False
 
 #slider
 sliderPos = 0
@@ -45,9 +48,9 @@ sliderPosInc = 0.0
 class readSensorThread(threading.Thread):
     def __init__(self, com_port='COM8', baud_rate=9600):
         threading.Thread.__init__(self)
-        self.sx = Interface.Interface()
-        self.sx.initSensor(com_port=com_port, baud_rate=baud_rate)
         self.running = False
+        self.sx = Interface.Interface()
+        self.comOpen = self.sx.initSensor(com_port=com_port, baud_rate=baud_rate)
 
     def run(self):
         self.running = True
@@ -65,48 +68,60 @@ class readSensorThread(threading.Thread):
     def isRunning(self):
         return self.running
 
+    def isComOpen(self):
+        return self.comOpen
+
 # start sensor thread
-sxThread = readSensorThread(com_port='COM8', baud_rate=9600)
-sxThread.start()
+if simMode:
+    pass
+else:
+    sxThread = readSensorThread(com_port=sensor_com_port, baud_rate=sensor_baud_rate)
+    if sxThread.isComOpen():
+        sxThread.start()
+    else:
+        print("Unable to communicate with sensors")
+        print("Quitting program...")
+        sxThread.exitThread()
+        sys.exit()
 
 while 1:
 
     clock.tick(fps)
     pygame.event.pump()
 
-    # pygame update
+    # pygame interface update
     for event in pygame.event.get():
         if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
 
-
             # output to file
-            current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+            if export_data:
+                current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
-            #prediction history
-            file = open(os.path.join('outputs', current_datetime + '_prediction_error'+'.csv'), 'a+') # append mode
-            #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
-            for robot in robots[0:1]:  # for the first robot
-                numSample = len(robot.predict_history)
-                numDim = len(robot.predict_history[0])
-                for sample in robot.predict_history:
-                    for dataPt in sample:
-                        file.write(str(dataPt))
-                        file.write(',')
-                    file.write('\n')
-            file.close()
+                #prediction history
+                file = open(os.path.join(output_folder, current_datetime + '_prediction_error'+'.csv'), 'a+') # append mode
+                #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
+                for robot in robots[0:1]:  # for the first robot
+                    numSample = len(robot.predict_history)
+                    numDim = len(robot.predict_history[0])
+                    for sample in robot.predict_history:
+                        for dataPt in sample:
+                            file.write(str(dataPt))
+                            file.write(',')
+                        file.write('\n')
+                file.close()
 
-            # action history
-            file = open(os.path.join('outputs', current_datetime + '_action_error'+'.csv'), 'a+') # append mode
-            #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
-            for robot in robots[0:1]:  # for the first robot
-                numSample = len(robot.action_history)
-                numDim = len(robot.action_history[0])
-                for sample in robot.action_history:
-                    for dataPt in sample:
-                        file.write(str(dataPt))
-                        file.write(',')
-                    file.write('\n')
-            file.close()
+                # action history
+                file = open(os.path.join(output_folder, current_datetime + '_action_error'+'.csv'), 'a+') # append mode
+                #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
+                for robot in robots[0:1]:  # for the first robot
+                    numSample = len(robot.action_history)
+                    numDim = len(robot.action_history[0])
+                    for sample in robot.action_history:
+                        for dataPt in sample:
+                            file.write(str(dataPt))
+                            file.write(',')
+                        file.write('\n')
+                file.close()
 
             sxThread.exitThread()
             sys.exit()
@@ -117,54 +132,75 @@ while 1:
             sliderPosInc = 0.05
         elif event.type == KEYUP:
             sliderPosInc = 0.0
-            print("Interest Level = " + str(sigmoid(sliderPos)))
 
-    #get sensor reading
-    sliderPos += sliderPosInc
-    sxVal = sxThread.pollSensor()  # poll the sensor value from interface
-
-    # robots move
-    if sxVal is not None:
-
-        fea = [sigmoid(0.005*(sxVal[0]-800)), sigmoid(0.02*(sxVal[1]-512)), sigmoid(sliderPos)]
-        print("Sensor Readings")
-        print("---- Heart Rate = " + str(fea[0]) + "  (" + str(sxVal[0]) + ")" )
-        print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(sxVal[1]) + ")")
-        print("---- Interest Level = " + str(fea[2]))
-        print("---- Level of Engagement = " + str(robots[0].engage))
-
-        # user reacts to the animation
-        user.setFea(fea)
-
+    # sensor readings generation in simulation mode
+    if simMode:
+        pass
         # num_robot = 0
         # hrFea = 0.0
         # skinFea = 0.0
         # #interestFea = 0.0
-        avgState = np.array([0.0, 0.0])
-        for robot in pygame.sprite.Group.sprites(allRobots):
+        #avgState = np.array([0.0, 0.0])
+        #for robot in pygame.sprite.Group.sprites(allRobots):
         #
         #     hrFea += abs(robot.v)
         #     skinFea += abs(robot.v)**2
         #     #interestFea += abs(robot.v)**2
         #
              # use for updating the sync_state with average state
-             avgState += np.array(robot.getState())
+        #     avgState += np.array(robot.getState())
         #     num_robot += 1
         #
         #     #print robot.memory.R.getNumRegion()
-        avgState /= num_robot
+        #avgState /= num_robot
         #fea = [hrFea/num_robot, skinFea/num_robot, sigmoid(sliderPos)]
 
+    # real-time sensor input acquisition mode
+    else:
+        #get sensor readings
+        sliderPos += sliderPosInc  # update slider position
+        sxVal = sxThread.pollSensor()  # poll the sensor value from interface
+
+        # robots move
+        if sxVal is not None:
+
+            fea = [sigmoid(0.005*(sxVal[0]-650)), sigmoid(0.02*(sxVal[1]-512)), sigmoid(sliderPos)]
+            print("Sensor Readings")
+            print("---- Heart Rate = " + str(fea[0]) + "  (" + str(sxVal[0]) + ")" )
+            print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(sxVal[1]) + ")")
+            print("---- Interest Level = " + str(fea[2]))
+            print("---- Level of Engagement = " + str(robots[0].engage))
+
+            # set user's response features
+            user.setFea(fea)
+
+            # set start flag
+            startFlag = True
+
+    if startFlag:
+        # compute synchronous parameters
+        avgState = np.array([0.0, 0.0])
+        num_robot_sync = 0
+        for robot in pygame.sprite.Group.sprites(allRobots):
+             # use for updating the sync_state with average state
+             avgState += np.absolute(np.array(robot.getState()))
+             num_robot_sync += 1
+        avgState /= num_robot_sync
+        print avgState
 
         # update the synchronous state
         for robot in pygame.sprite.Group.sprites(allRobots):
             robot.setSyncState(avgState.tolist())
 
         allRobots.update(user)
-        screen.blit(background, (0, 0))
-        allRobots.draw(screen)
 
-        pygame.display.flip()
+
+    # draw robots on screen
+    screen.blit(background, (0, 0))
+    allRobots.draw(screen)
+
+
+    pygame.display.flip()
 
 
 

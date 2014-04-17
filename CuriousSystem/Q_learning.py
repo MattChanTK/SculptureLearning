@@ -15,14 +15,16 @@ class Q_learning():
     s_state = []
     bounds = Sensor.Sensor.getBound()
     for i in range(0, len(bounds)):
-        s_state.append(frange(bounds[i][0], bounds[i][1], division))
-    print "s-states: " + str(s_state[0])
+        discrete_states = frange(bounds[i][0], bounds[i][1], division)
+        s_state.append(discrete_states)
+        print("Sensor States[" + str(i) + "]: " + str(discrete_states))
     # mapping motor values into discrete set of states
     m_state = []
     bounds = Motor.Motor.getBound()
     for i in range(0, len(bounds)):
-        m_state.append(frange(bounds[i][0], bounds[i][1], division))
-    print "m-states: " + str(m_state[0])
+        discrete_states = frange(bounds[i][0], bounds[i][1], division)
+        m_state.append(discrete_states)
+        print("Motor States[" + str(i) + "]: " + str(discrete_states))
 
     def __init__(self):
 

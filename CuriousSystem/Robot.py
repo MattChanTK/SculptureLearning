@@ -38,8 +38,12 @@ class Robot(pygame.sprite.Sprite):
         self.rect.y = self.area.bottom - self.y
 
         # independent state variables
-        self.v = -10
-        self.w = -0.05
+        positiveV = random.randint(0,1)
+        positiveW = random.randint(0,1)
+        self.v = 10 * (positiveV + (1-positiveV)*-1)
+        self.w = 0.05 * (positiveW + (1-positiveW)*-1)
+       # self.v = random.random()*20 - 10
+       # self.w = random.random()*0.1 - 0.05
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
 
@@ -102,10 +106,17 @@ class Robot(pygame.sprite.Sprite):
         # calculate robot direction
         self.w += self.motor.getParam()[1]
 
+        # w_sync follows sign of w
+        if self.w < 0:
+            self.w_sync = -self.w_sync
         self.dir += (1-self.engage)*self.w + self.engage*self.w_sync
 
         # computing the new position
         self.v += self.motor.getParam()[0]
+
+        # v_sync follows sign of v
+        if self.v < 0:
+            self.v_sync = -self.v_sync
 
         dx = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.cos(self.dir)
         dy = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.sin(self.dir)
