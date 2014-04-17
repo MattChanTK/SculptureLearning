@@ -22,7 +22,10 @@ class Interface:
 
     def updateSensor(self):
         # read data stream from port
-        x = self.port.readline()
+        try:
+            x = self.port.readline()
+        except serial.portNotOpenError:
+            print("Port closed")
         if x[-1] == '\n':
             x = x[0:-1]
         # tokenizing the string to sub-strings
@@ -35,7 +38,10 @@ class Interface:
         except:
             print(x)
 
-        self.port.flushOutput()
+        try:
+            self.port.flushOutput()
+        except serial.portNotOpenError:
+            print("Port closed")
 
 
 

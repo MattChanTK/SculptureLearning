@@ -150,7 +150,7 @@ class Robot(pygame.sprite.Sprite):
         self.sensor.interest = user.interest
 
         self.__updateEngage()
-        # print "Level of Engagement = " + str(self.engage)
+
 
     def __act(self):
 
@@ -226,4 +226,4 @@ class Robot(pygame.sprite.Sprite):
 
     def __updateEngage(self):
         sensorInputs = self.sensor.getParam()
-        self.engage = 0.33*sensorInputs[0] + 0.33*sensorInputs[1] + 0.34*sensorInputs[2]
+        self.engage = 0.20*sensorInputs[0] + 0.20*sensorInputs[1] + 0.60*sensorInputs[2]

@@ -53,13 +53,17 @@ class readSensorThread(threading.Thread):
         self.running = True
         while self.running:
             self.sx.updateSensor()
+        self.sx.closeSensor()
 
     def exitThread(self):
         self.running = False
-        self.sx.closeSensor()
+
 
     def pollSensor(self):
         return self.sx.getSensorState()
+
+    def isRunning(self):
+        return self.running
 
 # start sensor thread
 sxThread = readSensorThread(com_port='COM8', baud_rate=9600)
@@ -80,7 +84,8 @@ while 1:
 
             #prediction history
             file = open(os.path.join('outputs', current_datetime + '_prediction_error'+'.csv'), 'a+') # append mode
-            for robot in pygame.sprite.Group.sprites(allRobots):
+            #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
+            for robot in robots[0:1]:  # for the first robot
                 numSample = len(robot.predict_history)
                 numDim = len(robot.predict_history[0])
                 for sample in robot.predict_history:
@@ -92,7 +97,8 @@ while 1:
 
             # action history
             file = open(os.path.join('outputs', current_datetime + '_action_error'+'.csv'), 'a+') # append mode
-            for robot in pygame.sprite.Group.sprites(allRobots):
+            #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
+            for robot in robots[0:1]:  # for the first robot
                 numSample = len(robot.action_history)
                 numDim = len(robot.action_history[0])
                 for sample in robot.action_history:
@@ -111,57 +117,54 @@ while 1:
             sliderPosInc = 0.05
         elif event.type == KEYUP:
             sliderPosInc = 0.0
-            print "Interest Level = " + str(sigmoid(sliderPos))
+            print("Interest Level = " + str(sigmoid(sliderPos)))
 
+    #get sensor reading
     sliderPos += sliderPosInc
+    sxVal = sxThread.pollSensor()  # poll the sensor value from interface
 
     # robots move
-    allRobots.update(user)
-
-    # user reacts to the animation
-
-    # poll the sensor value from interface
-
-    sxVal = sxThread.pollSensor()
     if sxVal is not None:
-        fea = [sigmoid(0.005*(sxVal[0]-600)), sigmoid(0.02*(sxVal[1]-512)), sigmoid(sliderPos)]
+
+        fea = [sigmoid(0.005*(sxVal[0]-800)), sigmoid(0.02*(sxVal[1]-512)), sigmoid(sliderPos)]
         print("Sensor Readings")
         print("---- Heart Rate = " + str(fea[0]) + "  (" + str(sxVal[0]) + ")" )
         print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(sxVal[1]) + ")")
         print("---- Interest Level = " + str(fea[2]))
+        print("---- Level of Engagement = " + str(robots[0].engage))
 
         # user reacts to the animation
         user.setFea(fea)
 
-    # num_robot = 0
-    # hrFea = 0.0
-    # skinFea = 0.0
-    # #interestFea = 0.0
-    avgState = np.array([0.0, 0.0])
-    for robot in pygame.sprite.Group.sprites(allRobots):
-    #
-    #     hrFea += abs(robot.v)
-    #     skinFea += abs(robot.v)**2
-    #     #interestFea += abs(robot.v)**2
-    #
-         # use for updating the sync_state with average state
-         avgState += np.array(robot.getState())
-    #     num_robot += 1
-    #
-    #     #print robot.memory.R.getNumRegion()
-    avgState /= num_robot
-    #fea = [hrFea/num_robot, skinFea/num_robot, sigmoid(sliderPos)]
+        # num_robot = 0
+        # hrFea = 0.0
+        # skinFea = 0.0
+        # #interestFea = 0.0
+        avgState = np.array([0.0, 0.0])
+        for robot in pygame.sprite.Group.sprites(allRobots):
+        #
+        #     hrFea += abs(robot.v)
+        #     skinFea += abs(robot.v)**2
+        #     #interestFea += abs(robot.v)**2
+        #
+             # use for updating the sync_state with average state
+             avgState += np.array(robot.getState())
+        #     num_robot += 1
+        #
+        #     #print robot.memory.R.getNumRegion()
+        avgState /= num_robot
+        #fea = [hrFea/num_robot, skinFea/num_robot, sigmoid(sliderPos)]
 
 
-    # update the synchronous state
-    for robot in pygame.sprite.Group.sprites(allRobots):
-        robot.setSyncState(avgState.tolist())
+        # update the synchronous state
+        for robot in pygame.sprite.Group.sprites(allRobots):
+            robot.setSyncState(avgState.tolist())
 
+        allRobots.update(user)
+        screen.blit(background, (0, 0))
+        allRobots.draw(screen)
 
-    screen.blit(background, (0, 0))
-    allRobots.draw(screen)
-
-    pygame.display.flip()
+        pygame.display.flip()
 
 
 

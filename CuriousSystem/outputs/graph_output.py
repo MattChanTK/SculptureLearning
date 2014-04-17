@@ -9,7 +9,7 @@ if len(sys.argv) > 1:
     filename_action = str(sys.argv[1]) + '_action_error.csv'
 else:
     #filename = '2014_03_24_13_36_16_prediction_error.csv'
-    time = '2014_04_10_02_20_57'
+    time = '2014_04_17_09_18_41'
     filename_predictErr = time +'_prediction_error.csv'
     filename_action = time + '_action_error.csv'
 
@@ -30,7 +30,7 @@ with open(filename_predictErr, 'rb') as csvfile:
         #plt.title('Sensor Signal ' + str(subplotNum - (len(data)*100+11)))
         #fig.subplots_adjust(hspace=1)
 
-
+'''
 # outputting action history graph
 window = 300
 with open(filename_action, 'rb') as csvfile:
@@ -75,6 +75,6 @@ with open(filename_action, 'rb') as csvfile:
         plt.ylim([0, 0.50])
         #plt.title('Sensor Signal ' + str(subplotNum - (len(data)*100+11)))
         #fig.subplots_adjust(hspace=1)
-
+'''
 
 plt.show()

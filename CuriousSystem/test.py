@@ -44,6 +44,10 @@ print stores
 sortedStores = sorted(stores, key=lambda store: store.a)
 print sortedStores
 
+
+arr = [1,2]
+for x in arr[0:1]:
+    print x
 '''
 
 svr = svm.SVR()
