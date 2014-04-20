@@ -7,8 +7,8 @@ import random
 class Q_learning():
 
     division = 10  # number of sensor states per dimension
-    greed = 0.35
-    learnRate = 0.2
+    greed = 0.10
+    learnRate = 0.35
     gamma = 1.0
 
     # mapping sensor values into discrete set of states

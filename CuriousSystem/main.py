@@ -123,7 +123,8 @@ while 1:
                         file.write('\n')
                 file.close()
 
-            sxThread.exitThread()
+            if not simMode:
+                sxThread.exitThread()
             sys.exit()
 
         elif event.type == KEYDOWN and event.key == K_DOWN:
@@ -135,25 +136,45 @@ while 1:
 
     # sensor readings generation in simulation mode
     if simMode:
-        pass
-        # num_robot = 0
-        # hrFea = 0.0
-        # skinFea = 0.0
-        # #interestFea = 0.0
-        #avgState = np.array([0.0, 0.0])
-        #for robot in pygame.sprite.Group.sprites(allRobots):
-        #
-        #     hrFea += abs(robot.v)
-        #     skinFea += abs(robot.v)**2
-        #     #interestFea += abs(robot.v)**2
-        #
-             # use for updating the sync_state with average state
-        #     avgState += np.array(robot.getState())
-        #     num_robot += 1
-        #
-        #     #print robot.memory.R.getNumRegion()
-        #avgState /= num_robot
-        #fea = [hrFea/num_robot, skinFea/num_robot, sigmoid(sliderPos)]
+
+        num_robot_sim = 0
+        hrFea = 0
+        skinFea = 0
+        interestFea = 0
+        for robot in pygame.sprite.Group.sprites(allRobots):
+            if robot.motor.accel > -1000000:
+                print ("non-random")
+                hrFea += abs(robot.motor.accel*10)
+                skinFea += abs(robot.motor.accel*10)**2
+                interestFea += abs(robot.motor.angAccel*10)
+            else:
+                print ("random")
+                hrFea += abs(random.random()*5)
+                skinFea += abs(random.random()*5)
+                interestFea += abs(random.random()*5)
+
+            num_robot_sim += 1
+
+
+        fea = [sigmoid(0.1*(hrFea/num_robot_sim-10)),
+               sigmoid(0.01*(skinFea/num_robot_sim-100)),
+               sigmoid(2*(interestFea/num_robot_sim))]
+
+        print("Simulated Sensor Readings")
+        print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea/num_robot_sim) + ")" )
+        print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea/num_robot_sim) + ")")
+        print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea/num_robot_sim) + ") ")
+
+
+        # set user's response features
+        user.setFea(fea)
+
+        # calculate user engagement level
+        Robot.Robot.updateEngage(fea)
+        print("---- Level of Engagement = " + str(Robot.Robot.engage))
+
+        # set start flag
+        startFlag = True
 
     # real-time sensor input acquisition mode
     else:
@@ -174,24 +195,33 @@ while 1:
             # set user's response features
             user.setFea(fea)
 
+            # calculate user engagement level
+            Robot.Robot.updateEngage(fea)
+
             # set start flag
             startFlag = True
 
     if startFlag:
         # compute synchronous parameters
-        avgState = np.array([0.0, 0.0])
-        num_robot_sync = 0
-        for robot in pygame.sprite.Group.sprites(allRobots):
-             # use for updating the sync_state with average state
-             avgState += np.absolute(np.array(robot.getState()))
-             num_robot_sync += 1
-        avgState /= num_robot_sync
-        print avgState
+        if sync_behaviour:
+            avgState = np.array([0.0, 0.0])
+            num_robot_sync = 0
+            for robot in pygame.sprite.Group.sprites(allRobots):
+                 # use for updating the sync_state with average state
+                 avgState += np.array(robot.getMotorParam())
+                 num_robot_sync += 1
+            avgState /= num_robot_sync
 
-        # update the synchronous state
-        for robot in pygame.sprite.Group.sprites(allRobots):
-            robot.setSyncState(avgState.tolist())
+            #avgState = 0.01*random.random() - 0.005
 
+            # update the synchronous state
+            new_sync_state = np.array(Robot.Robot.getSyncState())
+            #print("Sync Acceleration (init): " + str(new_sync_state))
+
+            Robot.Robot.setSyncState(avgState.tolist())
+        else:
+            Robot.Robot.updateEngage(None)
+        # update robot states
         allRobots.update(user)
 
 

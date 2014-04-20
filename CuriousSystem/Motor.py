@@ -5,7 +5,7 @@ class Motor(object):
 
     # lower nad upper bound of the motor accelerates
     accelBound = [-1.5, 1.5]
-    angAccelBound = [-math.pi/5000, math.pi/5000]
+    angAccelBound = [-math.pi/4000, math.pi/4000]
 
     def __init__(self, default=[0, 0]):
         self.accel = default[0]  # velocity

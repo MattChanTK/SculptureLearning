@@ -11,6 +11,10 @@ random.seed()
 
 class Robot(pygame.sprite.Sprite):
 
+    # synchronous state variables
+    accel_sync = -0.1
+    angAcc_sync = -0.0005
+    engage = 0.0  # level of engagement
 
     def __init__(self, this_robot_size=robot_size):
 
@@ -47,10 +51,6 @@ class Robot(pygame.sprite.Sprite):
         self.motor = Motor.Motor()
         self.sensor = Sensor.Sensor()
 
-        # synchronous state variables
-        self.v_sync = copy.copy(self.v)
-        self.w_sync = copy.copy(self.w)
-        self.engage = 0.0  # level of engagement
 
         # instantiate the robot's memory
         self.memory = Memory.Memory()
@@ -104,22 +104,18 @@ class Robot(pygame.sprite.Sprite):
     def __move(self):
 
         # calculate robot direction
-        self.w += self.motor.getParam()[1]
+        self.w += ((1-Robot.engage)*self.motor.getParam()[1] + Robot.engage*self.angAcc_sync)
 
-        # w_sync follows sign of w
-        if self.w < 0:
-            self.w_sync = -self.w_sync
-        self.dir += (1-self.engage)*self.w + self.engage*self.w_sync
+        self.dir += self.w
 
         # computing the new position
-        self.v += self.motor.getParam()[0]
+        self.v += ((1-Robot.engage)*self.motor.getParam()[0] + Robot.engage*self.accel_sync)
 
-        # v_sync follows sign of v
-        if self.v < 0:
-            self.v_sync = -self.v_sync
+       # print("self.v: " + str(self.v) )
+       # print("self.w: " + str(self.w) )
 
-        dx = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.cos(self.dir)
-        dy = ((1-self.engage)*self.v + self.engage*self.v_sync)*math.sin(self.dir)
+        dx = self.v*math.cos(self.dir)
+        dy = self.v*math.sin(self.dir)
         #print "v  = " + str(self.v) + "    w = " + str(self.w) + "    dir = " + str(self.dir)
         # updating pygame rect position
         newpos = self.rect.move(dx, -dy)
@@ -159,8 +155,6 @@ class Robot(pygame.sprite.Sprite):
         self.sensor.hr = user.hr
         self.sensor.skin = user.skin
         self.sensor.interest = user.interest
-
-        self.__updateEngage()
 
 
     def __act(self):
@@ -223,18 +217,26 @@ class Robot(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
+    def getMotorParam(self):
+        return self.motor.getParam()
+
     def printRegionPop(self):
         print len(self.memory.exp), '-->'
         self.memory.R.getNumExemplarRecursive()
         print('-----------')
 
-    def getSyncState(self):
-        return [self.v_sync, self.w_sync]
+    def getSyncState():
+        return [Robot.accel_sync, Robot.angAcc_sync]
+    getSyncState = staticmethod(getSyncState)
 
-    def setSyncState(self, state):
-        self.v_sync = state[0]
-        self.w_sync = state[1]
+    def setSyncState(state):
+        Robot.accel_sync = state[0]
+        Robot.angAcc_sync = state[1]
+    setSyncState = staticmethod(setSyncState)
 
-    def __updateEngage(self):
-        sensorInputs = self.sensor.getParam()
-        self.engage = 0.20*sensorInputs[0] + 0.20*sensorInputs[1] + 0.60*sensorInputs[2]
+    def updateEngage(sensorInputs):
+        if sensorInputs is None:
+            Robot.engage = 0
+        else:
+            Robot.engage = 0.20*sensorInputs[0] + 0.20*sensorInputs[1] + 0.60*sensorInputs[2]
+    updateEngage = staticmethod(updateEngage)

@@ -66,14 +66,17 @@ def sigmoid(x):
   return 1 / (1 + math.exp(-x))
 
 # number of blue dots
-num_robot = 4
+num_robot = 1
+
+# sync behaviours
+sync_behaviour = False
 
 # number of updates per second
 fps = 30
 
 # ==== simulation setting ====
 # simulation mode on or off
-simMode = False
+simMode = True
 
 # ==== sensor interface setting ====
 sensor_com_port = 'COM8'
@@ -98,7 +101,7 @@ smoothing_parameter = 5
 
 # ==== data collection settings
 output_folder = 'outputs'
-export_data = False
+export_data = True
 
 
 
