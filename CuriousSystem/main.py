@@ -44,6 +44,8 @@ startFlag = False
 sliderPos = 0
 sliderPosInc = 0.0
 
+feaHistory = []
+
 # initialize sensor interface
 class readSensorThread(threading.Thread):
     def __init__(self, com_port='COM8', baud_rate=9600):
@@ -123,6 +125,21 @@ while 1:
                         file.write('\n')
                 file.close()
 
+                fig = plt.figure(1)
+                # subplotNum = len(3)*100 + 11
+                # for type in range(3):
+                #     plt.subplot(subplotNum)
+                #     plt.plot(feaHistory[type])
+                #     subplotNum += 1
+
+                plt.plot(feaHistory)
+
+               # plt.ylabel('Percent Action Taken (window='+str(window)+')')
+                plt.xlabel('Time Step')
+              #  plt.ylim([0, 1.0])
+                plt.show()
+
+
             if not simMode:
                 sxThread.exitThread()
             sys.exit()
@@ -142,11 +159,11 @@ while 1:
         skinFea = 0
         interestFea = 0
         for robot in pygame.sprite.Group.sprites(allRobots):
-            if robot.motor.accel > -1000000:
+            if -50 < robot.motor.accel < 50:
                 print ("non-random")
-                hrFea += abs(robot.motor.accel*10)
-                skinFea += abs(robot.motor.accel*10)**2
-                interestFea += abs(robot.motor.angAccel*10)
+                hrFea += robot.v
+                skinFea += robot.v**2
+                interestFea += robot.w*10
             else:
                 print ("random")
                 hrFea += abs(random.random()*5)
@@ -159,6 +176,8 @@ while 1:
         fea = [sigmoid(0.1*(hrFea/num_robot_sim-10)),
                sigmoid(0.01*(skinFea/num_robot_sim-100)),
                sigmoid(2*(interestFea/num_robot_sim))]
+
+        feaHistory.append(copy.copy([hrFea, skinFea, interestFea]))
 
         print("Simulated Sensor Readings")
         print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea/num_robot_sim) + ")" )
@@ -194,7 +213,7 @@ while 1:
 
             # set user's response features
             user.setFea(fea)
-
+            feaHistory.append(copy.copy([sxVal[0], sxVal[1], sliderPos]))
             # calculate user engagement level
             Robot.Robot.updateEngage(fea)
 
@@ -223,6 +242,7 @@ while 1:
             Robot.Robot.updateEngage(None)
         # update robot states
         allRobots.update(user)
+        robot.memory.R.getNumExemplarRecursive()
 
 
     # draw robots on screen

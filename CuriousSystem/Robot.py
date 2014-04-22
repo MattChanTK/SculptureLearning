@@ -12,8 +12,8 @@ random.seed()
 class Robot(pygame.sprite.Sprite):
 
     # synchronous state variables
-    accel_sync = -0.1
-    angAcc_sync = -0.0005
+    accel_sync = 0 #-0.1
+    angAcc_sync = 0# -0.0005
     engage = 0.0  # level of engagement
 
     def __init__(self, this_robot_size=robot_size):
@@ -44,8 +44,8 @@ class Robot(pygame.sprite.Sprite):
         # independent state variables
         positiveV = random.randint(0,1)
         positiveW = random.randint(0,1)
-        self.v = 10 * (positiveV + (1-positiveV)*-1)
-        self.w = 0.05 * (positiveW + (1-positiveW)*-1)
+        self.v = 0 #10 * (positiveV + (1-positiveV)*-1)
+        self.w = 0 #0.05 * (positiveW + (1-positiveW)*-1)
        # self.v = random.random()*20 - 10
        # self.w = random.random()*0.1 - 0.05
         self.motor = Motor.Motor()
@@ -105,14 +105,14 @@ class Robot(pygame.sprite.Sprite):
 
         # calculate robot direction
         self.w += ((1-Robot.engage)*self.motor.getParam()[1] + Robot.engage*self.angAcc_sync)
-
+        print("self.a: " + str(self.motor.getParam()))
         self.dir += self.w
 
         # computing the new position
         self.v += ((1-Robot.engage)*self.motor.getParam()[0] + Robot.engage*self.accel_sync)
 
-       # print("self.v: " + str(self.v) )
-       # print("self.w: " + str(self.w) )
+        print("self.v: " + str(self.v) )
+        print("self.w: " + str(self.w) )
 
         dx = self.v*math.cos(self.dir)
         dy = self.v*math.sin(self.dir)

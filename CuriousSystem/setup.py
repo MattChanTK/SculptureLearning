@@ -6,6 +6,7 @@ import datetime
 import copy
 import numpy as np
 import time
+import matplotlib.pyplot as plt
 
 
 
@@ -72,11 +73,11 @@ num_robot = 1
 sync_behaviour = False
 
 # number of updates per second
-fps = 30
+fps = 40
 
 # ==== simulation setting ====
 # simulation mode on or off
-simMode = True
+simMode = False
 
 # ==== sensor interface setting ====
 sensor_com_port = 'COM8'
@@ -92,7 +93,7 @@ robot_size = (20, 20)
 memory_size = 50000
 
 # Criterion 1
-C1 = 500
+C1 = 50000
 
 # Expert Setting
 time_window = 3
@@ -102,6 +103,4 @@ smoothing_parameter = 5
 # ==== data collection settings
 output_folder = 'outputs'
 export_data = True
-
-
 

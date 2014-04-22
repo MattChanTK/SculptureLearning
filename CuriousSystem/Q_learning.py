@@ -6,7 +6,8 @@ import random
 
 class Q_learning():
 
-    division = 10  # number of sensor states per dimension
+    division_s = 4  # number of sensor states per dimension
+    division_m = 3  # number of sensor states per dimension
     greed = 0.10
     learnRate = 0.35
     gamma = 1.0
@@ -15,14 +16,19 @@ class Q_learning():
     s_state = []
     bounds = Sensor.Sensor.getBound()
     for i in range(0, len(bounds)):
-        discrete_states = frange(bounds[i][0], bounds[i][1], division)
+        discrete_states = frange(bounds[i][0],  bounds[i][1], division_s)
         s_state.append(discrete_states)
         print("Sensor States[" + str(i) + "]: " + str(discrete_states))
     # mapping motor values into discrete set of states
     m_state = []
     bounds = Motor.Motor.getBound()
     for i in range(0, len(bounds)):
-        discrete_states = frange(bounds[i][0], bounds[i][1], division)
+        # ensuring equal number of plus and minuses
+        discrete_states = frange(0,  bounds[i][1], int(division_m/2) + 1)
+        negState = np.array(discrete_states[1:])
+        negState *= -1
+        discrete_states = discrete_states + negState.tolist()
+        discrete_states.sort()
         m_state.append(discrete_states)
         print("Motor States[" + str(i) + "]: " + str(discrete_states))
 
@@ -105,7 +111,7 @@ class Q_learning():
                     bestKey.append(key)
             elif q == bestQ:
                 bestKey.append(key)
-
+        print("Best Q: " + str(bestQ))
         if len(bestKey) == 0:
             return Q_learning.getRandomMotor(), bestQ
         elif len(bestKey) > 1:

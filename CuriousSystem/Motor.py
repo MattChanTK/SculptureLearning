@@ -4,7 +4,8 @@ from setup import *
 class Motor(object):
 
     # lower nad upper bound of the motor accelerates
-    accelBound = [-1.5, 1.5]
+    # actually only upper bound matters
+    accelBound = [-1.5, 1.0]
     angAccelBound = [-math.pi/4000, math.pi/4000]
 
     def __init__(self, default=[0, 0]):
