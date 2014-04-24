@@ -159,7 +159,7 @@ while 1:
         skinFea = 0
         interestFea = 0
         for robot in pygame.sprite.Group.sprites(allRobots):
-            if -50 < robot.motor.accel < 50:
+            if -50 < robot.motor.getVal()[0] < 50:
                 print ("non-random")
                 hrFea += robot.v
                 skinFea += robot.v**2
@@ -255,32 +255,32 @@ while 1:
 
 
 
-'''
-Might be useful later codes
----------------------------
-if Q_learning.Q_learning.discretize(robot.motor)[0] < 1 & Q_learning.Q_learning.discretize(robot.motor)[1] < 1:
 
-    hrFea += 0.5
-    # distance to centre
-    skinFea += 0.5
-    # average angular velocity
-    interestFea += 0.5
-
-
-elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
-     # just average speed for now
-    hrFea += abs(robot.v)
-    # distance to centre
-    skinFea += abs(robot.v)**2
-    # average angular velocity
-    interestFea += abs(robot.v)**2
-
-else:
-
-    bounds = Sensor.Sensor.getBound()
-    hrFea += random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
-    skinFea += random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
-    interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
-
-'''
+# Might be useful later codes
+# ---------------------------
+# if Q_learning.Q_learning.discretize(robot.motor)[0] < 1 & Q_learning.Q_learning.discretize(robot.motor)[1] < 1:
+#
+#     hrFea += 0.5
+#     # distance to centre
+#     skinFea += 0.5
+#     # average angular velocity
+#     interestFea += 0.5
+#
+#
+# elif Q_learning.Q_learning.discretize(robot.motor)[0] < 4 & Q_learning.Q_learning.discretize(robot.motor)[1]<4:
+#      # just average speed for now
+#     hrFea += abs(robot.v)
+#     # distance to centre
+#     skinFea += abs(robot.v)**2
+#     # average angular velocity
+#     interestFea += abs(robot.v)**2
+#
+# else:
+#
+#     bounds = Sensor.Sensor.getBound()
+#     hrFea += random.uniform(bounds[0][0], bounds[0][1])#/(user.hr+0.001)
+#     skinFea += random.uniform(bounds[1][0], bounds[1][1])#/(user.k_skin+0.001)
+#     interestFea += random.uniform(bounds[2][0], bounds[2][1])#/(user.k_interest+0.0001)
+#
+#
 

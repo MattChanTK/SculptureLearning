@@ -11,8 +11,10 @@ import matplotlib.pyplot as plt
 
 
 from pygame.locals import *
-if not pygame.font: print 'Warning, fonts disabled'
-if not pygame.mixer: print 'Warning, sound disabled'
+if not pygame.font:
+    print('Warning, fonts disabled')
+if not pygame.mixer:
+    print('Warning, sound disabled')
 
 def load_image(name, colorkey=None):
     fullname = os.path.join('img', name)
@@ -61,7 +63,7 @@ def frange(x, y, div):
     jump = (y - x)/float(div)
     for i in range(0, div):
         list.append(x + i*jump)
-    return list
+    return tuple(list)
 
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
@@ -75,9 +77,13 @@ sync_behaviour = False
 # number of updates per second
 fps = 40
 
-# ==== simulation setting ====
+# ==== simulation mode setting ====
 # simulation mode on or off
-simMode = False
+simMode = True
+simpleMode = False
+num_simpleStates_s = 3
+num_simpleStates_m = 3
+
 
 # ==== sensor interface setting ====
 sensor_com_port = 'COM8'
@@ -99,8 +105,12 @@ C1 = 50000
 time_window = 3
 smoothing_parameter = 5
 
+# ==== Q-learning setting ====
+num_s_division = 10  # discretization
+num_m_division = 10
+
 
 # ==== data collection settings
 output_folder = 'outputs'
-export_data = True
+export_data = False
 

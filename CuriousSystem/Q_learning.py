@@ -6,46 +6,56 @@ import random
 
 class Q_learning():
 
-    division_s = 4  # number of sensor states per dimension
-    division_m = 3  # number of sensor states per dimension
     greed = 0.10
     learnRate = 0.35
     gamma = 1.0
 
-    # mapping sensor values into discrete set of states
-    s_state = []
-    bounds = Sensor.Sensor.getBound()
-    for i in range(0, len(bounds)):
-        discrete_states = frange(bounds[i][0],  bounds[i][1], division_s)
-        s_state.append(discrete_states)
-        print("Sensor States[" + str(i) + "]: " + str(discrete_states))
-    # mapping motor values into discrete set of states
-    m_state = []
-    bounds = Motor.Motor.getBound()
-    for i in range(0, len(bounds)):
-        # ensuring equal number of plus and minuses
-        discrete_states = frange(0,  bounds[i][1], int(division_m/2) + 1)
-        negState = np.array(discrete_states[1:])
-        negState *= -1
-        discrete_states = discrete_states + negState.tolist()
-        discrete_states.sort()
-        m_state.append(discrete_states)
-        print("Motor States[" + str(i) + "]: " + str(discrete_states))
 
-    def __init__(self):
+    def __init__(self, sensor, motor):
 
         # Q value (weight for each action)
         self.q_table = dict()
 
-    def discretize(input):
+        # mapping sensor values into discrete set of states
+        self.s_state = []
+        if sensor.isSimple():
+            self.s_state = [sensor.getSimpleStates()]
+        else:
+            bounds = Sensor.Sensor.getBound()
+            division_s = num_s_division  # number of sensor states per dimension
+            for i in range(0, len(bounds)):
+                discrete_states = frange(bounds[i][0],  bounds[i][1], division_s)
+                self.s_state.append(discrete_states)
+                print("Sensor States[" + str(i) + "]: " + str(discrete_states))
+
+        self.s_state = tuple(self.s_state)
+
+
+        # mapping motor values into discrete set of states
+        self.m_state = []
+        if motor.isSimple():
+            self.m_state = [motor.getSimpleStates()]
+        else:
+            bounds = Motor.Motor.getBound()
+            division_m = num_m_division  # number of sensor states per dimension
+            for i in range(0, len(bounds)):
+                # ensuring equal number of plus and minuses
+                discrete_states = frange(0,  bounds[i][1], int(division_m/2) + 1)
+                negState = np.array(discrete_states[1:])
+                negState *= -1
+                discrete_states = list(discrete_states) + negState.tolist()
+                discrete_states.sort()
+                self.m_state.append(discrete_states)
+                discrete_states = tuple(discrete_states)
+                print("Motor States[" + str(i) + "]: " + str(discrete_states))
+        self.m_state = tuple(self.m_state)
+
+    def discretize(input, states):
         # sensor/motor state per dimension
         s = [0]*input.getNumParam()
 
         # check if it's a sensor input or motor input
-        if type(input) is Sensor.Sensor:
-            state = Q_learning.s_state
-        else:
-            state = Q_learning.m_state
+        state = states
 
         # mapping value into discrete set of states
         for i in range(0, len(s)):
@@ -63,16 +73,20 @@ class Q_learning():
 
         motorVal = []
         for i in range(0, len(input)):
-            motorVal.append(Q_learning.m_state[i][input[i]])
+            motorVal.append(self.m_state[i][input[i]])
         return Motor.Motor(motorVal)
 
     def getQ(self, sensor, motor):
-        s = Q_learning.discretize(sensor)
 
-        if type(motor) is Motor.Motor:
-            m = Q_learning.discretize(motor)
+        if sensor.isSimple():
+            s = sensor.getParam()
         else:
-            m = motor
+            s = Q_learning.discretize(sensor, self.s_state)
+
+        if motor.isSimple():
+            m = motor.getParam()
+        else:
+            m = Q_learning.discretize(motor, self.m_state)
 
         if s + m in self.q_table:
             return self.q_table[s + m]
@@ -80,8 +94,14 @@ class Q_learning():
             return 0
 
     def addQ(self, sensor, motor, q_val):
-        s = Q_learning.discretize(sensor)
-        m = Q_learning.discretize(motor)
+        if sensor.isSimple():
+            s = sensor.getParam()
+        else:
+            s = Q_learning.discretize(sensor, self.s_state)
+        if motor.isSimple():
+            m = motor.getParam()
+        else:
+            m = Q_learning.discretize(motor, self.m_state)
 
         self.q_table[s+m] = q_val
 
@@ -90,12 +110,15 @@ class Q_learning():
         # at random choose an random action
         k = random.random()
         if k < Q_learning.greed:
-            motor = Q_learning.getRandomMotor()
+            motor = self.getRandomMotor()
             return motor, self.getQ(sensor, motor)
 
         key_list = self.q_table.keys()
         numSParam = sensor.getNumParam()
-        s = Q_learning.discretize(sensor)
+        if sensor.isSimple():
+            s = sensor.getParam()
+        else:
+            s = Q_learning.discretize(sensor, self.s_state)
         matchingKey = []
         for key in key_list:
             if key[0:numSParam] == s:
@@ -113,7 +136,7 @@ class Q_learning():
                 bestKey.append(key)
         print("Best Q: " + str(bestQ))
         if len(bestKey) == 0:
-            return Q_learning.getRandomMotor(), bestQ
+            return self.getRandomMotor(), bestQ
         elif len(bestKey) > 1:
             i = random.randint(0, len(bestKey)-1)
 
@@ -122,22 +145,20 @@ class Q_learning():
             return self.__getMotor(bestKey[0][numSParam:len(bestKey[0])]), bestQ
 
 
-    def getRandomMotor():
+    def getRandomMotor(self, simple=False):
+
         val = []
-        bounds = Motor.Motor.getBound()
-        for bound in bounds:
-            val.append(random.uniform(bound[0], bound[1]))
+        for i in range(0,len(self.m_state)):
+            val.append(self.m_state[i][random.randint(0, len(self.m_state[i])-1)])
 
-        return Motor.Motor(val)
-    getRandomMotor = staticmethod(getRandomMotor)
+        return Motor.Motor(val, simple)
 
-'''
-# Test Code
-learner = Q_learning()
-sensor = Sensor.Sensor([60.0, 2.0, 100])
-motor = Motor.Motor([20.0, -1])
-learner.addQ(sensor, motor, 3)
-motor2 = Motor.Motor([20.0, 1])
-print learner.getQ(sensor, motor2)
-print learner.getBestMotor(sensor).getParam()
-'''
+
+# # Test Code
+# learner = Q_learning()
+# sensor = Sensor.Sensor([60.0, 2.0, 100])
+# motor = Motor.Motor([20.0, -1])
+# learner.addQ(sensor, motor, 3)
+# motor2 = Motor.Motor([20.0, 1])
+# print learner.getQ(sensor, motor2)
+# print learner.getBestMotor(sensor).getParam()

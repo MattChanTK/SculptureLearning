@@ -16,7 +16,7 @@ class Robot(pygame.sprite.Sprite):
     angAcc_sync = 0# -0.0005
     engage = 0.0  # level of engagement
 
-    def __init__(self, this_robot_size=robot_size):
+    def __init__(self, this_robot_size=robot_size, simple=False):
 
         # pygame parameters
         # call Sprite intializer
@@ -36,27 +36,28 @@ class Robot(pygame.sprite.Sprite):
         self.x = random.randint(self.area.left, self.area.right)
         self.y = self.area.bottom - random.randint(self.area.top, self.area.bottom)
         self.dir = random.random()*math.pi*2
+        self.simple = simple
 
         # randomize the initial location of the dot
         self.rect.x = self.x
         self.rect.y = self.area.bottom - self.y
 
         # independent state variables
-        positiveV = random.randint(0,1)
-        positiveW = random.randint(0,1)
+        # positiveV = random.randint(0, 1)
+        # positiveW = random.randint(0, 1)
         self.v = 0 #10 * (positiveV + (1-positiveV)*-1)
         self.w = 0 #0.05 * (positiveW + (1-positiveW)*-1)
-       # self.v = random.random()*20 - 10
-       # self.w = random.random()*0.1 - 0.05
-        self.motor = Motor.Motor()
-        self.sensor = Sensor.Sensor()
+        # self.v = random.random()*20 - 10
+        # self.w = random.random()*0.1 - 0.05
+        self.motor = Motor.Motor(simple=self.simple)
+        self.sensor = Sensor.Sensor(simple=self.simple)
 
 
         # instantiate the robot's memory
         self.memory = Memory.Memory()
 
         # Q-Learning engine
-        self.Q = Q_learning.Q_learning()
+        self.Q = Q_learning.Q_learning(self.sensor, self.motor)
 
         # Prediction Error history
         self.predict_history = []
@@ -73,7 +74,10 @@ class Robot(pygame.sprite.Sprite):
 
         # select action
         sm_q = self.__act()
-        self.action_history.append(Q_learning.Q_learning.discretize(copy.copy(self.motor)))
+        if self.simple:
+            self.action_history.append(self.motor, self.Q.m_state)
+        else:
+            self.action_history.append(Q_learning.Q_learning.discretize(copy.copy(self.motor), self.Q.m_state))
         m = copy.copy(self.motor)
 
         # predict results
@@ -149,20 +153,12 @@ class Robot(pygame.sprite.Sprite):
         self.v = math.sqrt((self.x-self.x0)**2 + (self.y-self.y0)**2)
         #self.w = self.dir-self.dir0
 
-
-
     def __sense(self, user):
-        self.sensor.hr = user.hr
-        self.sensor.skin = user.skin
-        self.sensor.interest = user.interest
-
+        self.sensor.setVal(user.state)
 
     def __act(self):
 
         self.motor, sm_q = self.Q.getBestMotor(self.sensor)
-
-        #self.motor.v = self.sensor.hr/8
-        #self.motor.w = self.sensor.interest/0.2
 
         return sm_q
 
