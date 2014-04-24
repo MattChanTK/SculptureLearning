@@ -67,7 +67,7 @@ class Expert:
 
             prediction.append(copy.copy(p))
 
-        return Sensor.Sensor(prediction)
+        return Sensor.Sensor(prediction, simple=sensor.isSimple())
 
     def addPredictError(self, s_actual, s_prediction):
 

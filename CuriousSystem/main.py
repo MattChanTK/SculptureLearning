@@ -22,11 +22,11 @@ background.fill(bg_colour)
 # instantiate robots
 robots = []
 for i in range(0, num_robot):
-    robot = Robot.Robot()
+    robot = Robot.Robot(simple=simpleMode)
     robots.append(robot)
 
 # instantiate user
-user = Simson.Simson()
+user = Simson.Simson(simple=simpleMode)
 
 # add elements to pygame space
 allRobots = pygame.sprite.Group()
@@ -153,44 +153,60 @@ while 1:
 
     # sensor readings generation in simulation mode
     if simMode:
-
-        num_robot_sim = 0
-        hrFea = 0
-        skinFea = 0
-        interestFea = 0
-        for robot in pygame.sprite.Group.sprites(allRobots):
-            if -50 < robot.motor.getVal()[0] < 50:
-                print ("non-random")
-                hrFea += robot.v
-                skinFea += robot.v**2
-                interestFea += robot.w*10
+        if simpleMode:
+            if robot.v > 50:
+                fea = Sensor.Sensor.getSimpleStates()[0]
+            elif robot.v > 15:
+                fea = Sensor.Sensor.getSimpleStates()[1]
             else:
-                print ("random")
-                hrFea += abs(random.random()*5)
-                skinFea += abs(random.random()*5)
-                interestFea += abs(random.random()*5)
+                fea = Sensor.Sensor.getSimpleStates()[2]
 
-            num_robot_sim += 1
-
-
-        fea = [sigmoid(0.1*(hrFea/num_robot_sim-10)),
-               sigmoid(0.01*(skinFea/num_robot_sim-100)),
-               sigmoid(2*(interestFea/num_robot_sim))]
-
-        feaHistory.append(copy.copy([hrFea, skinFea, interestFea]))
-
-        print("Simulated Sensor Readings")
-        print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea/num_robot_sim) + ")" )
-        print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea/num_robot_sim) + ")")
-        print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea/num_robot_sim) + ") ")
+            user.setFea(fea)
+            Robot.Robot.updateEngage(None)
+            print("Simple Simulated Sensor Readings")
+            print("---- Sensor State = " + str(fea))
 
 
-        # set user's response features
-        user.setFea(fea)
+        else:
 
-        # calculate user engagement level
-        Robot.Robot.updateEngage(fea)
-        print("---- Level of Engagement = " + str(Robot.Robot.engage))
+            num_robot_sim = 0
+            hrFea = 0
+            skinFea = 0
+            interestFea = 0
+            for robot in pygame.sprite.Group.sprites(allRobots):
+
+                if -50 < robot.motor.getParam()[0] < 50:
+                    print ("non-random")
+                    hrFea += robot.v
+                    skinFea += robot.v**2
+                    interestFea += robot.w*10
+                else:
+                    print ("random")
+                    hrFea += abs(random.random()*5)
+                    skinFea += abs(random.random()*5)
+                    interestFea += abs(random.random()*5)
+
+                num_robot_sim += 1
+
+
+            fea = [sigmoid(0.1*(hrFea/num_robot_sim-10)),
+                   sigmoid(0.01*(skinFea/num_robot_sim-100)),
+                   sigmoid(2*(interestFea/num_robot_sim))]
+
+            feaHistory.append(copy.copy([hrFea, skinFea, interestFea]))
+
+            print("Simulated Sensor Readings")
+            print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea/num_robot_sim) + ")" )
+            print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea/num_robot_sim) + ")")
+            print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea/num_robot_sim) + ") ")
+
+
+            # set user's response features
+            user.setFea(fea)
+
+            # calculate user engagement level
+            Robot.Robot.updateEngage(fea)
+            print("---- Level of Engagement = " + str(Robot.Robot.engage))
 
         # set start flag
         startFlag = True

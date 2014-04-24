@@ -12,7 +12,7 @@ class Motor(object):
 
     def __init__(self, default=[0]*2, simple=False):
         if simple:
-            self.val = 0
+            self.val = default[0]
         else:
             accel = default[0]  # velocity
             angAccel = default[1]  # angular velocity
@@ -21,7 +21,9 @@ class Motor(object):
         self.simple = simple
 
     def getParam(self):
-        return tuple(self.getVal(),)
+        if self.isSimple():
+            return (self.getVal(),)
+        return tuple(self.getVal())
 
     def getVal(self):
         return self.val
@@ -38,12 +40,9 @@ class Motor(object):
         return [Motor.accelBound, Motor.angAccelBound]
     getBound = staticmethod(getBound)
 
-    def getSimpleStates(self):
-        if self.simple:
-            return self.simpleStates
-        else:
-            print("Not in simple mode!")
-            raise
+    def getSimpleStates():
+        return Motor.simpleStates
+    getSimpleStates = staticmethod(getSimpleStates)
 
     def isSimple(self):
         return self.simple

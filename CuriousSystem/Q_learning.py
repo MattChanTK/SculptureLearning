@@ -19,7 +19,7 @@ class Q_learning():
         # mapping sensor values into discrete set of states
         self.s_state = []
         if sensor.isSimple():
-            self.s_state = [sensor.getSimpleStates()]
+            self.s_state = [Sensor.Sensor.getSimpleStates()]
         else:
             bounds = Sensor.Sensor.getBound()
             division_s = num_s_division  # number of sensor states per dimension
@@ -34,7 +34,7 @@ class Q_learning():
         # mapping motor values into discrete set of states
         self.m_state = []
         if motor.isSimple():
-            self.m_state = [motor.getSimpleStates()]
+            self.m_state = [Motor.Motor.getSimpleStates()]
         else:
             bounds = Motor.Motor.getBound()
             division_m = num_m_division  # number of sensor states per dimension
@@ -69,12 +69,12 @@ class Q_learning():
         return tuple(s)
     discretize = staticmethod(discretize)
 
-    def __getMotor(self, input):
+    def __getMotor(self, input, simple=False):
 
         motorVal = []
         for i in range(0, len(input)):
             motorVal.append(self.m_state[i][input[i]])
-        return Motor.Motor(motorVal)
+        return Motor.Motor(motorVal, simple=simple)
 
     def getQ(self, sensor, motor):
 
@@ -110,7 +110,7 @@ class Q_learning():
         # at random choose an random action
         k = random.random()
         if k < Q_learning.greed:
-            motor = self.getRandomMotor()
+            motor = self.getRandomMotor(simple=sensor.isSimple())
             return motor, self.getQ(sensor, motor)
 
         key_list = self.q_table.keys()
@@ -134,15 +134,15 @@ class Q_learning():
                     bestKey.append(key)
             elif q == bestQ:
                 bestKey.append(key)
-        print("Best Q: " + str(bestQ))
+
         if len(bestKey) == 0:
-            return self.getRandomMotor(), bestQ
+            return self.getRandomMotor(simple=sensor.isSimple()), bestQ
         elif len(bestKey) > 1:
             i = random.randint(0, len(bestKey)-1)
 
-            return self.__getMotor(bestKey[i][numSParam:len(bestKey[i])]), bestQ
+            return self.__getMotor(bestKey[i][numSParam:len(bestKey[i])], sensor.isSimple()), bestQ
         else:
-            return self.__getMotor(bestKey[0][numSParam:len(bestKey[0])]), bestQ
+            return self.__getMotor(bestKey[0][numSParam:len(bestKey[0])], sensor.isSimple()), bestQ
 
 
     def getRandomMotor(self, simple=False):

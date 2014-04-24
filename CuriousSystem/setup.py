@@ -80,9 +80,13 @@ fps = 40
 # ==== simulation mode setting ====
 # simulation mode on or off
 simMode = True
-simpleMode = False
+simpleMode = True
 num_simpleStates_s = 3
 num_simpleStates_m = 3
+
+# can't turn on simple mode unless in simulation
+if simMode == False:
+    simpleMode = False
 
 
 # ==== sensor interface setting ====
@@ -112,5 +116,5 @@ num_m_division = 10
 
 # ==== data collection settings
 output_folder = 'outputs'
-export_data = False
+export_data = True
 

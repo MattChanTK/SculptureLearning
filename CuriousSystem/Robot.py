@@ -74,8 +74,8 @@ class Robot(pygame.sprite.Sprite):
 
         # select action
         sm_q = self.__act()
-        if self.simple:
-            self.action_history.append(self.motor, self.Q.m_state)
+        if self.isSimple():
+            self.action_history.append(self.motor)
         else:
             self.action_history.append(Q_learning.Q_learning.discretize(copy.copy(self.motor), self.Q.m_state))
         m = copy.copy(self.motor)
@@ -108,15 +108,23 @@ class Robot(pygame.sprite.Sprite):
     def __move(self):
 
         # calculate robot direction
-        self.w += ((1-Robot.engage)*self.motor.getParam()[1] + Robot.engage*self.angAcc_sync)
-        print("self.a: " + str(self.motor.getParam()))
+        if self.isSimple():
+            self.w = 0
+        else:
+            self.w += ((1-Robot.engage)*self.motor.getParam()[1] + Robot.engage*self.angAcc_sync)
+
         self.dir += self.w
 
         # computing the new position
-        self.v += ((1-Robot.engage)*self.motor.getParam()[0] + Robot.engage*self.accel_sync)
+        if self.isSimple():
+            self.v += self.getSimpleMotor(self.motor)
+            print("self.a: " + str(self.getSimpleMotor(self.motor)))
+        else:
+            self.v += ((1-Robot.engage)*self.motor.getParam()[0] + Robot.engage*self.accel_sync)
+            print("self.a: " + str(self.motor.getVal()))
 
-        print("self.v: " + str(self.v) )
-        print("self.w: " + str(self.w) )
+        print("self.v: " + str(self.v))
+        print("self.w: " + str(self.w))
 
         dx = self.v*math.cos(self.dir)
         dy = self.v*math.sin(self.dir)
@@ -154,11 +162,13 @@ class Robot(pygame.sprite.Sprite):
         #self.w = self.dir-self.dir0
 
     def __sense(self, user):
-        self.sensor.setVal(user.state)
+        self.sensor.setVal(user.getState())
 
     def __act(self):
 
         self.motor, sm_q = self.Q.getBestMotor(self.sensor)
+        print("---- Motor State = "+ str(self.motor.getVal()))
+        print("Best Q: " + str(sm_q))
 
         return sm_q
 
@@ -236,3 +246,22 @@ class Robot(pygame.sprite.Sprite):
         else:
             Robot.engage = 0.20*sensorInputs[0] + 0.20*sensorInputs[1] + 0.60*sensorInputs[2]
     updateEngage = staticmethod(updateEngage)
+
+    def getSimpleMotor(self, motor):
+        if self.isSimple():
+            states = Motor.Motor.getSimpleStates()
+            if motor.getVal() == states[0]:
+                output = 1
+            elif motor.getVal() == states[1]:
+                output = -1
+            else:
+                output = 0
+        else:
+            print("Motor not in simple mode!")
+            raise
+        return output
+
+    def isSimple(self):
+        return self.simple
+
+

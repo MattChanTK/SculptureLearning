@@ -24,7 +24,9 @@ class Sensor(object):
 
 
     def getParam(self):
-        return tuple(self.getVal(),)
+        if self.isSimple():
+            return (self.getVal(),)
+        return tuple(self.getVal())
 
     def getVal(self):
         return self.val
@@ -41,12 +43,9 @@ class Sensor(object):
         return (Sensor.hrBound, Sensor.skinBound, Sensor.interestBound)
     getBound = staticmethod(getBound)
 
-    def getSimpleStates(self):
-        if self.simple:
-            return self.simpleStates
-        else:
-            print("Not in simple mode!")
-            raise
+    def getSimpleStates():
+        return Sensor.simpleStates
+    getSimpleStates = staticmethod(getSimpleStates)
 
     def isSimple(self):
         return self.simple
