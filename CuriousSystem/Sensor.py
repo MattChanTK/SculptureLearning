@@ -13,7 +13,7 @@ class Sensor(object):
 
     def __init__(self, default=[0]*3, simple=False):
         if simple:
-            self.val = 0
+            self.val = default[0]
         else:
             hr = default[0]
             skin = default[1]

@@ -100,14 +100,19 @@ while 1:
                 current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
                 # prediction history
-                exportToCSV(current_datetime, 'prediction_error', robots[0].predict_history)
+                for i in range(0, len(robots)):
+                    exportToCSV(current_datetime, 'prediction_error_' + str(i), robots[i].predict_history)
 
                 # action history
-                exportToCSV(current_datetime, 'action_rate', robots[0].action_history)
+                for i in range(0, len(robots)):
+                    exportToCSV(current_datetime, 'action_rate_' + str(i), robots[i].action_history)
+
+                # state history
+                for i in range(0, len(robots)):
+                    exportToCSV(current_datetime, 'state_history_' + str(i), robots[i].state_history)
 
                 # sensor history
                 exportToCSV(current_datetime, 'sensor_history', feaHistory)
-
 
             if not simMode:
                 sxThread.exitThread()
@@ -123,12 +128,20 @@ while 1:
     # sensor readings generation in simulation mode
     if simMode:
         if simpleMode:
-            if robot.v > 50:
-                fea = Sensor.Sensor.getSimpleStates()[0]
-            elif robot.v > 15:
+            #fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+            # if math.sin(robot.v) > 0.8:
+            #     fea = Sensor.Sensor.getSimpleStates()[0]
+            # elif math.cos(robot.v) > 0.8:
+            #     fea = Sensor.Sensor.getSimpleStates()[1]
+            # else:
+            #     fea = Sensor.Sensor.getSimpleStates()[2]
+            if 50 < robot.v < 100:
                 fea = Sensor.Sensor.getSimpleStates()[1]
-            else:
+            elif 30 < robot.v < 50:
                 fea = Sensor.Sensor.getSimpleStates()[2]
+            else:
+                fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+
 
             user.setFea(fea)
             feaHistory.append([fea])
@@ -148,27 +161,26 @@ while 1:
                 if -50 < robot.motor.getParam()[0] < 50:
                     print ("non-random")
                     hrFea += robot.v
-                    skinFea += robot.v**2
-                    interestFea += robot.w*10
+                    skinFea += robot.v ** 2
+                    interestFea += robot.w * 10
                 else:
                     print ("random")
-                    hrFea += abs(random.random()*5)
-                    skinFea += abs(random.random()*5)
-                    interestFea += abs(random.random()*5)
+                    hrFea += abs(random.random() * 5)
+                    skinFea += abs(random.random() * 5)
+                    interestFea += abs(random.random() * 5)
 
                 num_robot_sim += 1
 
-
-            fea = [sigmoid(0.1*(hrFea/num_robot_sim-10)),
-                   sigmoid(0.01*(skinFea/num_robot_sim-100)),
-                   sigmoid(2*(interestFea/num_robot_sim))]
+            fea = [sigmoid(0.1 * (hrFea / num_robot_sim - 10)),
+                   sigmoid(0.01 * (skinFea / num_robot_sim - 100)),
+                   sigmoid(2 * (interestFea / num_robot_sim))]
 
             feaHistory.append(copy.copy([hrFea, skinFea, interestFea]))
 
             print("Simulated Sensor Readings")
-            print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea/num_robot_sim) + ")" )
-            print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea/num_robot_sim) + ")")
-            print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea/num_robot_sim) + ") ")
+            print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea / num_robot_sim) + ")" )
+            print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea / num_robot_sim) + ")")
+            print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea / num_robot_sim) + ") ")
 
 
             # set user's response features
@@ -189,8 +201,7 @@ while 1:
 
         # robots move
         if sxVal is not None:
-
-            fea = [sigmoid(0.005*(sxVal[0]-650)), sigmoid(0.02*(sxVal[1]-512)), sigmoid(sliderPos)]
+            fea = [sigmoid(0.005 * (sxVal[0] - 650)), sigmoid(0.02 * (sxVal[1] - 512)), sigmoid(sliderPos)]
             print("Sensor Readings")
             print("---- Heart Rate = " + str(fea[0]) + "  (" + str(sxVal[0]) + ")" )
             print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(sxVal[1]) + ")")
@@ -212,9 +223,9 @@ while 1:
             avgState = np.array([0.0, 0.0])
             num_robot_sync = 0
             for robot in pygame.sprite.Group.sprites(allRobots):
-                 # use for updating the sync_state with average state
-                 avgState += np.array(robot.getMotorParam())
-                 num_robot_sync += 1
+                # use for updating the sync_state with average state
+                avgState += np.array(robot.getMotorParam())
+                num_robot_sync += 1
             avgState /= num_robot_sync
 
             #avgState = 0.01*random.random() - 0.005
@@ -226,15 +237,14 @@ while 1:
             Robot.Robot.setSyncState(avgState.tolist())
         else:
             Robot.Robot.updateEngage(None)
-        # update robot states
+            # update robot states
         allRobots.update(user)
-        robot.memory.R.getNumExemplarRecursive()
+        #robot.memory.R.getNumExemplarRecursive()
 
 
     # draw robots on screen
     screen.blit(background, (0, 0))
     allRobots.draw(screen)
-
 
     pygame.display.flip()
 

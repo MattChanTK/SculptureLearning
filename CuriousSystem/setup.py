@@ -92,7 +92,7 @@ fps = 40
 # simulation mode on or off
 simMode = True
 simpleMode = True
-num_simpleStates_s = 3
+num_simpleStates_s = 100
 num_simpleStates_m = 3
 
 # can't turn on simple mode unless in simulation
@@ -111,10 +111,10 @@ robot_size = (20, 20)
 
 # ===== Learning algorithm settings =====
 # Max number of exemplars before forgetting
-memory_size = 50000
+memory_size = 5000
 
 # Criterion 1
-C1 = 50000
+C1 = 500
 
 # Expert Setting
 time_window = 3

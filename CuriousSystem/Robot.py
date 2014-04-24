@@ -65,6 +65,9 @@ class Robot(pygame.sprite.Sprite):
         # Action History
         self.action_history = []
 
+        # State History
+        self.state_history = []
+
 
     def update(self, user):
 
@@ -161,6 +164,9 @@ class Robot(pygame.sprite.Sprite):
         self.v = math.sqrt((self.x-self.x0)**2 + (self.y-self.y0)**2)
         #self.w = self.dir-self.dir0
 
+        # record state
+        self.state_history.append((self.v, self.w))
+
     def __sense(self, user):
         self.sensor.setVal(user.getState())
 
@@ -251,9 +257,9 @@ class Robot(pygame.sprite.Sprite):
         if self.isSimple():
             states = Motor.Motor.getSimpleStates()
             if motor.getVal() == states[0]:
-                output = 1
-            elif motor.getVal() == states[1]:
                 output = -1
+            elif motor.getVal() == states[1]:
+                output = 1
             else:
                 output = 0
         else:
