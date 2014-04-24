@@ -99,45 +99,14 @@ while 1:
             if export_data:
                 current_datetime = datetime.datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
 
-                #prediction history
-                file = open(os.path.join(output_folder, current_datetime + '_prediction_error'+'.csv'), 'a+') # append mode
-                #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
-                for robot in robots[0:1]:  # for the first robot
-                    numSample = len(robot.predict_history)
-                    numDim = len(robot.predict_history[0])
-                    for sample in robot.predict_history:
-                        for dataPt in sample:
-                            file.write(str(dataPt))
-                            file.write(',')
-                        file.write('\n')
-                file.close()
+                # prediction history
+                exportToCSV(current_datetime, 'prediction_error', robots[0].predict_history)
 
                 # action history
-                file = open(os.path.join(output_folder, current_datetime + '_action_error'+'.csv'), 'a+') # append mode
-                #for robot in pygame.sprite.Group.sprites(allRobots):  # for all robot
-                for robot in robots[0:1]:  # for the first robot
-                    numSample = len(robot.action_history)
-                    numDim = len(robot.action_history[0])
-                    for sample in robot.action_history:
-                        for dataPt in sample:
-                            file.write(str(dataPt))
-                            file.write(',')
-                        file.write('\n')
-                file.close()
+                exportToCSV(current_datetime, 'action_rate', robots[0].action_history)
 
-                fig = plt.figure(1)
-                # subplotNum = len(3)*100 + 11
-                # for type in range(3):
-                #     plt.subplot(subplotNum)
-                #     plt.plot(feaHistory[type])
-                #     subplotNum += 1
-
-                plt.plot(feaHistory)
-
-               # plt.ylabel('Percent Action Taken (window='+str(window)+')')
-                plt.xlabel('Time Step')
-              #  plt.ylim([0, 1.0])
-                plt.show()
+                # sensor history
+                exportToCSV(current_datetime, 'sensor_history', feaHistory)
 
 
             if not simMode:
@@ -162,6 +131,7 @@ while 1:
                 fea = Sensor.Sensor.getSimpleStates()[2]
 
             user.setFea(fea)
+            feaHistory.append([fea])
             Robot.Robot.updateEngage(None)
             print("Simple Simulated Sensor Readings")
             print("---- Sensor State = " + str(fea))

@@ -75,7 +75,7 @@ class Robot(pygame.sprite.Sprite):
         # select action
         sm_q = self.__act()
         if self.isSimple():
-            self.action_history.append(self.motor)
+            self.action_history.append(copy.copy(self.motor).getParam())
         else:
             self.action_history.append(Q_learning.Q_learning.discretize(copy.copy(self.motor), self.Q.m_state))
         m = copy.copy(self.motor)

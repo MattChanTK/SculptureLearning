@@ -68,6 +68,17 @@ def frange(x, y, div):
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
 
+#prediction history
+def exportToCSV(current_datetime, filename, robot_history):
+    file = open(os.path.join(output_folder, current_datetime + '_' + filename+'.csv'), 'a+') # append mode
+
+    for sample in robot_history:
+        for dataPt in sample:
+            file.write(str(dataPt))
+            file.write(',')
+        file.write('\n')
+    file.close()
+
 # number of blue dots
 num_robot = 1
 
