@@ -68,6 +68,9 @@ class Robot(pygame.sprite.Sprite):
         # State History
         self.state_history = []
 
+        # learning progress history
+        self.lp_history = []
+
 
     def update(self, user):
 
@@ -99,6 +102,10 @@ class Robot(pygame.sprite.Sprite):
         lp = [0]*s2.getNumParam()
         if s2_predict is not None:
             lp = self.__observe(expert, s2_predict, s2)
+
+        # record learning progress
+        self.lp_history.append(lp)
+
 
         # Learn the consequence of the action
         self.__learn(sm_q, lp)
@@ -165,10 +172,12 @@ class Robot(pygame.sprite.Sprite):
         #self.w = self.dir-self.dir0
 
         # record state
-        self.state_history.append((self.v, self.w))
+        self.state_history.append((self.v, self.w, self.x, self.y, self.dir))
+
 
     def __sense(self, user):
-        self.sensor.setVal(user.getState())
+        intStates = [self.v, self.w, self.x, self.y, self.dir]
+        self.sensor.setVal(user.getState() + intStates )
 
     def __act(self):
 
@@ -208,6 +217,7 @@ class Robot(pygame.sprite.Sprite):
         for comp in lp:
             reward += comp
         reward /= float(len(lp))
+        print ("self.avgLP: " + str(reward))
 
         q = q0 + alpha*(reward + gamma*(self.Q.getBestMotor(self.sensor))[1] - q0)
 

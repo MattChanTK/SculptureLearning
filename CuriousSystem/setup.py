@@ -91,7 +91,7 @@ fps = 40
 # ==== simulation mode setting ====
 # simulation mode on or off
 simMode = True
-simpleMode = True
+simpleMode = False
 num_simpleStates_s = 100
 num_simpleStates_m = 3
 
@@ -111,10 +111,10 @@ robot_size = (20, 20)
 
 # ===== Learning algorithm settings =====
 # Max number of exemplars before forgetting
-memory_size = 5000
+memory_size = 50000
 
 # Criterion 1
-C1 = 500
+C1 = 5000
 
 # Expert Setting
 time_window = 3
@@ -122,7 +122,7 @@ smoothing_parameter = 5
 
 # ==== Q-learning setting ====
 num_s_division = 10  # discretization
-num_m_division = 10
+num_m_division = 3
 
 
 # ==== data collection settings

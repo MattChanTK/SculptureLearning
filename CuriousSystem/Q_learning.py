@@ -6,8 +6,8 @@ import random
 
 class Q_learning():
 
-    greed = 0.10
-    learnRate = 0.35
+    greed = 0.25
+    learnRate = 0.25
     gamma = 1.0
 
 

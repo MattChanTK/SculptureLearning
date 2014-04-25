@@ -104,12 +104,17 @@ while 1:
                     exportToCSV(current_datetime, 'prediction_error_' + str(i), robots[i].predict_history)
 
                 # action history
-                for i in range(0, len(robots)):
-                    exportToCSV(current_datetime, 'action_rate_' + str(i), robots[i].action_history)
+                if simpleMode:  # too many states if not simple mode
+                    for i in range(0, len(robots)):
+                        exportToCSV(current_datetime, 'action_rate_' + str(i), robots[i].action_history)
 
                 # state history
                 for i in range(0, len(robots)):
                     exportToCSV(current_datetime, 'state_history_' + str(i), robots[i].state_history)
+
+                # learning progress history
+                for i in range(0, len(robots)):
+                    exportToCSV(current_datetime, 'lp_history_' + str(i), robots[i].lp_history)
 
                 # sensor history
                 exportToCSV(current_datetime, 'sensor_history', feaHistory)
@@ -135,9 +140,11 @@ while 1:
             #     fea = Sensor.Sensor.getSimpleStates()[1]
             # else:
             #     fea = Sensor.Sensor.getSimpleStates()[2]
-            if 50 < robot.v < 100:
+            if 0 < robot.v <= 5:
                 fea = Sensor.Sensor.getSimpleStates()[1]
-            elif 30 < robot.v < 50:
+            elif 5 < robot.v <= 10:
+                fea = Sensor.Sensor.getSimpleStates()[2]
+            elif 25 < robot.v <= 45:
                 fea = Sensor.Sensor.getSimpleStates()[2]
             else:
                 fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
@@ -175,7 +182,7 @@ while 1:
                    sigmoid(0.01 * (skinFea / num_robot_sim - 100)),
                    sigmoid(2 * (interestFea / num_robot_sim))]
 
-            feaHistory.append(copy.copy([hrFea, skinFea, interestFea]))
+            feaHistory.append(copy.copy(fea))
 
             print("Simulated Sensor Readings")
             print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea / num_robot_sim) + ")" )

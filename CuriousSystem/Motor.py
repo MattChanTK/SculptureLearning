@@ -5,17 +5,17 @@ class Motor(object):
 
     # lower nad upper bound of the motor accelerates
     # actually only upper bound matters
-    accelBound = (-1.5, 1.0)
+    accelBound = (-2.0, 2.0)
     angAccelBound = (-math.pi/4000, math.pi/4000)
 
     simpleStates = tuple(range(num_simpleStates_m))
 
-    def __init__(self, default=[0]*2, simple=False):
+    def __init__(self, val=[0]*2, simple=False):
         if simple:
-            self.val = default[0]
+            self.val = val[0]
         else:
-            accel = default[0]  # velocity
-            angAccel = default[1]  # angular velocity
+            accel = val[0]  # velocity
+            angAccel = val[1]  # angular velocity
             self.val = [accel, angAccel]
 
         self.simple = simple
