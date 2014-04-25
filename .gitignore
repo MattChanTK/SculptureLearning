@@ -3,6 +3,7 @@ Bradon_IRtracking/
 serial_output*.txt
 serial_output*.csv
 CuriousSystem/outputs/*.csv
+CuriousSystem/outputs/*/*
 CuriousSystem/outputs/*.png
 
 

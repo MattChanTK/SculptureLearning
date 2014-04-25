@@ -165,16 +165,27 @@ while 1:
             interestFea = 0
             for robot in pygame.sprite.Group.sprites(allRobots):
 
-                if -50 < robot.motor.getParam()[0] < 50:
-                    print ("non-random")
-                    hrFea += robot.v
-                    skinFea += robot.v ** 2
-                    interestFea += robot.w * 10
+                # if -50 < robot.motor.getParam()[0] < 50:
+                #     print ("non-random")
+                #     hrFea += robot.v
+                #     skinFea += robot.v ** 2
+                #     interestFea += robot.w * 10
+                # else:
+                #     print ("random")
+                #     hrFea += abs(random.random() * 5)
+                #     skinFea += abs(random.random() * 5)
+                #     interestFea += abs(random.random() * 5)
+
+                if 0 < robot.v <= 5:
+                    fea = [0.5, 0.5, 0.5]
+                elif 5 < robot.v <= 10:
+                    fea = [0.8, 0.8, 0.8]
+                elif 25 < robot.v <= 45:
+                    fea = [0.8, 0.8, 0.8]
                 else:
-                    print ("random")
-                    hrFea += abs(random.random() * 5)
-                    skinFea += abs(random.random() * 5)
-                    interestFea += abs(random.random() * 5)
+                    hrFea += min(abs(int(robot.v)), Sensor.Sensor.getBound()[0][1])
+                    skinFea += min(abs(int(robot.v)), Sensor.Sensor.getBound()[0][1])
+                    interestFea += min(abs(int(robot.v)), Sensor.Sensor.getBound()[0][1])
 
                 num_robot_sim += 1
 
