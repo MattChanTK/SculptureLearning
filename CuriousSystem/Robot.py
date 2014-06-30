@@ -13,7 +13,7 @@ class Robot(pygame.sprite.Sprite):
 
     # synchronous state variables
     accel_sync = 0 #-0.1
-    angAcc_sync = 0# -0.0005
+    angAcc_sync = 0 # -0.0005
     engage = 0.0  # level of engagement
 
     def __init__(self, this_robot_size=robot_size, simple=False):
@@ -33,9 +33,13 @@ class Robot(pygame.sprite.Sprite):
         self.area = screen.get_rect()
 
         # state of the robot
-        self.x = random.randint(self.area.left, self.area.right)
-        self.y = self.area.bottom - random.randint(self.area.top, self.area.bottom)
-        self.dir = random.random()*math.pi*2
+        #self.x = random.randint(self.area.left, self.area.right)
+        self.x = self.area.right/2
+        #self.y = self.area.bottom - random.randint(self.area.top, self.area.bottom)
+        self.y = self.area.bottom/2
+        #self.dir = random.random()*math.pi*2
+        self.dir = 0
+
         self.simple = simple
 
         # randomize the initial location of the dot
@@ -127,8 +131,8 @@ class Robot(pygame.sprite.Sprite):
 
         # computing the new position
         if self.isSimple():
-            self.v += self.getSimpleMotor(self.motor)
-            print("self.a: " + str(self.getSimpleMotor(self.motor)))
+            self.v += self.getSimpleMotor()
+            print("self.a: " + str(self.getSimpleMotor()))
         else:
             self.v += ((1-Robot.engage)*self.motor.getParam()[0] + Robot.engage*self.accel_sync)
             print("self.a: " + str(self.motor.getVal()))
@@ -176,8 +180,12 @@ class Robot(pygame.sprite.Sprite):
 
 
     def __sense(self, user):
-        intStates = [self.v, self.w, self.x, self.y, self.dir]
-        self.sensor.setVal(user.getState() + intStates )
+        if self.isSimple():
+            inputs = user.getState()
+        else:
+            intStates = [self.v, self.w, self.x, self.y, self.dir]
+            inputs = user.getState() + intStates
+        self.sensor.setVal(inputs)
 
     def __act(self):
 
@@ -263,12 +271,12 @@ class Robot(pygame.sprite.Sprite):
             Robot.engage = 0.20*sensorInputs[0] + 0.20*sensorInputs[1] + 0.60*sensorInputs[2]
     updateEngage = staticmethod(updateEngage)
 
-    def getSimpleMotor(self, motor):
+    def getSimpleMotor(self):
         if self.isSimple():
             states = Motor.Motor.getSimpleStates()
-            if motor.getVal() == states[0]:
+            if self.motor.getVal() == states[0]:
                 output = -1
-            elif motor.getVal() == states[1]:
+            elif self.motor.getVal() == states[1]:
                 output = 1
             else:
                 output = 0

@@ -70,13 +70,13 @@ def sigmoid(x):
 
 #prediction history
 def exportToCSV(current_datetime, filename, robot_history):
-    file = open(os.path.join(output_folder, current_datetime + '_' + filename+'.csv'), 'a+') # append mode
+    with open(os.path.join(output_folder, current_datetime + '_' + filename+'.csv'), 'a+') as file: # append mode
 
-    for sample in robot_history:
-        for dataPt in sample:
-            file.write(str(dataPt))
-            file.write(',')
-        file.write('\n')
+        for sample in robot_history:
+            for dataPt in sample:
+                file.write(str(dataPt))
+                file.write(',')
+            file.write('\n')
     file.close()
 
 # number of blue dots
@@ -91,7 +91,7 @@ fps = 40
 # ==== simulation mode setting ====
 # simulation mode on or off
 simMode = True
-simpleMode = False
+simpleMode = True
 num_simpleStates_s = 100
 num_simpleStates_m = 3
 
@@ -128,4 +128,5 @@ num_m_division = 3
 # ==== data collection settings
 output_folder = 'outputs'
 export_data = True
+show_plot = True
 

@@ -8,6 +8,7 @@ import Q_learning
 import Sensor
 import threading
 import Interface
+from outputs import graph_output
 
 # pygame set up
 pygame.init()
@@ -119,8 +120,15 @@ while 1:
                 # sensor history
                 exportToCSV(current_datetime, 'sensor_history', feaHistory)
 
+
+                # plot the data
+                if show_plot:
+                    graph_output.plotData(output_folder +"/"+ current_datetime)
+
+
             if not simMode:
                 sxThread.exitThread()
+
             sys.exit()
 
         elif event.type == KEYDOWN and event.key == K_DOWN:
@@ -140,11 +148,11 @@ while 1:
             #     fea = Sensor.Sensor.getSimpleStates()[1]
             # else:
             #     fea = Sensor.Sensor.getSimpleStates()[2]
-            if 0 < robot.v <= 5:
+            if robot.getSimpleMotor() <= -1:
                 fea = Sensor.Sensor.getSimpleStates()[1]
-            elif 5 < robot.v <= 10:
+            elif -1 < robot.getSimpleMotor() < 1:
                 fea = Sensor.Sensor.getSimpleStates()[2]
-            elif 25 < robot.v <= 45:
+            elif 1 <= robot.getSimpleMotor() :
                 fea = Sensor.Sensor.getSimpleStates()[2]
             else:
                 fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
@@ -155,7 +163,6 @@ while 1:
             Robot.Robot.updateEngage(None)
             print("Simple Simulated Sensor Readings")
             print("---- Sensor State = " + str(fea))
-
 
         else:
 
