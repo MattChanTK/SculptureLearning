@@ -38,7 +38,7 @@ class Robot(pygame.sprite.Sprite):
         #self.y = self.area.bottom - random.randint(self.area.top, self.area.bottom)
         self.y = self.area.bottom/2
         #self.dir = random.random()*math.pi*2
-        self.dir = 0
+        self.dir = 0.9
 
         self.simple = simple
 
@@ -50,7 +50,7 @@ class Robot(pygame.sprite.Sprite):
         # positiveV = random.randint(0, 1)
         # positiveW = random.randint(0, 1)
         self.v = 0 #10 * (positiveV + (1-positiveV)*-1)
-        self.w = 0 #0.05 * (positiveW + (1-positiveW)*-1)
+        self.w = 0.05 #0.05 * (positiveW + (1-positiveW)*-1)
         # self.v = random.random()*20 - 10
         # self.w = random.random()*0.1 - 0.05
         self.motor = Motor.Motor(simple=self.simple)
@@ -172,15 +172,16 @@ class Robot(pygame.sprite.Sprite):
         self.x += move_x
         self.y += move_y
 
-        # calculate new direction (will change if it hits wall)
-        self.dir = math.atan2(move_y, move_x)
+        if self.v != 0:
+            # calculate new direction (will change if it hits wall)
+            self.dir = math.atan2(move_y, move_x)
 
         # calculate new velocity
         self.v = math.sqrt((self.x-self.x0)**2 + (self.y-self.y0)**2)
         #self.w = self.dir-self.dir0
 
         # record state
-        self.state_history.append((self.v, self.w, self.x, self.y, self.dir))
+        self.state_history.append((self.v, self.w, self.x, self.y, self.dir) + self.motor.getParam() )
 
 
     def __sense(self, user):

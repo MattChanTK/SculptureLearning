@@ -1,5 +1,6 @@
 import csv
 import matplotlib.pyplot as plt
+import Motor
 
 time = '2014_06_30_11_56_57'
 robot = 0
@@ -111,8 +112,11 @@ def plotData(time, robotID=0):
             data = map(list, zip(*data))  #transpose the data
             data.pop()  # remove the empty row
             subplotNum = len(data)*100 + 11
-            stateLabel = 0;
+            stateLabel = ['v', 'w', 'x', 'y', 'dir', 'output']
+
+            rowID = 0
             for row in data:
+
                 row = [float(i) for i in row]
                 fig = plt.figure(figNum)
                 plt.subplot(subplotNum)
@@ -120,52 +124,43 @@ def plotData(time, robotID=0):
                 plt.plot(row)
                 plt.xlabel('Time Step')
                 plt.suptitle('State History Graph')
-                if stateLabel == 0:
-                    plt.ylabel('v')
-                elif stateLabel == 1:
-                    plt.ylabel('w')
-                elif stateLabel == 2:
-                    plt.ylabel('x')
-                elif stateLabel == 3:
-                    plt.ylabel('y')
-                elif stateLabel == 4:
-                    plt.ylabel('dir')
-                else:
-                    plt.ylabel('State')
-                stateLabel+=1
+
+                try:
+                    plt.ylabel(stateLabel[rowID])
+                except OverflowError:
+                    plt.ylabel('state')
+                rowID += 1
     except IOError:
         pass
     figNum += 1
 
-    # outputting state history graph
+    # outputting state-space diagram
     try:
         with open(filename_stateHist, 'r') as csvfile:
             data = csv.reader(csvfile, delimiter=',') #import the data
             data = map(list, zip(*data))  #transpose the data
             data.pop()  # remove the empty row
-            subplotNum = len(data)*100 + 11
-            stateLabel = 0;
-            for row in data:
-                row = [float(i) for i in row]
-                fig = plt.figure(figNum)
-                plt.subplot(subplotNum)
-                subplotNum += 1
-                plt.plot(row)
-                plt.xlabel('Time Step')
-                plt.suptitle('State History Graph')
-                if stateLabel == 0:
-                    plt.ylabel('v')
-                elif stateLabel == 1:
-                    plt.ylabel('w')
-                elif stateLabel == 2:
-                    plt.ylabel('x')
-                elif stateLabel == 3:
-                    plt.ylabel('y')
-                elif stateLabel == 4:
-                    plt.ylabel('dir')
-                else:
-                    plt.ylabel('State')
-                stateLabel+=1
+
+            plotState = [0, 5]
+            stateLabel = ['v', 'w', 'x', 'y', 'dir', 'output']
+
+            xData = [float(i) for i in data[plotState[0]]]
+            yData = [float(i) for i in data[plotState[1]]]
+
+            plt.figure(figNum)
+            plt.plot(xData, yData)
+            #for i in range(1, len(xData)):
+            #    plt.arrow(xData[i-1], yData[i-1], xData[i]-xData[i-1],yData[i]-yData[i-1])
+
+            plt.xlabel('state')
+            plt.ylabel('state')
+            try:
+                plt.xlabel(stateLabel[plotState[0]])
+                plt.ylabel(stateLabel[plotState[1]])
+            except OverflowError:
+                pass
+
+            plt.suptitle('State Space Diagram')
     except IOError:
         pass
     figNum += 1
