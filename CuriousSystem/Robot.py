@@ -69,6 +69,9 @@ class Robot(pygame.sprite.Sprite):
         # Action History
         self.action_history = []
 
+         # Sensor History
+        self.sensor_history = []
+
         # State History
         self.state_history = []
 
@@ -81,6 +84,7 @@ class Robot(pygame.sprite.Sprite):
         # Sense the user
         self.__sense(user)
         s1 = copy.copy(self.sensor)
+        self.sensor_history.append(s1.getParam())
 
         # select action
         sm_q = self.__act()

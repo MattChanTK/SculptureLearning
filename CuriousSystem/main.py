@@ -45,7 +45,7 @@ startFlag = False
 sliderPos = 0
 sliderPosInc = 0.0
 
-feaHistory = []
+# feaHistory = []
 
 # initialize sensor interface
 class readSensorThread(threading.Thread):
@@ -107,7 +107,10 @@ while 1:
                 # action history
                 if simpleMode:  # too many states if not simple mode
                     for i in range(0, len(robots)):
-                        exportToCSV(current_datetime, 'action_rate_' + str(i), robots[i].action_history)
+                        # action history
+                        exportToCSV(current_datetime, 'action_history_' + str(i), robots[i].action_history)
+                        # sensor history
+                        exportToCSV(current_datetime, 'sensor_history_' + str(i), robots[i].sensor_history)
 
                 # state history
                 for i in range(0, len(robots)):
@@ -117,8 +120,7 @@ while 1:
                 for i in range(0, len(robots)):
                     exportToCSV(current_datetime, 'lp_history_' + str(i), robots[i].lp_history)
 
-                # sensor history
-                exportToCSV(current_datetime, 'sensor_history', feaHistory)
+
 
 
                 # plot the data
@@ -149,17 +151,17 @@ while 1:
             # else:
             #     fea = Sensor.Sensor.getSimpleStates()[2]
             if robot.getSimpleMotor() <= -1:
-                fea = Sensor.Sensor.getSimpleStates()[1]
+                fea = Sensor.Sensor.getSimpleStates()[0]
             elif -1 < robot.getSimpleMotor() < 1:
-                fea = Sensor.Sensor.getSimpleStates()[2]
+                fea = Sensor.Sensor.getSimpleStates()[1]
             elif 1 <= robot.getSimpleMotor() :
                 fea = Sensor.Sensor.getSimpleStates()[2]
-            else:
-                fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+            #else:
+            #    fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
 
 
             user.setFea(fea)
-            feaHistory.append([fea])
+            #feaHistory.append([fea])
             Robot.Robot.updateEngage(None)
             print("Simple Simulated Sensor Readings")
             print("---- Sensor State = " + str(fea))
@@ -200,7 +202,7 @@ while 1:
                    sigmoid(0.01 * (skinFea / num_robot_sim - 100)),
                    sigmoid(2 * (interestFea / num_robot_sim))]
 
-            feaHistory.append(copy.copy(fea))
+           # feaHistory.append(copy.copy(fea))
 
             print("Simulated Sensor Readings")
             print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea / num_robot_sim) + ")" )
@@ -235,7 +237,7 @@ while 1:
 
             # set user's response features
             user.setFea(fea)
-            feaHistory.append(copy.copy([sxVal[0], sxVal[1], sliderPos]))
+            #feaHistory.append(copy.copy([sxVal[0], sxVal[1], sliderPos]))
             # calculate user engagement level
             Robot.Robot.updateEngage(fea)
 
