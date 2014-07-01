@@ -53,7 +53,7 @@ def calcVariance(dataRaw):
     diff = [0]*cardinalS
 
     for i in range(0, cardinalS):
-        diff[i] = np.linalg.norm((data[i, :] - mean), 1)**2 # find difference from mean
+        diff[i] = np.linalg.norm((data[i, :] - mean)/mean, 1)**2 # find difference from mean
    # print "   --> inside calc var: " + str(time.clock()-calcVarStart)
     return sum(diff)/cardinalS
 
@@ -114,7 +114,7 @@ robot_size = (20, 20)
 memory_size = 50000
 
 # Criterion 1
-C1 = 5000
+C1 = 250
 
 # Expert Setting
 time_window = 3

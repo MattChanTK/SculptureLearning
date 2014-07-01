@@ -85,6 +85,8 @@ class Robot(pygame.sprite.Sprite):
         self.__sense(user)
         s1 = copy.copy(self.sensor)
         self.sensor_history.append(s1.getParam())
+        m1 = copy.copy(self.motor)
+
 
         # select action
         sm_q = self.__act()
@@ -99,6 +101,8 @@ class Robot(pygame.sprite.Sprite):
         if self.memory.getMemorySize() > 2:
             s2_predict, expert = self.__consult()
 
+
+
         # perform action
         self.__move()
 
@@ -110,6 +114,9 @@ class Robot(pygame.sprite.Sprite):
         lp = [0]*s2.getNumParam()
         if s2_predict is not None:
             lp = self.__observe(expert, s2_predict, s2)
+             # record state
+            self.state_history.append((self.v, self.x, self.y, self.dir)
+                                  + s1.getParam() + m1.getParam() + s2_predict.getParam() + m.getParam())
 
         # record learning progress
         self.lp_history.append(lp)
@@ -180,8 +187,7 @@ class Robot(pygame.sprite.Sprite):
         self.v = math.sqrt((self.x-self.x0)**2 + (self.y-self.y0)**2)
         #self.w = self.dir-self.dir0
 
-        # record state
-        self.state_history.append((self.v, self.w, self.x, self.y, self.dir) + self.motor.getParam() )
+
 
 
     def __sense(self, user):

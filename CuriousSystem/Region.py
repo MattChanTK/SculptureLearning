@@ -2,9 +2,8 @@ from setup import *
 import random
 import Expert
 
-
 class Region:
-    def __init__(self, exemplars=None):
+    def __init__(self, j0=None, vj0=None, exemplars=None):
         self.left = None
         self.right = None
         self.expert = Expert.Expert()
@@ -18,6 +17,9 @@ class Region:
         self.cut_dim = None
         self.cut_val = None
 
+        self.cut_dim_0 = j0
+        self.cut_val_0 = vj0
+
 
 
     def getLeftChild(self):
@@ -27,6 +29,7 @@ class Region:
         return self.right
 
     def updateRegions(self):
+        splitted = False
         # Forgetting region that has no exemplar
         if self.left is not None and self.left.getNumExemplar() == 0:
             self.left = None
@@ -37,11 +40,11 @@ class Region:
         if self.left is None and self.right is None:
             # split if C1 is met
             if self.getNumExemplar() > C1:
-                self.split()
+                splitted = self.split()
         elif self.left is not None and self.right is not None:
 
-            self.left.updateRegions()
-            self.right.updateRegions()
+            splitted |= self.left.updateRegions()
+            splitted |= self.right.updateRegions()
         else:
             # there's no right node, only left node
             if self.right is None:
@@ -61,12 +64,13 @@ class Region:
                 self.left = self.right.left
                 self.right = self.right.right
 
-            self.updateRegions()
+            splitted |= self.updateRegions()
 
-        return self
+        return splitted
 
     def addExemplar(self, exemplar):
-        self.updateRegions()
+        splitted = False
+        splitted |= self.updateRegions()
         # adding an exemplar
         self.exemplars.append(exemplar)
 
@@ -79,14 +83,15 @@ class Region:
         else:
             # determining to add the exemplar to left or right node
             if exemplar.getVal(self.cut_dim) < self.cut_val:
-                self.left.addExemplar(exemplar)
+                splitted |= self.left.addExemplar(exemplar)
             elif exemplar.getVal(self.cut_dim) > self.cut_val:
-                self.right.addExemplar(exemplar)
+                splitted |= self.right.addExemplar(exemplar)
             else:
                 if self.left.getNumExemplar() > self.right.getNumExemplar():
-                    self.right.addExemplar(exemplar)
+                    splitted |= self.right.addExemplar(exemplar)
                 else:
-                    self.left.addExemplar(exemplar)
+                    splitted |= self.left.addExemplar(exemplar)
+        return splitted
 
     def forgetExemplar(self, exemplar):
         #self = self.updateRegions()
@@ -112,21 +117,25 @@ class Region:
     def getNumExemplar(self):
         return len(self.exemplars)
 
-    def getNumExemplarRecursive(self):
+    def getNumExemplarRecursive(self, level=0):
 
         numInLeft = 0
         numInRight = 0
         if self.left is not None:
-            numInLeft = self.left.getNumExemplarRecursive()
+            numInLeft = self.left.getNumExemplarRecursive(level+1)
 
         if self.right is not None:
-            numInRight = self.right.getNumExemplarRecursive()
+            numInRight = self.right.getNumExemplarRecursive(level+1)
 
         if self.right is None and self.left is None:
-            print '(' ,len(self.exemplars), ')'
+            print('\t'*level),
+            print(str(len(self.exemplars)))
+
             return len(self.exemplars)
 
-        print numInLeft + numInRight
+        print('\t'*level),
+        print(numInLeft + numInRight),
+        print(' [' + str(self.cut_dim) + ', ' + str(self.cut_val) + ']')
         return numInLeft + numInRight
 
     def split(self):
@@ -139,16 +148,22 @@ class Region:
         if j < 0:
             print ('ERROR: j cannot be less than 0!')
 
+        if j == self.cut_dim_0 and vj == self.cut_val_0:
+            return False
         r1, r2 = self.applyC2(j)
 
         # instantiate the new sub regions
-        self.left = Region(exemplars=r1)
-        self.right = Region(exemplars=r2)
-        print 'Split Region'
+        self.left = Region(exemplars=r1, j0=j, vj0=vj)
+        self.right = Region(exemplars=r2, j0=j, vj0=vj)
+        print ('Split Region')
+
 
         # record the new j and vj
         self.cut_dim = j
         self.cut_val = vj
+
+        return True
+
 
     def applyC2(self, j):
 
@@ -193,7 +208,7 @@ class Region:
             if not set1 or not set2: # if of the set is empty
                 pass
             else:
-                calcVarStart = time.clock()
+                #calcVarStart = time.clock()
                 set1Array = Region.getExpValArray(set1)
                 set2Array = Region.getExpValArray(set2)
 

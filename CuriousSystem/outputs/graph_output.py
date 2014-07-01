@@ -1,8 +1,8 @@
 import csv
 import matplotlib.pyplot as plt
-import Motor
 
-time = '2014_06_30_11_56_57'
+
+time = '2014_07_01_14_39_28'
 robot = 0
 
 def plotData(time, robotID=0):
@@ -111,8 +111,8 @@ def plotData(time, robotID=0):
             data = csv.reader(csvfile, delimiter=',') #import the data
             data = map(list, zip(*data))  #transpose the data
             data.pop()  # remove the empty row
-            subplotNum = len(data)*100 + 11
-            stateLabel = ['v', 'w', 'x', 'y', 'dir', 'output']
+            subplotNum = 200 + len(data)*10/2 + 1
+            stateLabel = ['v', 'x', 'y', 'dir', 's1', 'm1', 's2_predict', 'm2']
 
             rowID = 0
             for row in data:
@@ -141,14 +141,14 @@ def plotData(time, robotID=0):
             data = map(list, zip(*data))  #transpose the data
             data.pop()  # remove the empty row
 
-            plotState = [0, 5]
-            stateLabel = ['v', 'w', 'x', 'y', 'dir', 'output']
+            plotState = [0, 4]
+            stateLabel = ['v', 'x', 'y', 'dir', 's1', 'm1', 's2_predict', 'm2']
 
             xData = [float(i) for i in data[plotState[0]]]
             yData = [float(i) for i in data[plotState[1]]]
 
             plt.figure(figNum)
-            plt.plot(xData, yData)
+            plt.plot(xData, yData, '.')
             #for i in range(1, len(xData)):
             #    plt.arrow(xData[i-1], yData[i-1], xData[i]-xData[i-1],yData[i]-yData[i-1])
 
@@ -159,6 +159,39 @@ def plotData(time, robotID=0):
                 plt.ylabel(stateLabel[plotState[1]])
             except OverflowError:
                 pass
+
+            plt.suptitle('State Space Diagram')
+    except IOError:
+        pass
+    figNum += 1
+
+    # outputting Histogram
+    try:
+        with open(filename_stateHist, 'r') as csvfile:
+            data = csv.reader(csvfile, delimiter=',') #import the data
+            data = map(list, zip(*data))  #transpose the data
+            data.pop()  # remove the empty row
+
+
+
+            subplotNum = 200+ len(data)*10/2 + 1
+            numBin = [100, 100, 100, 100, 100, 3, 100, 3]
+            stateLabel = ['v', 'x', 'y', 'dir', 's1', 'm1', 's2_predict', 'm2']
+            for plotState in range(0, len(data)):
+
+                yData = [float(i) for i in data[plotState]]
+
+                plt.figure(figNum)
+                plt.subplot(subplotNum)
+                subplotNum += 1
+                plt.hist(yData, numBin[plotState])
+
+                plt.xlabel('state')
+                plt.ylabel('occurance')
+                try:
+                    plt.xlabel(stateLabel[plotState])
+                except OverflowError:
+                    pass
 
             plt.suptitle('State Space Diagram')
     except IOError:

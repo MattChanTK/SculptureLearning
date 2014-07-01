@@ -6,6 +6,7 @@ import datetime
 import random
 import Q_learning
 import Sensor
+import Motor
 import threading
 import Interface
 from outputs import graph_output
@@ -150,20 +151,34 @@ while 1:
             #     fea = Sensor.Sensor.getSimpleStates()[1]
             # else:
             #     fea = Sensor.Sensor.getSimpleStates()[2]
-            if robot.getSimpleMotor() <= -1:
-                fea = Sensor.Sensor.getSimpleStates()[0]
-            elif -1 < robot.getSimpleMotor() < 1:
-                fea = Sensor.Sensor.getSimpleStates()[1]
-            elif 1 <= robot.getSimpleMotor() :
-                fea = Sensor.Sensor.getSimpleStates()[2]
-            #else:
-            #    fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+
+            #fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)), Sensor.Sensor.getBound(simpleMode)[1])]
+            if 3 < math.fabs(robot.v) < 9:
+                fea = Sensor.Sensor.getSimpleStates()[6]
+            elif 12 < math.fabs(robot.v) < 15:
+                fea = Sensor.Sensor.getSimpleStates()[20]
+            elif 20 <=  math.fabs(robot.v) < 21 :
+                fea = Sensor.Sensor.getSimpleStates()[50]
+            elif 30 <=  math.fabs(robot.v) < 33 :
+                fea = random.randint(Sensor.Sensor.getBound(simpleMode)[0], Sensor.Sensor.getBound(simpleMode)[1])
+            else:
+               fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+
+           #  if robot.motor.getVal() == Motor.Motor.simpleStates[0]:
+           #      fea = Sensor.Sensor.getSimpleStates()[6]
+           # # elif robot.motor.getVal() == Motor.Motor.simpleStates[1]:
+           # #     fea = Sensor.Sensor.getSimpleStates()[20]
+           #  elif robot.motor.getVal() == Motor.Motor.simpleStates[2]:
+           #      #fea = Sensor.Sensor.getSimpleStates()[50]
+           #      fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+           #  else:
+           #      fea = random.randint(Sensor.Sensor.getBound(simpleMode)[0], Sensor.Sensor.getBound(simpleMode)[1])
 
 
             user.setFea(fea)
             #feaHistory.append([fea])
             Robot.Robot.updateEngage(None)
-            print("Simple Simulated Sensor Readings")
+            print("\nSimple Simulated Sensor Readings")
             print("---- Sensor State = " + str(fea))
 
         else:
@@ -204,7 +219,7 @@ while 1:
 
            # feaHistory.append(copy.copy(fea))
 
-            print("Simulated Sensor Readings")
+            print("\nSimulated Sensor Readings")
             print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea / num_robot_sim) + ")" )
             print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea / num_robot_sim) + ")")
             print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea / num_robot_sim) + ") ")
