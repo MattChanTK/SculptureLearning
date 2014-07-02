@@ -5,6 +5,8 @@ import Sensor
 import Memory
 import Exemplar
 import Q_learning
+import matplotlib.pyplot as plt
+
 
 
 random.seed()
@@ -78,6 +80,7 @@ class Robot(pygame.sprite.Sprite):
         # learning progress history
         self.lp_history = []
 
+        self.fig, self.ax = plt.subplots()
 
     def update(self, user):
 
@@ -125,6 +128,7 @@ class Robot(pygame.sprite.Sprite):
         # Learn the consequence of the action
         self.__learn(sm_q, lp)
 
+
         self.memory.addExemplar(s1, m, s2)
 
         # self.printRegionPop()
@@ -143,13 +147,15 @@ class Robot(pygame.sprite.Sprite):
         # computing the new position
         if self.isSimple():
             self.v += self.getSimpleMotor()
-            print("self.a: " + str(self.getSimpleMotor()))
+            if (printToTerm):
+                print("self.a: " + str(self.getSimpleMotor()))
         else:
             self.v += ((1-Robot.engage)*self.motor.getParam()[0] + Robot.engage*self.accel_sync)
-            print("self.a: " + str(self.motor.getVal()))
-
-        print("self.v: " + str(self.v))
-        print("self.w: " + str(self.w))
+            if (printToTerm):
+                print("self.a: " + str(self.motor.getVal()))
+        if (printToTerm):
+            print("self.v: " + str(self.v))
+            print("self.w: " + str(self.w))
 
         dx = self.v*math.cos(self.dir)
         dy = self.v*math.sin(self.dir)
@@ -201,8 +207,9 @@ class Robot(pygame.sprite.Sprite):
     def __act(self):
 
         self.motor, sm_q = self.Q.getBestMotor(self.sensor)
-        print("---- Motor State = "+ str(self.motor.getVal()))
-        print("Best Q: " + str(sm_q))
+        if (printToTerm):
+            print("---- Motor State = "+ str(self.motor.getVal()))
+            print("Best Q: " + str(sm_q))
 
         return sm_q
 
@@ -236,7 +243,8 @@ class Robot(pygame.sprite.Sprite):
         for comp in lp:
             reward += comp
         reward /= float(len(lp))
-        print ("self.avgLP: " + str(reward))
+        if (printToTerm):
+            print ("self.avgLP: " + str(reward))
 
         q = q0 + alpha*(reward + gamma*(self.Q.getBestMotor(self.sensor))[1] - q0)
 

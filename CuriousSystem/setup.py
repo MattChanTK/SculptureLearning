@@ -129,4 +129,4 @@ num_m_division = 3
 output_folder = 'outputs'
 export_data = True
 show_plot = True
-
+printToTerm = False

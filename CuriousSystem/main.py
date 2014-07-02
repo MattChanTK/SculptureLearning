@@ -153,33 +153,35 @@ while 1:
             #     fea = Sensor.Sensor.getSimpleStates()[2]
 
             #fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)), Sensor.Sensor.getBound(simpleMode)[1])]
-            if 3 < math.fabs(robot.v) < 9:
-                fea = Sensor.Sensor.getSimpleStates()[6]
-            elif 12 < math.fabs(robot.v) < 15:
-                fea = Sensor.Sensor.getSimpleStates()[20]
-            elif 20 <=  math.fabs(robot.v) < 21 :
-                fea = Sensor.Sensor.getSimpleStates()[50]
-            elif 30 <=  math.fabs(robot.v) < 33 :
-                fea = random.randint(Sensor.Sensor.getBound(simpleMode)[0], Sensor.Sensor.getBound(simpleMode)[1])
-            else:
-               fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
 
-           #  if robot.motor.getVal() == Motor.Motor.simpleStates[0]:
-           #      fea = Sensor.Sensor.getSimpleStates()[6]
-           # # elif robot.motor.getVal() == Motor.Motor.simpleStates[1]:
-           # #     fea = Sensor.Sensor.getSimpleStates()[20]
-           #  elif robot.motor.getVal() == Motor.Motor.simpleStates[2]:
-           #      #fea = Sensor.Sensor.getSimpleStates()[50]
-           #      fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
-           #  else:
-           #      fea = random.randint(Sensor.Sensor.getBound(simpleMode)[0], Sensor.Sensor.getBound(simpleMode)[1])
+            # if 3 < math.fabs(robot.v) < 9:
+            #     fea = Sensor.Sensor.getSimpleStates()[6]
+            # elif 12 < math.fabs(robot.v) < 15:
+            #     fea = Sensor.Sensor.getSimpleStates()[20]
+            # elif 20 <= math.fabs(robot.v) < 21:
+            #     fea = Sensor.Sensor.getSimpleStates()[50]
+            # elif 30 <= math.fabs(robot.v) < 33:
+            #     fea = random.randint(Sensor.Sensor.getBound(simpleMode)[0], Sensor.Sensor.getBound(simpleMode)[1])
+            # else:
+            #     fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+
+            if robot.motor.getVal() == Motor.Motor.simpleStates[0]:
+                fea = Sensor.Sensor.getSimpleStates()[6]
+            #elif robot.motor.getVal() == Motor.Motor.simpleStates[1]:
+                 #fea = Sensor.Sensor.getSimpleStates()[20]
+            elif robot.motor.getVal() == Motor.Motor.simpleStates[2]:
+                #fea = Sensor.Sensor.getSimpleStates()[50]
+                fea = Sensor.Sensor.getSimpleStates()[min(abs(int(robot.v)),Sensor.Sensor.getBound(simpleMode)[1])]
+            else:
+                fea = random.randint(Sensor.Sensor.getBound(simpleMode)[0], Sensor.Sensor.getBound(simpleMode)[1])
 
 
             user.setFea(fea)
             #feaHistory.append([fea])
             Robot.Robot.updateEngage(None)
-            print("\nSimple Simulated Sensor Readings")
-            print("---- Sensor State = " + str(fea))
+            if (printToTerm):
+                print("\nSimple Simulated Sensor Readings")
+                print("---- Sensor State = " + str(fea))
 
         else:
 
@@ -218,11 +220,11 @@ while 1:
                    sigmoid(2 * (interestFea / num_robot_sim))]
 
            # feaHistory.append(copy.copy(fea))
-
-            print("\nSimulated Sensor Readings")
-            print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea / num_robot_sim) + ")" )
-            print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea / num_robot_sim) + ")")
-            print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea / num_robot_sim) + ") ")
+            if (printToTerm):
+                print("\nSimulated Sensor Readings")
+                print("---- Heart Rate = " + str(fea[0]) + "  (" + str(hrFea / num_robot_sim) + ")" )
+                print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(skinFea / num_robot_sim) + ")")
+                print("---- Interest Level = " + str(fea[2]) + " (" + str(interestFea / num_robot_sim) + ") ")
 
 
             # set user's response features
@@ -230,7 +232,8 @@ while 1:
 
             # calculate user engagement level
             Robot.Robot.updateEngage(fea)
-            print("---- Level of Engagement = " + str(Robot.Robot.engage))
+            if (printToTerm):
+                print("---- Level of Engagement = " + str(Robot.Robot.engage))
 
         # set start flag
         startFlag = True
@@ -244,11 +247,12 @@ while 1:
         # robots move
         if sxVal is not None:
             fea = [sigmoid(0.005 * (sxVal[0] - 650)), sigmoid(0.02 * (sxVal[1] - 512)), sigmoid(sliderPos)]
-            print("Sensor Readings")
-            print("---- Heart Rate = " + str(fea[0]) + "  (" + str(sxVal[0]) + ")" )
-            print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(sxVal[1]) + ")")
-            print("---- Interest Level = " + str(fea[2]))
-            print("---- Level of Engagement = " + str(robots[0].engage))
+            if (printToTerm):
+                print("Sensor Readings")
+                print("---- Heart Rate = " + str(fea[0]) + "  (" + str(sxVal[0]) + ")" )
+                print("---- Skin Conductance = " + str(fea[1]) + "  (" + str(sxVal[1]) + ")")
+                print("---- Interest Level = " + str(fea[2]))
+                print("---- Level of Engagement = " + str(robots[0].engage))
 
             # set user's response features
             user.setFea(fea)

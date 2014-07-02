@@ -103,7 +103,7 @@ class Expert:
         for i in range(0, numParam):
             mean_err[i] /= self.smoothing
             mean_err_0[i] /= self.smoothing
-            learnProgress[i] = (mean_err_0[i] - mean_err[i])/mean_err_0[i] # scaled to mean_err
+            learnProgress[i] = mean_err_0[i] - mean_err[i]
         return learnProgress
 
 

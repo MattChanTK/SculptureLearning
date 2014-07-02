@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 
 
-time = '2014_07_01_14_39_28'
+time = '2014_07_01_14_57_55'
 robot = 0
 
 def plotData(time, robotID=0):
@@ -141,14 +141,16 @@ def plotData(time, robotID=0):
             data = map(list, zip(*data))  #transpose the data
             data.pop()  # remove the empty row
 
-            plotState = [0, 4]
+            plotState = [0, 6]
             stateLabel = ['v', 'x', 'y', 'dir', 's1', 'm1', 's2_predict', 'm2']
 
             xData = [float(i) for i in data[plotState[0]]]
             yData = [float(i) for i in data[plotState[1]]]
 
             plt.figure(figNum)
-            plt.plot(xData, yData, '.')
+            #plt.plot(xData, yData, '.')
+            plt.plot(xData[len(xData)-4000:-1], yData[len(yData)-4000:-1], '.')
+
             #for i in range(1, len(xData)):
             #    plt.arrow(xData[i-1], yData[i-1], xData[i]-xData[i-1],yData[i]-yData[i-1])
 
@@ -193,7 +195,7 @@ def plotData(time, robotID=0):
                 except OverflowError:
                     pass
 
-            plt.suptitle('State Space Diagram')
+            plt.suptitle('Histograms')
     except IOError:
         pass
     figNum += 1

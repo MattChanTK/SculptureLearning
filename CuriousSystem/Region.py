@@ -155,7 +155,7 @@ class Region:
         # instantiate the new sub regions
         self.left = Region(exemplars=r1, j0=j, vj0=vj)
         self.right = Region(exemplars=r2, j0=j, vj0=vj)
-        print ('Split Region')
+        print ('\nSplit Region')
 
 
         # record the new j and vj

@@ -153,6 +153,18 @@ class Q_learning():
 
         return Motor.Motor(val, simple)
 
+    def plotSimpleHeatmap(self):
+        key_list = self.q_table.keys()
+        x = []
+        y = []
+        q = []
+        for key in key_list:
+            x.append(key[0])
+            y.append(key[1])
+            q.append(self.q_table[key])
+
+        return (tuple(x), tuple(y), tuple(q))
+
 
 # # Test Code
 # learner = Q_learning()
