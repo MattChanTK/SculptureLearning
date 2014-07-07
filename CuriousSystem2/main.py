@@ -1,4 +1,6 @@
 import numpy as np
+
+
 # ===== Settings ======
 input_num = 1
 input_name = ["sensor"]
@@ -13,6 +15,7 @@ output_val = np.zeros(output_num)
 # ==== Algorithm ======
 
 # ---- initialize ----
+
 
 # ---- read sensor inputs ----
 
