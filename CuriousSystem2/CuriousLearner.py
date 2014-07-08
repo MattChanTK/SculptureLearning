@@ -5,18 +5,19 @@ import RLtoolkit.tiles as tiles
 
 class CuriousLearner():
 
-    greed = 0.25
-    learnRate = 0.35
+    greed = 0.20
+    learnRate = 0.75
     gamma = 0.75
 
     tiling_num = 2**8
     partition_size = 2**4
     memory_size = min(tiling_num*partition_size**2, 512000)
 
+    action_step_size = 0.01
+
 
     def __init__(self, fea_num, cmd_num):
         self.q_table = dict()
-        self.past_action = dict()
 
         # get to know the dimensions of features and commands
         self.fea_num = fea_num
@@ -29,7 +30,7 @@ class CuriousLearner():
         if k < CuriousLearner.greed:
             cmd = np.zeros(self.cmd_num)
             for i in range(self.cmd_num):
-                cmd[i] = random.random()*CuriousLearner.partition_size
+                cmd[i] = random.random()
             return cmd
         else:
             return self.__get_optimal_action(state)
@@ -48,64 +49,64 @@ class CuriousLearner():
 
             self.q_table[q0_id[i]] += delta_q
 
-    def update_past_action(self, state, action):
-        state_id = tiles.tiles(CuriousLearner.tiling_num, CuriousLearner.memory_size, state)
-
-        for i in range(CuriousLearner.tiling_num):
-            if state_id[i] not in self.past_action:
-                self.past_action[state_id[i]] = []
-            self.past_action[state_id[i]].append(action)
-
     def __estimate_future_reward(self, state):
         return 0
 
     def __get_optimal_action(self, state):
 
-        state_id = tiles.tiles(CuriousLearner.tiling_num, CuriousLearner.memory_size, state)
-        q_max = [None]*CuriousLearner.tiling_num
-        action_max = [None]*CuriousLearner.tiling_num
+        best_q = None
+        best_action = None
+        action_selected = None
 
-        for i in range(CuriousLearner.tiling_num):
-            if state_id[i] in self.past_action:
-                action_list = self.past_action[state_id[i]]
+        for action in np.arange(0.0, 1.0, CuriousLearner.action_step_size):
+            action = np.asarray([action])
+            query = np.concatenate([state, action])*CuriousLearner.partition_size
+            q_id = tiles.tiles(CuriousLearner.tiling_num, CuriousLearner.memory_size, query)
+            q = 0
+            for i in range(self.tiling_num):
+                if q_id[i] in self.q_table:
+                    q += self.q_table[q_id[i]]
 
-                # get the action with the max q that has already been tried
-                for action in action_list:
-                    q_id = tiles.tiles(CuriousLearner.tiling_num, CuriousLearner.memory_size, state + action)
-                    q = 0
-                    for j in range(CuriousLearner.tiling_num):
-                        q += self.q_table[q_id[j]]
-
-                    # record the max q and its associated action
-                    if q_max[i] is None:
-                        q_max[i] = q
-                        action_max[i] = action
-                    else:
-                        if (q > q_max[i]):
-                            q_max[i] = q
-                            action_max[i] = action
-
-            # if no action has been done before or the best q is less than or equal to 0
-            if q_max[i]is None or q_max[i] <= 0:
-                q_max[i] = 0
-                action = np.zeros(self.cmd_num)
-                for k in range(self.cmd_num):
-                    action[k] = random.random()*CuriousLearner.partition_size
-                action_max[i] = action
-
-        return np.sum(action_max, axis=0)/CuriousLearner.tiling_num
+            if best_q is None:
+                best_q = 0
+                best_action = [random.random()]
+            else:
+                if q > best_q:
+                    best_q = q
+                    best_action = [action]
+                elif q == best_q:
+                    best_action.append(action)
 
 
+        # if more than one possible action with the same q
+        if len(best_action) > 0:
+            # randomly select one out of the list of possible candidates
+            k = random.randint(0, len(best_action) - 1)
+            action_selected = best_action[k]
+        else:
+            print("CuriousLearner: Error! Length of \"highest_states\" is not supposed to be " + str(len(best_action)))
+
+        print("Best Q: " + str(best_q))
+        print("Action Selected: " + str(action_selected))
+
+        return action_selected
 
 
-learner = CuriousLearner(1, 2)
-for i in range(10):
-    state = (30,)
-    action = learner.select_action(state)
-    print action
-    learner.update_past_action(state, action)
-    learner.update_q_table(state, action, 5, 4)
-print learner.select_action((10,))
+
+learner = CuriousLearner(1, 1)
+state0 = np.asarray([0.0])
+for i in range(100):
+
+    action = learner.select_action(state0)
+    state1 = state0 + (action/10.0)-0.05
+    if state1:
+        reward = -state1**2
+
+    print("State1: " +str(state1))
+    print("Reward: " +str(reward))
+    learner.update_q_table(state0, action, state1, reward)
+    state0 = state1
+print learner.select_action([0.3])
 
 '''
     def __select_next_action(self, input_state):
@@ -148,34 +149,3 @@ print learner.select_action((10,))
 
 
 
-'''
-
-float_array = [0.5, 0.5]
-num_tiling = 1
-memory_size = 512
-tiles_array = tiles.tiles(num_tiling, memory_size, float_array)
-sum = 0
-weight = np.zeros(memory_size)
-
-
-for j in range(50):
-    result = 0
-
-    for i in range(num_tiling):
-        result += weight[tiles_array[i]]
-
-    for i in range(num_tiling):
-        weight[(tiles_array[i])] += alpha*(target-result)
-    print tiles_array
-    print result
-result = 0
-
-tiles_array = tiles.tiles(num_tiling, memory_size, [0.6, 0.6])
-for i in range(num_tiling):
-    result += weight[tiles_array[i]]
-print tiles_array
-print result
-print weight
-
-
-'''
