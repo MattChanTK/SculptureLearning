@@ -25,11 +25,13 @@ sim_sys = SimSystem.SimSystem()
 q_learner = CuriousLearner2.CuriousLearner2(fea_dim, cmd_dim, fea_num, cmd_num)
 cmd_val = np.ones_like(cmd_val)  # initial commands
 
-# ---- read features ----
-input_val = sim_sys.simulate(cmd_val)
+# ---- initial simulation ----
+sim_sys.write_command(cmd_val)
+sim_sys.simulate()
+input_val = sim_sys.read_feature()
 
 # LOOP START
-while False:
+while True:
 
     # ---- select action ----
     output_val = q_learner.select_action(input_val)
@@ -41,17 +43,27 @@ while False:
     sim_sys.write_command(output_val)
 
     # ---- simulate one time step -----
+    input_val_0 = input_val  # remember previous input_val
+    output_val_0 = output_val  # remember previous output_val
     sim_sys.simulate()
 
     # ---- read features ----
-
+    input_val = sim_sys.read_feature()
 
     # ---- calculate prediction error ----
 
+
     # ---- add to training set -----
 
+
     # ---- calculate learning progress -----
+    reward = 1
 
     # ---- update learner ----
+    q_learner.update_q_table(input_val_0, output_val_0, input_val, reward)
+    print("State0: " + str(input_val_0,))
+    print("Action: " + str(output_val_0))
+    print("State1: " + str(input_val))
+    print("Reward: " + str(reward) + "\n")
 
 # LOOP END

@@ -122,4 +122,4 @@ class CuriousLearner2():
         print (matrix)
         plt.show()
 
-CuriousLearner2.test()
+#CuriousLearner2.test()
