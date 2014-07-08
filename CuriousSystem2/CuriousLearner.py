@@ -5,7 +5,7 @@ import RLtoolkit.tiles as tiles
 
 class CuriousLearner():
 
-    greed = 0.25
+    greed = 0.0
     learnRate = 0.35
     gamma = 0.75
 
@@ -16,7 +16,7 @@ class CuriousLearner():
 
     def __init__(self, fea_num, cmd_num):
         self.q_table = dict()
-        self.optimal_action_table = dict()
+        self.past_action = dict()
 
         # get to know the dimensions of features and commands
         self.fea_num = fea_num
@@ -29,7 +29,7 @@ class CuriousLearner():
         if k < CuriousLearner.greed:
             cmd = np.zeros(self.cmd_num)
             for i in range(self.cmd_num):
-                cmd[i] = random.random()
+                cmd[i] = random.random()*CuriousLearner.partition_size
             return cmd
         else:
             return self.__get_optimal_action(state)
@@ -48,20 +48,62 @@ class CuriousLearner():
 
             self.q_table[q0_id[i]] += delta_q
 
+    def update_past_action(self, state, action):
+        state_id = tiles.tiles(CuriousLearner.tiling_num, CuriousLearner.memory_size, state)
+
+        for i in range(CuriousLearner.tiling_num):
+            if state_id[i] not in self.past_action:
+                self.past_action[state_id[i]] = []
+            self.past_action[state_id[i]].append(action)
+
     def __estimate_future_reward(self, state):
         return 0
 
     def __get_optimal_action(self, state):
-        cmd = np.zeros(self.cmd_num)
-        for i in range(self.cmd_num):
-            cmd[i] = random.random()
-        return cmd
+
+        state_id = tiles.tiles(CuriousLearner.tiling_num, CuriousLearner.memory_size, state)
+        q_max = [None]*CuriousLearner.tiling_num
+        action_max = [None]*CuriousLearner.tiling_num
+
+        for i in range(CuriousLearner.tiling_num):
+            if state_id[i] in self.past_action:
+                action_list = self.past_action[state_id[i]]
+
+                # get the action with the max q that has already been tried
+                for action in action_list:
+                    q_id = tiles.tiles(CuriousLearner.tiling_num, CuriousLearner.memory_size, state + action)
+                    q = 0
+                    for j in range(CuriousLearner.tiling_num):
+                        q += self.q_table[q_id[j]]
+
+                    # record the max q and its associated action
+                    if q_max[i] is None:
+                        q_max[i] = q
+                        action_max[i] = action
+                    else:
+                        if (q > q_max[i]):
+                            q_max[i] = q
+                            action_max[i] = action
+
+            # if no action has been done before or the best q is less than or equal to 0
+            if q_max[i]is None or q_max[i] <= 0:
+                q_max[i] = 0
+                action_max[i] = random.random()*CuriousLearner.partition_size
+            else:
+                action_max[i]
+
+        return np.sum(action_max)/CuriousLearner.tiling_num
+
+
 
 
 learner = CuriousLearner(1, 1)
 for i in range(10):
-    learner.update_q_table([10], [10], 5, 4)
-print learner.select_action([1])
+    state = (10,)
+    action = (1000,)
+    learner.update_past_action(state, action)
+    learner.update_q_table(state, action, 5, 4)
+print learner.select_action((10,))
 
 '''
     def __select_next_action(self, input_state):
