@@ -1,9 +1,11 @@
 import numpy as np
 import RLtoolkit.tiles as tiles
-
+import copy
 
 import SimSystem
 import CuriousLearner2
+import Expert
+
 
 # ===== Settings ======
 fea_dim = 1
@@ -24,6 +26,7 @@ cmd_val = np.zeros(cmd_dim)
 sim_sys = SimSystem.SimSystem()
 q_learner = CuriousLearner2.CuriousLearner2(fea_dim, cmd_dim, fea_num, cmd_num)
 cmd_val = np.ones_like(cmd_val)  # initial commands
+expert = Expert.Expert()
 
 # ---- initial simulation ----
 sim_sys.write_command(cmd_val)
@@ -43,8 +46,8 @@ while True:
     sim_sys.write_command(output_val)
 
     # ---- simulate one time step -----
-    input_val_0 = input_val  # remember previous input_val
-    output_val_0 = output_val  # remember previous output_val
+    input_val_0 = copy.copy(input_val)  # remember previous input_val
+    output_val_0 = copy.copy(output_val)  # remember previous output_val
     sim_sys.simulate()
 
     # ---- read features ----
@@ -54,10 +57,13 @@ while True:
 
 
     # ---- add to training set -----
-
+    #expert.add_to_training_set(input_val_0, output_val_0, input_val)
 
     # ---- calculate learning progress -----
-    reward = 1
+    if sum(5 < input_val < 7):
+        reward = sum(input_val)**2
+    else:
+        reward = -1
 
     # ---- update learner ----
     q_learner.update_q_table(input_val_0, output_val_0, input_val, reward)

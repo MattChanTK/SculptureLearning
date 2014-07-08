@@ -37,7 +37,8 @@ class CuriousLearner2():
         # choose an random action "greed" percent of the time
         k = random.random()
         if k < CuriousLearner2.greed:
-            cmd = random.randint(0, self.cmd_dim)
+            print("Chose a random output")
+            cmd = random.randint(0, self.cmd_num)
             return np.array([cmd])
         else:
             optimal_action, bestq = self.__get_optimal_action(state)

@@ -18,15 +18,19 @@ class SimSystem():
     def __extract_feature(self):
 
         feature = self.input
+        for i in range(len(feature)):
+            feature[i] = min(max(0, feature[i]), 9)
 
         return feature
 
     def __decode_command(self, command):
-        self.output = command
+        for i in range(len(command)):
+            self.output[i] = min(max(0, command[i]), 9)
 
     def simulate(self):
         # simulate the system
-        self.input += self.output - 5
+        self.input += self.output-5
+
 
     def read_feature(self):
 
