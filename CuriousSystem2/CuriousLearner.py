@@ -5,7 +5,7 @@ import RLtoolkit.tiles as tiles
 
 class CuriousLearner():
 
-    greed = 0.0
+    greed = 0.25
     learnRate = 0.35
     gamma = 0.75
 
@@ -88,19 +88,21 @@ class CuriousLearner():
             # if no action has been done before or the best q is less than or equal to 0
             if q_max[i]is None or q_max[i] <= 0:
                 q_max[i] = 0
-                action_max[i] = random.random()*CuriousLearner.partition_size
-            else:
-                action_max[i]
+                action = np.zeros(self.cmd_num)
+                for k in range(self.cmd_num):
+                    action[k] = random.random()*CuriousLearner.partition_size
+                action_max[i] = action
 
-        return np.sum(action_max)/CuriousLearner.tiling_num
+        return np.sum(action_max, axis=0)/CuriousLearner.tiling_num
 
 
 
 
-learner = CuriousLearner(1, 1)
+learner = CuriousLearner(1, 2)
 for i in range(10):
-    state = (10,)
-    action = (1000,)
+    state = (30,)
+    action = learner.select_action(state)
+    print action
     learner.update_past_action(state, action)
     learner.update_q_table(state, action, 5, 4)
 print learner.select_action((10,))
