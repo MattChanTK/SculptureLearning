@@ -24,13 +24,17 @@ class SimSystem():
     def __decode_command(self, command):
         self.output = command
 
-    def simulate(self, command):
+    def simulate(self):
+        # simulate the system
+        self.input += self.output - 5
+
+    def read_feature(self):
+
+         # return the features
+        return self.__extract_feature()
+
+    def write_command(self, command):
 
         # decode the command and invoke the actuator
         self.__decode_command(command)
 
-        # simulate the system
-        self.input = self.output*2
-
-        # return the features
-        return self.__extract_feature()

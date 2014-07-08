@@ -3,80 +3,48 @@ import RLtoolkit.tiles as tiles
 
 
 import SimSystem
-import CuriousLearner
+import CuriousLearner2
 
 # ===== Settings ======
-fea_num = 1
+fea_dim = 1
 fea_name = ["state"]
-cmd_num = 1
+fea_num = 10  # 0 to 9
+cmd_dim = 1
 cmd_name = ["action"]
+cmd_num = 10  # 0 to 9
 
 # ==== Global variables =====
-fea_val = np.zeros(fea_num)
-cmd_val = np.zeros(cmd_num)
+fea_val = np.zeros(fea_dim)
+cmd_val = np.zeros(cmd_dim)
 
 
 # ==== Algorithm ======
 
 # ---- initialize ----
 sim_sys = SimSystem.SimSystem()
-q_learner = CuriousLearner.CuriousLearner(fea_num, cmd_num)
+q_learner = CuriousLearner2.CuriousLearner2(fea_dim, cmd_dim, fea_num, cmd_num)
 cmd_val = np.ones_like(cmd_val)  # initial commands
 
 # ---- read features ----
 input_val = sim_sys.simulate(cmd_val)
 
-float_array = [50, 50]
-num_tiling = 512
-
-memory_size = 512
-tiles_array = tiles.tiles(num_tiling, memory_size, float_array)
-sum = 0
-weight = dict()
-target = 100
-alpha = 0.2/num_tiling
-
-for j in range(50):
-    result = 0
-
-    for i in range(num_tiling):
-        if tiles_array[i] in weight:
-            result += weight[tiles_array[i]]
-
-    for i in range(num_tiling):
-        if tiles_array[i] in weight:
-            weight[(tiles_array[i])] += alpha*(target-result)
-        else:
-            weight[(tiles_array[i])] = alpha*(target-result)
-    print tiles_array
-    print result
-result = 0
-
-tiles_array = tiles.tiles(num_tiling, memory_size, [50, 56])
-for i in range(num_tiling):
-    if tiles_array[i] in weight:
-        result += weight[tiles_array[i]]
-print tiles_array
-print result
-print weight
-
 # LOOP START
 while False:
 
-    pass
-
     # ---- select action ----
-
+    output_val = q_learner.select_action(input_val)
 
     # ---- predict features ----
 
+
     # ---- generate actuator output commands ----
+    sim_sys.write_command(output_val)
 
-    # ---- write actuator outputs -----
+    # ---- simulate one time step -----
+    sim_sys.simulate()
 
-    # ---- read sensor inputs ----
+    # ---- read features ----
 
-    # ---- extract features ----
 
     # ---- calculate prediction error ----
 
