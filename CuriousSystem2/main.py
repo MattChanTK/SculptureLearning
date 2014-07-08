@@ -57,7 +57,7 @@ while True:
 
 
     # ---- add to training set -----
-    #expert.add_to_training_set(input_val_0, output_val_0, input_val)
+    expert.add_to_training_set(input_val_0, output_val_0, input_val)
 
     # ---- calculate learning progress -----
     if sum(5 < input_val < 7):
