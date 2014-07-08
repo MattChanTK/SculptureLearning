@@ -2,9 +2,12 @@ import numpy as np
 
 class SimSystem():
 
-    def __init__(self, input_num, output_num):
-        self.input = np.zeros(input_num)
-        self.output = np.zeros(output_num)
+    input_num = 1
+    output_num = 1
+
+    def __init__(self):
+        self.input = np.zeros(SimSystem.input_num)
+        self.output = np.zeros(SimSystem.output_num)
 
     def _get_input_num(self):
         return np.size(self.input)
