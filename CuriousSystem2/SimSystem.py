@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class SimSystem():
 
@@ -29,8 +30,7 @@ class SimSystem():
 
     def simulate(self):
         # simulate the system
-        self.input += self.output-5
-
+        self.input += self.output-5 + random.randint(-2, 2)
 
     def read_feature(self):
 

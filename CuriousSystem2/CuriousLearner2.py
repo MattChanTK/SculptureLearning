@@ -32,7 +32,7 @@ class CuriousLearner2():
     def select_action(self, state):
 
         # bound the state
-        state = min(max(0, state[0]), self.fea_num-1)
+        state = int(round(min(max(0, state[0]), self.fea_num-1)))
 
         # choose an random action "greed" percent of the time
         k = random.random()
@@ -49,9 +49,9 @@ class CuriousLearner2():
     def update_q_table(self, state_0, action_0, state_1, reward):
 
         # bound the values
-        state_0 = min(max(0, state_0[0]), self.fea_num-1)
-        state_1 = min(max(0, state_1[0]), self.fea_num-1)
-        action_0 = min(max(0, action_0[0]), self.cmd_num-1)
+        state_0 = int(round(min(max(0, state_0[0]), self.fea_num-1)))
+        state_1 = int(round(min(max(0, state_1[0]), self.fea_num-1)))
+        action_0 = int(round(min(max(0, action_0[0]), self.cmd_num-1)))
 
         # calculate the change in q
         delta_q = CuriousLearner2.learnRate\

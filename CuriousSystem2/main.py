@@ -15,6 +15,8 @@ cmd_dim = 1
 cmd_name = ["action"]
 cmd_num = 10  # 0 to 9
 
+loop_num = 1000
+
 # ==== Global variables =====
 fea_val = np.zeros(fea_dim)
 cmd_val = np.zeros(cmd_dim)
@@ -32,15 +34,16 @@ expert = Expert.Expert()
 sim_sys.write_command(cmd_val)
 sim_sys.simulate()
 input_val = sim_sys.read_feature()
+t = 0
 
 # LOOP START
-while True:
+while t < loop_num:
 
     # ---- select action ----
     output_val = q_learner.select_action(input_val)
 
     # ---- predict features ----
-
+    input_prediction = expert.predict(input_val, output_val)
 
     # ---- generate actuator output commands ----
     sim_sys.write_command(output_val)
@@ -54,14 +57,14 @@ while True:
     input_val = sim_sys.read_feature()
 
     # ---- calculate prediction error ----
-
+    prediction_error = input_val - input_prediction
 
     # ---- add to training set -----
     expert.add_to_training_set(input_val_0, output_val_0, input_val)
 
     # ---- calculate learning progress -----
-    if sum(5 < input_val < 7):
-        reward = sum(input_val)**2
+    if sum(5 < output_val < 7):
+        reward = sum(output_val)**2
     else:
         reward = -1
 
@@ -70,6 +73,11 @@ while True:
     print("State0: " + str(input_val_0,))
     print("Action: " + str(output_val_0))
     print("State1: " + str(input_val))
+    print("Prediction Error: " + str(prediction_error) + "\n")
     print("Reward: " + str(reward) + "\n")
 
+
+    t += 1
+
 # LOOP END
+expert.plot_model()
