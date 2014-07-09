@@ -57,7 +57,7 @@ while t < loop_num:
     input_val = sim_sys.read_feature()
 
     # ---- calculate prediction error ----
-    prediction_error = input_val - input_prediction
+    prediction_error = input_val - np.array(input_prediction)
 
     # ---- add to training set -----
     expert.add_to_training_set(input_val_0, output_val_0, input_val)
@@ -73,11 +73,15 @@ while t < loop_num:
     print("State0: " + str(input_val_0,))
     print("Action: " + str(output_val_0))
     print("State1: " + str(input_val))
-    print("Prediction Error: " + str(prediction_error) + "\n")
+    print("Prediction Error: " + str(prediction_error))
+    print("Number of Partitions: " + str(expert.cluster_num) + "\n")
     print("Reward: " + str(reward) + "\n")
 
 
     t += 1
 
 # LOOP END
-expert.plot_model()
+
+
+for i in range(expert.cluster_num):
+    expert.plot_model(partition=i, show_plot=(i==expert.cluster_num-1))
