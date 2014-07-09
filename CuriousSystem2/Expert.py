@@ -1,51 +1,57 @@
 from sklearn.svm import SVR
+from sklearn.cluster import KMeans
 import numpy as np
 import pylab as pl
 from mpl_toolkits.mplot3d import Axes3D
 
 class Expert():
 
+    cluster_num = 1
     def __init__(self):
         self.exemplar = dict()
-        self.model = SVR(C=1.0, degree=2, epsilon=0.2, kernel='rbf', gamma=0.01)
+
+        self.cluster = KMeans(n_clusters=Expert.cluster_num)
+        self.partition = [dict()]*Expert.cluster_num
+        self.model = [SVR(C=1.0, epsilon=0.2, gamma=0.5, kernel='rbf')]*Expert.cluster_num
 
     def add_to_training_set(self, state_0, action_0, state_1):
+
+        # add exemplar to main training set
         self.exemplar[tuple(state_0) + tuple(action_0)] = tuple(state_1)
+
+        # find clusters
+        self.cluster.fit(tuple(self.exemplar.keys()))
+
+        # partition the training set based on the clusters
+        for sa in tuple(self.exemplar.keys()):
+            cluster_id = self.cluster.predict(sa)[0]
+            self.partition[cluster_id][sa] = self.exemplar[sa]
         self.__train()
-        #print self.exemplar
+
 
     def __train(self):
-        X = tuple(self.exemplar.keys())
-        y = []
-        for x in X:
-            y.append(self.exemplar[x][0])
-        y = tuple(y)
 
-        if len(self.exemplar) > 1:
-            try:
-                self.model.fit(X, y)
-            except ValueError:
-                pass
+        for i in range (len(self.model)):
+            X = tuple(self.partition[i].keys())
+            y = []
+            for x in X:
+                y.append(self.partition[i][x][0])
+            y = tuple(y)
+
+            if len(self.partition[i]) > 1:
+                try:
+                    self.model[i].fit(X, y)
+                except ValueError:
+                    pass
 
     def predict(self, state_0, action_0):
         try:
-            y = self.model.predict(tuple(action_0) + tuple(state_0))
+            y = self.model[0].predict(tuple(action_0) + tuple(state_0))
 
         except AttributeError:
             y = -1
 
         return y
-
-    def display_distance_function(self):
-
-        x1 = range(0, 10)
-        x2 = range(0, 10)
-        dist = np.zeros([len(x1), len(x2)])
-
-        for i in range(len(x1)):
-            for j in range(len(x2)):
-                dist[i][j] = self.model.decision_function([x1[i], x2[j]])
-        print dist
 
     def plot_model(self):
 
@@ -73,7 +79,7 @@ class Expert():
         x = y = np.arange(0, 10, 0.05)
         X, Y = np.meshgrid(x, y)
         try:
-            zs = np.array([self.model.predict(tuple([x,y])) for x,y in zip(np.ravel(X), np.ravel(Y))])
+            zs = np.array([self.model[0].predict(tuple([x,y])) for x,y in zip(np.ravel(X), np.ravel(Y))])
             Z = zs.reshape(X.shape)
         except AttributeError:
             print("Expert does not have a valid model.")
