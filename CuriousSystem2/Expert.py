@@ -13,7 +13,7 @@ class Expert():
         self.cluster_num = 1
         self.cluster = KMeans(n_clusters=1)
         self.partition = [dict()]*1
-        self.model = [SVR(C=1.0, epsilon=0.2, gamma=0.5, kernel='linear')]*1
+        self.model = [SVR(C=1.0, epsilon=0.2, gamma=0.5, kernel='rbf')]*1
 
     def add_to_training_set(self, state_0, action_0, state_1):
 
@@ -31,7 +31,7 @@ class Expert():
         self.model = [None]*self.cluster_num
         for i in range(self.cluster_num):
             self.partition[i] = dict()
-            self.model[i] = SVR(C=1.0, epsilon=0.2, gamma=0.5, kernel='linear')
+            self.model[i] = SVR(C=1.0, epsilon=0.2, gamma=0.5, kernel='rbf')
 
         # partition the training set based on the clusters
         for sa in tuple(self.exemplar.keys()):

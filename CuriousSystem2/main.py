@@ -63,8 +63,8 @@ while t < loop_num:
     expert.add_to_training_set(input_val_0, output_val_0, input_val)
 
     # ---- calculate learning progress -----
-    if sum(5 < output_val < 7):
-        reward = sum(output_val)**2
+    if 5 < sum(input_val) < 7:
+        reward = sum(input_val)**2
     else:
         reward = -1
 
