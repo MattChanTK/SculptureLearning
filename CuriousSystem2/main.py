@@ -5,6 +5,7 @@ import copy
 import SimSystem
 import CuriousLearner2
 import Expert
+import Expert2
 
 
 # ===== Settings ======
@@ -21,6 +22,7 @@ loop_num = 1000
 fea_val = np.zeros(fea_dim)
 cmd_val = np.zeros(cmd_dim)
 
+# ==== storage
 
 # ==== Algorithm ======
 
@@ -28,7 +30,7 @@ cmd_val = np.zeros(cmd_dim)
 sim_sys = SimSystem.SimSystem()
 q_learner = CuriousLearner2.CuriousLearner2(fea_dim, cmd_dim, fea_num, cmd_num)
 cmd_val = np.ones_like(cmd_val)  # initial commands
-expert = Expert.Expert()
+expert = Expert2.Expert2()
 
 # ---- initial simulation ----
 sim_sys.write_command(cmd_val)
@@ -66,20 +68,23 @@ while t < loop_num:
     if 5 < sum(input_val) < 7:
         reward = sum(input_val)**2
     else:
-        reward = -1
+        reward = 10
 
     # ---- update learner ----
     q_learner.update_q_table(input_val_0, output_val_0, input_val, reward)
-    print("State0: " + str(input_val_0,))
+
+    # ---- print to terminal ----
+
+    print("State0: " + str(input_val_0))
     print("Action: " + str(output_val_0))
     print("State1: " + str(input_val))
     print("Prediction Error: " + str(prediction_error))
-    print("Number of Partitions: " + str(expert.cluster_num) + "\n")
+    print("Number of Partitions: " + str(expert.cluster_num))
     print("Reward: " + str(reward) + "\n")
 
 
     t += 1
-
+    print("t = " + str(t))
 # LOOP END
 
 

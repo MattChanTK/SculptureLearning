@@ -31,7 +31,9 @@ class SimSystem():
 
     def simulate(self):
         # simulate the system
-        self.input = [int(5*math.sin(self.output[0])*2)]
+        #self.input = [int(5*math.sin(self.output[0])*2)]
+        self.input = [int(10.0*math.cos(self.output[0]/5.0))]
+
         # self.input += self.output-5 + random.randint(-2, 2)
         # if self.input > 8:
         #     self.input = [math.sin(self.output[0])]
