@@ -1,6 +1,7 @@
 import numpy as np
 import RLtoolkit.tiles as tiles
 import copy
+import pylab as pl
 
 import SimSystem
 import CuriousLearner2
@@ -16,13 +17,15 @@ cmd_dim = 1
 cmd_name = ["action"]
 cmd_num = 10  # 0 to 9
 
-loop_num = 1000
+loop_num = 100
 
 # ==== Global variables =====
 fea_val = np.zeros(fea_dim)
 cmd_val = np.zeros(cmd_dim)
 
-# ==== storage
+# ==== storage ====
+prediction_error_history = []
+state1_history = []
 
 # ==== Algorithm ======
 
@@ -59,16 +62,17 @@ while t < loop_num:
     input_val = sim_sys.read_feature()
 
     # ---- calculate prediction error ----
-    prediction_error = input_val - np.array(input_prediction)
+    prediction_error = np.array(input_prediction) - input_val
+    prediction_error_history.append(prediction_error)
 
     # ---- add to training set -----
     expert.add_to_training_set(input_val_0, output_val_0, input_val)
 
     # ---- calculate learning progress -----
-    if 5 < sum(input_val) < 7:
-        reward = sum(input_val)**2
+    if len(prediction_error_history) > 1:
+        reward = prediction_error_history[-2]**2 - prediction_error_history[-1]**2
     else:
-        reward = 10
+        reward = 0
 
     # ---- update learner ----
     q_learner.update_q_table(input_val_0, output_val_0, input_val, reward)
@@ -78,15 +82,17 @@ while t < loop_num:
     print("State0: " + str(input_val_0))
     print("Action: " + str(output_val_0))
     print("State1: " + str(input_val))
+    print("Input Prediction: " + str(input_prediction))
     print("Prediction Error: " + str(prediction_error))
     print("Number of Partitions: " + str(expert.cluster_num))
     print("Reward: " + str(reward) + "\n")
-
 
     t += 1
     print("t = " + str(t))
 # LOOP END
 
-
 for i in range(expert.cluster_num):
     expert.plot_model(partition=i, show_plot=(i==expert.cluster_num-1))
+
+pl.plot(prediction_error_history)
+pl.show()

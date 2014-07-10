@@ -25,7 +25,7 @@ class Expert2():
 
         # reconstruct partitions
 
-        self.cluster_num = int(max(1, (min(len(self.exemplar), math.floor(math.log(len(self.exemplar)+1)*1)))))
+        self.cluster_num = 1# int(max(1, (min(len(self.exemplar), math.floor(math.log(len(self.exemplar)+1)*1)))))
 
         # find clusters
         self.cluster = KMeans(n_clusters=self.cluster_num)
@@ -65,7 +65,7 @@ class Expert2():
 
     def predict(self, state_0, action_0):
 
-        sa = tuple(action_0) + tuple(state_0)
+        sa =  tuple(state_0) + tuple(action_0)
         model_id = 0
 
         # find the cluster that this data point belongs to
