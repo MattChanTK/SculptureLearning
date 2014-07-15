@@ -4,11 +4,12 @@ from sklearn.cluster import DBSCAN
 import numpy as np
 import pylab as pl
 import math
+import save_figure
 from mpl_toolkits.mplot3d import Axes3D
 
 class Expert2():
 
-    svr_kernel = 'linear'
+    svr_kernel = 'rbf'
 
     def __init__(self):
         self.exemplar = set()
@@ -25,7 +26,7 @@ class Expert2():
 
         # reconstruct partitions
 
-        self.cluster_num = 1# int(max(1, (min(len(self.exemplar), math.floor(math.log(len(self.exemplar)+1)*1)))))
+        self.cluster_num = 1 #int(max(1, (min(len(self.exemplar), math.floor(math.log(len(self.exemplar)+1)*0.5)))))
 
         # find clusters
         self.cluster = KMeans(n_clusters=self.cluster_num)
@@ -65,7 +66,7 @@ class Expert2():
 
     def predict(self, state_0, action_0):
 
-        sa =  tuple(state_0) + tuple(action_0)
+        sa = tuple(state_0) + tuple(action_0)
         model_id = 0
 
         # find the cluster that this data point belongs to
@@ -82,7 +83,7 @@ class Expert2():
 
         return tuple(y)
 
-    def plot_model(self, partition=0, show_plot=True):
+    def plot_model(self, partition=0, show_plot=True, save_fig_folder=None):
 
         # plotting the data points
         fig = pl.figure(partition)
@@ -126,6 +127,8 @@ class Expert2():
         ax.set_ylabel('Action 0')
         ax.set_zlabel('Predicted State 1')
         pl.title('Support Vector Regression Model (Partition #' + str(partition) + ")")
+        if save_fig_folder is not None:
+            save_figure.save(save_fig_folder+"/Support Vector Regression Model (Partition #" + str(partition) + ")")
 
         if show_plot:
             pl.show()
