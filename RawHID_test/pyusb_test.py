@@ -27,4 +27,5 @@ ep = usb.util.find_descriptor(
 assert ep is not None
 
 # write the data
-ep.write('test')
+while True:
+    ep.write('test')
