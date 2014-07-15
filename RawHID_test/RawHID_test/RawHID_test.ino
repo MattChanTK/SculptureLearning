@@ -9,30 +9,33 @@ byte outgoingByte[numOutgoingByte];
 byte incomingByte[numIncomingByte];
 unsigned long msUntilNextSend = millis() + period;
 unsigned int packetCount = 0;
-unsigned short byteCount = 0;
+
 boolean ledState = 0;
 
 void setup() {
   Serial.begin(9600);
   pinMode(13, OUTPUT);
+  
 }
 
 
 void loop() {
 
+  unsigned short byteCount = RawHID.recv(incomingByte, 10);
   
-  while (Serial.available() && byteCount < numIncomingByte) {
-    incomingByte[byteCount] = Serial.read();
-    byteCount++;
-    if (byteCount == 0)
-      ledState ^= 1;
+  if (byteCount > 0) {
+    // the computer sent a message.  Display the bits
+    // of the first byte on pin 0 to 7.  Ignore the
+    // other 63 bytes!
+    Serial.print(F("Received packet, first byte: "));
+    Serial.println((int)incomingByte[0]);
+  
+    ledState = 1;
+    
   }
-  for (int i=byteCount; i < numIncomingByte; i++){
-    incomingByte[byteCount] = lowByte(-1);
-  }
-   
-  digitalWrite(13, ledState); 
-   
+  //Serial.println(ledState);
+  //digitalWrite(13, 0); 
+ 
   // every period, send a packet to the computer
   if (int(msUntilNextSend - millis()) <= 0) {
     msUntilNextSend = millis() + period;
@@ -44,8 +47,12 @@ void loop() {
          outgoingByte[i] = lowByte(i);
          
     }
-    Serial.write(outgoingByte, numOutgoingByte);
+    packetCount++;
+    RawHID.send(outgoingByte, 100);
+    Serial.println(packetCount);
     ledState ^= 1;
     digitalWrite(13, ledState); 
   }
+  
+ 
 }

@@ -14,19 +14,14 @@ import pywinusb.hid as hid
 prev_time = clock()
 def sample_handler(data):
     print(data)
-    prev_time = data[1] << 8 + data[0]
-
-    time = clock()*1000
-    print(time - prev_time)
-    print(time)
-    print(prev_time)
-    #prev_time = clock()
 
 def raw_test():
     # simple test
     # browse devices...
     all_hids = hid.find_all_hid_devices()
-    if all_hids:
+    if not all_hids:
+        print("There's not any non system HID class device available")
+    else:
         while True:
             print("Choose a device to monitor raw input reports:\n")
             print("0 => Exit")
@@ -53,13 +48,26 @@ def raw_test():
                 print("\nWaiting for data...\nPress any (system keyboard) key to stop...")
                 while not kbhit() and device.is_plugged():
                     #just keep the device opened to receive events
+                    for report in device.find_output_reports():
+                        for target_usage in range(len(report)):
+                            # found out target!
+                           # report[target_usage] = 1 # yes, changing values is that easy
+                            # at this point you could change different usages at a time...
+                            # and finally send the prepared output report
+                            report.send()
+                            # now toggle back the signal
+                            #report[target_usage] = 0
+                           # report.send()
+                            print(report)
+                            sleep(0.2)
+
+
                     #sleep(1000)
                     pass
                 return
             finally:
                 device.close()
-    else:
-        print("There's not any non system HID class device available")
+
 #
 if __name__ == '__main__':
     # first be kind with local encodings
@@ -72,5 +80,9 @@ if __name__ == '__main__':
         # allow to show encoded strings
         import codecs
         sys.stdout = codecs.getwriter('mbcs')(sys.stdout)
+
+    target_vendor_id = 0x1234 # just an example, change it to the actual vendor_id
+    target_usage = hid.get_full_usage_id(0xffa0, 0x02) # generic vendor page, usage_id = 2
+
     raw_test()
 
