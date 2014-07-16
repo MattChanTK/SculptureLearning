@@ -23,6 +23,9 @@ intf = interface[0]
 loopCount = 0
 
 while loopCount < 1000000:
+
+    prev_time = clock()
+    intf = interface[0]
     ep = usb.util.find_descriptor(
         intf,
         # match the first OUT endpoint
@@ -35,13 +38,13 @@ while loopCount < 1000000:
     prev_time = clock()
 
     # write the data
-    out_string = "This is a message from the PC!"
+    out_string = "This is a message from the PC!" + str(loopCount)
     out_msg = out_string.encode(encoding='UTF-8')
     padding = ' ' *(64-len(out_msg))
     out_msg = out_msg + padding
     ep.write(out_msg)
 
-
+    intf = interface[0]
     ep = usb.util.find_descriptor(
         intf,
         # match the first OUT endpoint
@@ -57,20 +60,20 @@ while loopCount < 1000000:
    # print("claiming device")
     usb.util.claim_interface(dev, intf)
     try:
-        prev_time = clock()
+
         data = ep.read(64, 0)
+        if data:
+            print(clock() - prev_time)
+            prev_time = clock()
+            #print(data)
 
-        print(clock() - prev_time)
-        prev_time = clock()
-        #print(data)
+            i = 0
+            while i < len(data):
+                char = chr(data[i])
+                print(char),
+                i +=1
 
-        i = 0
-        while i < len(data):
-            char = chr(data[i])
-            print(char),
-            i +=1
-
-        print('\n')
+            print('\n')
     except usb.core.USBError:
         print("Timeout! Couldn't read anything")
 
