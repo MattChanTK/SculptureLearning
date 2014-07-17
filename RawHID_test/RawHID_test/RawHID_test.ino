@@ -23,8 +23,9 @@ String replyMsg = "Teensy heard: ";
 
 void loop() {
 
-  
-  unsigned short byteCount = RawHID.recv(incomingByte, 0);
+ // RawHID.send(outgoingByte, 100);
+//  int prev_time = micros();
+  unsigned short byteCount = RawHID.recv(incomingByte, 100);
   //incomingByte = Serial.write;
   //Serial.println(byteCount);
   if (byteCount > 0) {
@@ -34,7 +35,7 @@ void loop() {
    // Serial.print(F("Received packet, first byte: "));
   //  Serial.println((int)incomingByte[0]);
     ledState ^= 1;
-  }
+  
   for (int i = byteCount; i < numIncomingByte; i++)
     incomingByte[i] = 13;
  // Serial.println(ledState);
@@ -60,15 +61,16 @@ void loop() {
 
     }
     packetCount++;
-    RawHID.send(outgoingByte, 1000);
+    RawHID.send(outgoingByte, 100);
    // outgoingByte[0] = 'j';
     //Serial.write(outgoingByte, 64);
     
  //   Serial.println(packetCount);
     //ledState ^= 1;
     // digitalWrite(13, ledState); 
+ //   Serial.println(micros() - prev_time);
   }
-  
+  }
 
 
 }

@@ -2,6 +2,7 @@ import usb.core
 import usb.util
 import sys
 from time import clock
+from time import sleep
 
 # find our device
 dev = usb.core.find(idVendor=0x16C0, idProduct=0x0486)
@@ -24,6 +25,7 @@ loopCount = 0
 
 while loopCount < 1000000:
 
+
     prev_time = clock()
     intf = interface[0]
     ep = usb.util.find_descriptor(
@@ -35,14 +37,14 @@ while loopCount < 1000000:
             usb.util.ENDPOINT_OUT)
 
     assert ep is not None
-    prev_time = clock()
 
     # write the data
     out_string = "This is a message from the PC!" + str(loopCount)
     out_msg = out_string.encode(encoding='UTF-8')
     padding = ' ' *(64-len(out_msg))
     out_msg = out_msg + padding
-    ep.write(out_msg)
+    ep.write(out_msg, 10)
+    #sleep(0.001)
 
     intf = interface[0]
     ep = usb.util.find_descriptor(
@@ -61,7 +63,7 @@ while loopCount < 1000000:
     usb.util.claim_interface(dev, intf)
     try:
 
-        data = ep.read(64, 0)
+        data = ep.read(64, 100)
         if data:
             print(clock() - prev_time)
             prev_time = clock()
@@ -74,6 +76,8 @@ while loopCount < 1000000:
                 i +=1
 
             print('\n')
+
+
     except usb.core.USBError:
         print("Timeout! Couldn't read anything")
 
