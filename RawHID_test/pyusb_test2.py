@@ -1,8 +1,11 @@
 import usb.core
 import usb.util
+
 import sys
 from time import clock
 from time import sleep
+import copy
+import array
 
 
 
@@ -20,12 +23,15 @@ def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
     assert ep is not None
 
    # print("release device")
-    usb.util.release_interface(dev, intf)
+   # usb.util.release_interface(dev, intf)
    # print("claiming device")
-    usb.util.claim_interface(dev, intf)
-    try:
+   # usb.util.claim_interface(dev, intf)
 
+    try:
+        prev_time = clock()
         data = ep.read(byte_num, timeout)
+        after_time = clock()
+        print("Time to read one packet (s): " + str(after_time-prev_time))
 
     except usb.core.USBError:
         print("Timeout! Couldn't read anything")
@@ -36,9 +42,9 @@ def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
 def talk_to_Teensy(dev, intf, out_msg, timeout=10):
 
     # print("release device")
-    usb.util.release_interface(dev, intf)
+    # usb.util.release_interface(dev, intf)
     # print("claiming device")
-    usb.util.claim_interface(dev, intf)
+    # usb.util.claim_interface(dev, intf)
 
     ep = usb.util.find_descriptor(
         intf,
@@ -82,33 +88,43 @@ def listen_and_respond_test(vendorID, productID, loop_num=1000):
     # get an endpoint instance
     cfg = dev.get_active_configuration()
 
-    interface = usb.util.find_descriptor(cfg, find_all=True)
+    interface_iter = usb.util.find_descriptor(cfg, find_all=True)
+    interface = []
+    for iter in interface_iter:
+        interface.append(iter)
     intf = interface[0]
 
     loop_count = 0
 
+    listen_string = "Hello PC! This is Teensy"
+    listen_msg = bytearray(listen_string)
     while loop_count < loop_num:
 
-        data = listen_to_Teensy(dev, intf)
 
-        print_data(data)
+        data = listen_to_Teensy(dev, intf, timeout=100)
 
         if data:
-            #intf = interface[0]
+            correct_msg = True
+            for i in range(len(listen_msg)):
+                correct_msg &= (listen_msg[i] == data[i])
 
-            # write the data
-            out_string = "I heard you Teensy! " + str(loop_count)
-            out_msg = out_string.encode(encoding='UTF-8')
-            padding = ' ' *(64 - len(out_msg))
-            out_msg = out_msg + padding
-
-            print("Sent: " + out_string)
-            talk_to_Teensy(dev, intf, out_msg)
-
-            # read reply
-            data = listen_to_Teensy(dev, intf)
             print_data(data)
 
+            #intf = interface[0]
+
+            if correct_msg:
+                # write the data
+                out_string = str(loop_count) + " I heard you Teensy!"
+                padding = ' ' *(64 - len(out_string))
+                out_msg = bytearray(out_string + padding)
+
+                #intf = interface[0]
+                print("Sent: " + out_string)
+                talk_to_Teensy(dev, intf, out_msg, timeout=100)
+
+                # read reply
+                data = listen_to_Teensy(dev, intf, timeout=100)
+                print_data(data)
 
 
         loop_count += 1

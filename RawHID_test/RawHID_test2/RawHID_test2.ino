@@ -13,7 +13,7 @@ unsigned int packetCount = 0;
 boolean ledState = 0;
 
 void setup() {
-//  Serial.begin(9600);
+  Serial.begin(9600);
   pinMode(13, OUTPUT);
  
 }
@@ -24,8 +24,8 @@ String outgoingMsg = "Hello PC! This is Teensy";
 void loop() {
   
     // Send a message
-    int out_time = micros();
-    digitalWrite(13, 0);
+
+   
     for (int i=0; i<numOutgoingByte;i++){
         if (i < outgoingMsg.length()){
           outgoingByte[i] = outgoingMsg[i];
@@ -34,14 +34,23 @@ void loop() {
           outgoingByte[i] = ' ';
         }
     }
+
     //packetCount++;
-    RawHID.send(outgoingByte, 10);
+    int out_time = micros();
+    digitalWrite(13, 0);
+    RawHID.send(outgoingByte, 1000);
+    //Serial.write(outgoingByte, 64);
+    
+    //delay(1000);
     
     // Receiving an echo
+    Serial.flush();
     unsigned short byteCount = RawHID.recv(incomingByte, 10);
     if (byteCount > 0) {
-      
       int in_time = micros();
+      digitalWrite(13, 1);
+     
+      
       String replyMsg = replyMsgHeader + String(in_time - out_time) + "us: " ;
       
       for (int i=0; i<numOutgoingByte;i++){
@@ -52,9 +61,10 @@ void loop() {
             outgoingByte[i] = incomingByte[i-replyMsg.length()];
           }
       }
-     digitalWrite(13, 1);
+      RawHID.send(outgoingByte, 100);
+     
     }
-    
+    /*
     else{
       
         String replyMsg = "Didn't hear an echo";
@@ -69,7 +79,7 @@ void loop() {
       
     }
     RawHID.send(outgoingByte, 100);
- 
+    */
 
 
 }

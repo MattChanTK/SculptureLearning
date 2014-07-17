@@ -4,6 +4,7 @@ import sys
 from time import clock
 from time import sleep
 
+
 # find our device
 dev = usb.core.find(idVendor=0x16C0, idProduct=0x0486)
 
