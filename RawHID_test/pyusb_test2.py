@@ -7,9 +7,8 @@ from time import sleep
 
 
 
-def listen_to_Teensy():
-    data = None
-    intf = interface[0]
+def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
+
     ep = usb.util.find_descriptor(
         intf,
         # match the first OUT endpoint
@@ -26,7 +25,7 @@ def listen_to_Teensy():
     usb.util.claim_interface(dev, intf)
     try:
 
-        data = ep.read(64, 1000)
+        data = ep.read(byte_num, timeout)
 
     except usb.core.USBError:
         print("Timeout! Couldn't read anything")
@@ -34,8 +33,8 @@ def listen_to_Teensy():
 
     return data
 
-def talk_to_Teensy(out_msg):
-    intf = interface[0]
+def talk_to_Teensy(dev, intf, out_msg, timeout=10):
+
     # print("release device")
     usb.util.release_interface(dev, intf)
     # print("claiming device")
@@ -52,7 +51,7 @@ def talk_to_Teensy(out_msg):
     assert ep is not None
 
     try:
-        ep.write(out_msg, 10)
+        ep.write(out_msg, timeout)
     except usb.core.USBError:
         print("Timeout! Couldn't write")
 
@@ -67,9 +66,10 @@ def print_data(data):
 
         print('\n')
 
-if __name__ == '__main__':
+
+def listen_and_respond_test(vendorID, productID, loop_num=1000):
     # find our device
-    dev = usb.core.find(idVendor=0x16C0, idProduct=0x0486)
+    dev = usb.core.find(idVendor=vendorID, idProduct=productID)
 
     # was it found?
     if dev is None:
@@ -85,30 +85,34 @@ if __name__ == '__main__':
     interface = usb.util.find_descriptor(cfg, find_all=True)
     intf = interface[0]
 
-    loopCount = 0
+    loop_count = 0
 
-    while loopCount < 1000000:
+    while loop_count < loop_num:
 
-        data = listen_to_Teensy()
+        data = listen_to_Teensy(dev, intf)
 
         print_data(data)
 
         if data:
-            intf = interface[0]
+            #intf = interface[0]
 
             # write the data
-            out_string = "I heard you Teensy! " + str(loopCount)
+            out_string = "I heard you Teensy! " + str(loop_count)
             out_msg = out_string.encode(encoding='UTF-8')
-            padding = ' ' *(64-len(out_msg))
+            padding = ' ' *(64 - len(out_msg))
             out_msg = out_msg + padding
 
             print("Sent: " + out_string)
-            talk_to_Teensy(out_msg)
+            talk_to_Teensy(dev, intf, out_msg)
 
             # read reply
-            data = listen_to_Teensy()
-            print_data
+            data = listen_to_Teensy(dev, intf)
+            print_data(data)
 
 
 
-        loopCount += 1
+        loop_count += 1
+
+if __name__ == '__main__':
+
+    listen_and_respond_test(vendorID=0x16C0, productID=0x0486, loop_num=100000)

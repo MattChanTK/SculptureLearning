@@ -15,8 +15,7 @@ boolean ledState = 0;
 void setup() {
 //  Serial.begin(9600);
   pinMode(13, OUTPUT);
-  ledState = 0;
-
+ 
 }
 
 String replyMsgHeader = "Teensy heard an echo after  ";
@@ -26,6 +25,7 @@ void loop() {
   
     // Send a message
     int out_time = micros();
+    digitalWrite(13, 0);
     for (int i=0; i<numOutgoingByte;i++){
         if (i < outgoingMsg.length()){
           outgoingByte[i] = outgoingMsg[i];
@@ -52,6 +52,7 @@ void loop() {
             outgoingByte[i] = incomingByte[i-replyMsg.length()];
           }
       }
+     digitalWrite(13, 1);
     }
     
     else{
