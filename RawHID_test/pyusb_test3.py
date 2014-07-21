@@ -9,10 +9,28 @@ import array
 import math
 import threading
 import Queue
-
+import changePriority
 
 packet_size_in = 64
 packet_size_out = 64
+
+def setpriority(pid=None,priority=1):
+    """ Set The Priority of a Windows Process.  Priority is a value between 0-5 where
+        2 is normal priority.  Default sets the priority of the current
+        python process but can take any valid process ID. """
+
+    import win32api,win32process,win32con
+
+    priorityclasses = [win32process.IDLE_PRIORITY_CLASS,
+                       win32process.BELOW_NORMAL_PRIORITY_CLASS,
+                       win32process.NORMAL_PRIORITY_CLASS,
+                       win32process.ABOVE_NORMAL_PRIORITY_CLASS,
+                       win32process.HIGH_PRIORITY_CLASS,
+                       win32process.REALTIME_PRIORITY_CLASS]
+    if pid == None:
+        pid = win32api.GetCurrentProcessId()
+    handle = win32api.OpenProcess(win32con.PROCESS_ALL_ACCESS, True, pid)
+    win32process.SetPriorityClass(handle, priorityclasses[priority])
 
 def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
 
@@ -152,6 +170,9 @@ def find_teensy_serial_number(vendorID=0x16C0, productID=0x0486):
 
 if __name__ == '__main__':
 
+
+    changePriority.SetPriority(changePriority.Priorities.ABOVE_NORMAL_PRIORITY_CLASS)
+
     vendor_id = 0x16C0
     product_id = 0x0486
     serial_num_list = (find_teensy_serial_number(vendorID=vendor_id, productID=product_id))
@@ -160,7 +181,7 @@ if __name__ == '__main__':
     thread_list = []
     for serial_num in serial_num_list:
         ids = ()
-        t = threading.Thread(target=listen_and_respond_test, args=(result_queue, vendor_id, product_id, serial_num, 100))
+        t = threading.Thread(target=listen_and_respond_test, args=(result_queue, vendor_id, product_id, serial_num, 1000))
         thread_list.append(t)
         t.daemon = False
         t.start()
