@@ -1,7 +1,7 @@
 
 //==== constants ====
-const unsigned short numOutgoingByte = 64;
-const unsigned short numIncomingByte = 64;
+const unsigned int numOutgoingByte = 64;
+const unsigned int numIncomingByte = 64;
 const unsigned int period = 0;
 
 //==== internal global variables =====
@@ -31,25 +31,32 @@ void loop() {
           outgoingByte[i] = outgoingMsg[i];
         }
         else{
-          outgoingByte[i] = ' ';
+          outgoingByte[i] = char(' ');
         }
     }
 
     //packetCount++;
     int out_time = micros();
     digitalWrite(13, 0);
-    RawHID.send(outgoingByte, 1000);
-    //Serial.write(outgoingByte, 64);
     
-    //delay(1000);
+    for (int i = 0; i<numOutgoingByte; i+=64)
+      RawHID.send(outgoingByte, 0);
+   
+      //Serial.write(outgoingByte, 64);
+   
+    
     
     // Receiving an echo
-    Serial.flush();
-    unsigned short byteCount = RawHID.recv(incomingByte, 10);
+    //Serial.flush();
+    
+
+    unsigned short byteCount = RawHID.recv(incomingByte, 0);
+    ///delay(1000);
+    //Serial.println(byteCount);
     if (byteCount > 0) {
-      int in_time = micros();
+      
       digitalWrite(13, 1);
-     
+      int in_time = micros();
       
       String replyMsg = replyMsgHeader + String(in_time - out_time) + "us: " ;
       
@@ -61,7 +68,10 @@ void loop() {
             outgoingByte[i] = incomingByte[i-replyMsg.length()];
           }
       }
-      RawHID.send(outgoingByte, 100);
+    
+     
+      for (int i = 0; i<numOutgoingByte; i+=64)
+        RawHID.send(outgoingByte, 0);
      
     }
     /*

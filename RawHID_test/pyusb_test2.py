@@ -6,9 +6,11 @@ from time import clock
 from time import sleep
 import copy
 import array
+import math
 
 
-
+packet_size_in = 64
+packet_size_out = 64
 
 def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
 
@@ -31,7 +33,7 @@ def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
         prev_time = clock()
         data = ep.read(byte_num, timeout)
         after_time = clock()
-        print("Time to read one packet (s): " + str(after_time-prev_time))
+        print("Time to read " + str(byte_num) + " bytes: " + str(after_time-prev_time) + "s")
 
     except usb.core.USBError:
         print("Timeout! Couldn't read anything")
@@ -65,6 +67,7 @@ def talk_to_Teensy(dev, intf, out_msg, timeout=10):
 def print_data(data):
     if data:
         i = 0
+        print("Number of byte: " + str(len(data)))
         while i < len(data):
             char = chr(data[i])
             print(char),
@@ -97,11 +100,12 @@ def listen_and_respond_test(vendorID, productID, loop_num=1000):
     loop_count = 0
 
     listen_string = "Hello PC! This is Teensy"
-    listen_msg = bytearray(listen_string)
+    listen_msg = bytearray(listen_string)[:packet_size_in]
     while loop_count < loop_num:
 
 
-        data = listen_to_Teensy(dev, intf, timeout=100)
+        data = listen_to_Teensy(dev, intf, timeout=0, byte_num=packet_size_in)
+
 
         if data:
             correct_msg = True
@@ -115,16 +119,22 @@ def listen_and_respond_test(vendorID, productID, loop_num=1000):
             if correct_msg:
                 # write the data
                 out_string = str(loop_count) + " I heard you Teensy!"
-                padding = ' ' *(64 - len(out_string))
-                out_msg = bytearray(out_string + padding)
-
+                padding = ' ' *(packet_size_out - len(out_string))
+                out_msg = bytearray((out_string + padding)[:packet_size_out])
+                #print(out_msg)
                 #intf = interface[0]
-                print("Sent: " + out_string)
-                talk_to_Teensy(dev, intf, out_msg, timeout=100)
+                print("Sent: " + out_string + padding)
+                talk_to_Teensy(dev, intf, out_msg, timeout=0)
 
                 # read reply
-                data = listen_to_Teensy(dev, intf, timeout=100)
-                print_data(data)
+
+                data = listen_to_Teensy(dev, intf, timeout=0, byte_num=packet_size_in)
+
+                if data:
+                    print("Replied: "),
+                    print_data(data)
+                else:
+                    print("Received no reply.")
 
 
         loop_count += 1
