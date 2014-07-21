@@ -8,6 +8,7 @@ import copy
 import array
 import math
 import threading
+import Queue
 
 
 packet_size_in = 64
@@ -31,13 +32,10 @@ def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
    # usb.util.claim_interface(dev, intf)
 
     try:
-        prev_time = clock()
         data = ep.read(byte_num, timeout)
-        after_time = clock()
-        print("Time to read " + str(byte_num) + " bytes: " + str(after_time-prev_time) + "s")
 
     except usb.core.USBError:
-        print("Timeout! Couldn't read anything")
+        #print("Timeout! Couldn't read anything")
         data = None
 
     return data
@@ -62,12 +60,14 @@ def talk_to_Teensy(dev, intf, out_msg, timeout=10):
     try:
         ep.write(out_msg, timeout)
     except usb.core.USBError:
-        print("Timeout! Couldn't write")
+        pass
+        #print("Timeout! Couldn't write")
 
 
-def print_data(data):
+def print_data(data, serialNum=u'N/A'):
     if data:
         i = 0
+        print("Serial Number: " + str(serialNum))
         print("Number of byte: " + str(len(data)))
         while i < len(data):
             char = chr(data[i])
@@ -76,14 +76,12 @@ def print_data(data):
 
         print('\n')
 
+def save_data(queue, data, serial_num):
+    if data and queue:
+        queue.put([serial_num, copy.copy(data)])
 
-def listen_and_respond_test(vendorID, productID, serialNumber, loop_num=1000):
+def listen_and_respond_test(resultQueue, vendorID, productID, serialNumber, loop_num=1000):
     # find our device
-    # dev_iter = usb.core.find(find_all=True)#, idVendor=vendorID, idProduct=productID)
-    # dev_list = []
-    # for iter in dev_iter:
-    #     dev_list.append(iter)
-    # dev = dev_list[1]
     dev = usb.core.find(idVendor=vendorID, idProduct=productID, serial_number=serialNumber)
     # was it found?
     if dev is None:
@@ -117,29 +115,25 @@ def listen_and_respond_test(vendorID, productID, serialNumber, loop_num=1000):
             for i in range(len(listen_msg)):
                 correct_msg &= (listen_msg[i] == data[i])
 
-            print_data(data)
-
-            #intf = interface[0]
 
             if correct_msg:
                 # write the data
                 out_string = str(loop_count) + " I heard you Teensy!"
                 padding = ' ' *(packet_size_out - len(out_string))
                 out_msg = bytearray((out_string + padding)[:packet_size_out])
-                #print(out_msg)
-                #intf = interface[0]
-                print("Sent: " + out_string + padding)
+
+                #print("Sent: " + out_string + padding)
                 talk_to_Teensy(dev, intf, out_msg, timeout=0)
 
                 # read reply
-
                 data = listen_to_Teensy(dev, intf, timeout=0, byte_num=packet_size_in)
 
                 if data:
-                    print("Replied: "),
-                    print_data(data)
+                    #print("Replied: "),
+                    save_data(resultQueue, data, serialNumber)
                 else:
-                    print("Received no reply.")
+                    pass
+                    #print("Received no reply.")
 
 
         loop_count += 1
@@ -162,11 +156,19 @@ if __name__ == '__main__':
     product_id = 0x0486
     serial_num_list = (find_teensy_serial_number(vendorID=vendor_id, productID=product_id))
 
+    result_queue = Queue.Queue()
+    thread_list = []
     for serial_num in serial_num_list:
         ids = ()
-        t = threading.Thread(target=listen_and_respond_test, args=(vendor_id, product_id, serial_num, 10000))
+        t = threading.Thread(target=listen_and_respond_test, args=(result_queue, vendor_id, product_id, serial_num, 100))
+        thread_list.append(t)
         t.daemon = False
         t.start()
-        #listen_and_respond_test(vendorID=vendor_id, productID=product_id, serialNumber=serial_num, loop_num=100)
 
-    s = raw_input()
+    for t in thread_list:
+        t.join()
+        while not result_queue.empty():
+            result = result_queue.get()
+            print_data(result[1], serialNum=result[0])
+
+
