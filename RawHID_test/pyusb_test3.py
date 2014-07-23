@@ -175,7 +175,7 @@ if __name__ == '__main__':
 
     vendor_id = 0x16C0
     product_id = 0x0486
-    serial_num_list = (find_teensy_serial_number(vendorID=vendor_id, productID=product_id))
+    serial_num_list = find_teensy_serial_number(vendorID=vendor_id, productID=product_id)
 
     result_queue = Queue.Queue()
     thread_list = []

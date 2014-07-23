@@ -5,10 +5,10 @@ import sys
 
 class CuriousLearner2():
 
-    greed = 0.25
-    learnRate = 0.25
+    greed = 0.1
+    learnRate = 0.1
     gamma = 0.5
-    degrade_rate = 0.99
+    degrade_rate = 1.0  #0.99
 
 
     def __init__(self, fea_dim, cmd_dim, fea_num, cmd_num):
@@ -29,6 +29,8 @@ class CuriousLearner2():
         # instantiate the q-table
         self.q_table = np.zeros((self.fea_num, self.cmd_num))
 
+
+
     def select_action(self, state):
 
         # bound the state
@@ -38,9 +40,10 @@ class CuriousLearner2():
         k = random.random()
         if k < CuriousLearner2.greed:
             print("Chose a random output")
-            cmd = random.randint(0, self.cmd_num)
+            cmd = random.randint(0, self.cmd_num-1)
             return np.array([cmd])
         else:
+            # get the optimal action
             optimal_action, bestq = self.__get_optimal_action(state)
             #print("Best Q: " + str(bestq))
             return np.array([optimal_action])
@@ -55,7 +58,7 @@ class CuriousLearner2():
 
         # calculate the change in q
         delta_q = CuriousLearner2.learnRate\
-                  * (reward + CuriousLearner2.gamma*(self.__estimate_future_reward(state_1) - self.q_table[state_0][action_0]))
+                  * (reward + CuriousLearner2.gamma*(self.__estimate_future_reward(state_1)) - self.q_table[state_0][action_0])
 
         self.q_table[state_0][action_0] += delta_q
         self.q_table *= CuriousLearner2.degrade_rate
@@ -80,6 +83,18 @@ class CuriousLearner2():
             action_selected = best_action[k]
 
         return action_selected, best_q
+
+    def get_state_action_with_highest_q(self):
+
+        best_q_index_flat = self.q_table.argmax()
+        return np.unravel_index(best_q_index_flat, self.q_table.shape)
+
+    def get_q_column(self, state0):
+        # bound the values
+        state0 = int(min(max(0, state0), self.fea_num-1))
+        q_col = self.q_table[state0, :]
+
+        return q_col
 
     @staticmethod
     def test():

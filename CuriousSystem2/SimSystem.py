@@ -36,10 +36,10 @@ class SimSystem():
         # self.input = [int(self.output[0])]
 
         # ---- LeftSineRightLinear ----
-        if 6 > self.input[0]:
-            self.input = [int(10*math.sin(self.output[0]))]
-        else:
-            self.input = [int(self.output[0])]
+        # if 6 > self.input[0]:
+        #     self.input = [int(10*math.sin(self.output[0]))]
+        # else:
+        #     self.input = [int(self.output[0])]
 
         # ---- RightSineLeftLinear ----
         # if 6 <= self.input[0]:
@@ -59,6 +59,14 @@ class SimSystem():
         # else:
         #     self.input = [int(self.output[0])]
 
+        # ---- Velocity Control -----
+        if self.output == 0:
+            self.input = [random.randint(0, 9)]
+        elif self.output == 2:
+            self.input = [self.input[0] + self.output[0] - 1]
+        else:
+            self.input = [self.output[0]+2]
+            #self.input = [self.input[0] + (self.output[0]-1)*0.9 + random.randint(-1, 1)*0.1]
 
     def read_feature(self):
 
