@@ -1,33 +1,84 @@
-#include <avr/io.h>
-#include <avr/interrupt.h>
 
 //==== constants ====
 const unsigned int numOutgoingByte = 64;
 const unsigned int numIncomingByte = 64;
 const unsigned int period = 0;
 
+
 //==== internal global variables =====
 byte outgoingByte[numOutgoingByte];
 byte incomingByte[numIncomingByte];
 unsigned long msUntilNextSend = millis() + period;
 unsigned int packetCount = 0;
+volatile boolean ledState = 0;
 
-boolean ledState = 0;
+IntervalTimer ledBlinkTimer;
+volatile int ledBlinkPeriod_0 = 150000;
+volatile int ledBlinkPeriod = 150000;
 
 void setup() {
 //Serial.begin(9600);
   pinMode(13, OUTPUT);
+  ledBlinkTimer.begin(blinkLED, ledBlinkPeriod_0);
  
 }
 
-String replyMsgHeader = "Teensy heard an echo after  ";
-String outgoingMsg = "Hello PC! This is Teensy";
+void blinkLED(void){
+  if (ledBlinkPeriod == ledBlinkPeriod_0){
+    ledState ^= 1;
+    digitalWrite(13, ledState);
+  }
+  else{    
+    ledBlinkTimer.end();
+    ledBlinkPeriod_0 = ledBlinkPeriod;
+    if (ledBlinkPeriod > 0){
+        ledBlinkTimer.begin(blinkLED, ledBlinkPeriod_0);
+    }
+    else if (ledBlinkPeriod == 0){
+      ledState == 1;
+      digitalWrite(13, ledState);
+    }
+    else{
+      ledState = 0;
+      digitalWrite(13, ledState);
+    }
+
+  }
+  
+}
+
+void receive_msg(byte data_buff[]){
+  
+    unsigned short byteCount = RawHID.recv(data_buff, 0);
+  
+    if (byteCount > 0) {
+        ledBlinkPeriod = int(data_buff[1] << 8 + data_buff[0]);
+        
+    }
+    for (int i=0; i<numOutgoingByte;i++){
+      if (i < outgoingMsg.length()){
+        outgoingByte[i] = data_buff[i];
+      }
+      else{
+        outgoingByte[i] = char(' ');
+      }
+    }
+    send_msg(outgoingByte);
+}
+
+void send_msg(byte data_buff[]){
+   // Send a message
+   RawHID.send(data_buff, 0);
+   
+}
 
 void loop() {
   
+    
+   receive_msg(incomingByte);
     // Send a message
 
-   
+   /*
     for (int i=0; i<numOutgoingByte;i++){
         if (i < outgoingMsg.length()){
           outgoingByte[i] = outgoingMsg[i];
@@ -76,24 +127,9 @@ void loop() {
         RawHID.send(outgoingByte, 0);
      
     }
-    /*
-    else{
-      
-        String replyMsg = "Didn't hear an echo";
-        for (int i=0; i<numOutgoingByte;i++){
-          if (i < replyMsg.length()){
-              outgoingByte[i] = replyMsg[i];
-          }
-          else{
-              outgoingByte[i] = ' ';
-          }
-        }
-      
-    }
-    RawHID.send(outgoingByte, 100);
-    */
 
 
+  */
 }
 
 
