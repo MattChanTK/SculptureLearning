@@ -41,6 +41,7 @@ def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
 
     return data
 
+
 def talk_to_Teensy(dev, intf, out_msg, timeout=10):
 
     # print("release device")
@@ -65,21 +66,26 @@ def talk_to_Teensy(dev, intf, out_msg, timeout=10):
         #print("Timeout! Couldn't write")
 
 
-def print_data(data, serialNum=u'N/A'):
+def print_data(data, serialNum=u'N/A', raw_dec=False):
     if data:
         i = 0
         print("Serial Number: " + str(serialNum))
         print("Number of byte: " + str(len(data)))
         while i < len(data):
-            char = chr(data[i])
+            if raw_dec:
+                char = int(data[i])
+            else:
+                char = chr(data[i])
             print(char),
             i +=1
 
         print('\n')
 
+
 def save_data(queue, data, serial_num):
     if data and queue:
         queue.put([serial_num, copy.copy(data)])
+
 
 def listen_and_respond_test(resultQueue, vendorID, productID, serialNumber, loop_num=1000):
     # find our device
@@ -142,7 +148,8 @@ def listen_and_respond_test(resultQueue, vendorID, productID, serialNumber, loop
 
         loop_count += 1
 
-def interactive_test(vendorID, productID, serialNumber,):
+
+def interactive_test(vendorID, productID, serialNumber):
 
     # find our device
     dev = usb.core.find(idVendor=vendorID, idProduct=productID, serial_number=serialNumber)
@@ -163,12 +170,21 @@ def interactive_test(vendorID, productID, serialNumber,):
         interface.append(iter)
     intf = interface[0]
 
-    # compose the data
-    out_string = struct.pack('l', 100000)
-    padding = chr(0) *(packet_size_out - len(out_string))
-    out_msg = bytearray((out_string + padding)[:packet_size_out])
-    print("sent: ", out_msg)
+
     while(True):
+
+        try:
+            blinkPeriod = long(raw_input())
+        except ValueError:
+            blinkPeriod = -1
+
+        # compose the data
+        out_string = struct.pack('l', blinkPeriod)
+        padding = chr(0) *(packet_size_out - len(out_string))
+        out_msg = bytearray((out_string + padding)[:packet_size_out])
+
+        # sending the data
+        print_data(out_msg, serialNumber, raw_dec=True)
         talk_to_Teensy(dev, intf, out_msg, timeout=0)
         data = listen_to_Teensy(dev, intf, timeout=0, byte_num=packet_size_in)
 
@@ -176,6 +192,7 @@ def interactive_test(vendorID, productID, serialNumber,):
             print(data)
             print(struct.unpack_from('l', data))
            # print(data[0] + data [1]<<8) # + data[2]<<16) #+ data[3]<<24)
+
 
 
 def find_teensy_serial_number(vendorID=0x16C0, productID=0x0486):
@@ -206,13 +223,12 @@ if __name__ == '__main__':
     for serial_num in serial_num_list:
         t = threading.Thread(target=interactive_test, args=(vendor_id, product_id, serial_num))
         thread_list.append(t)
-        t.daemon = True
+        t.daemon = False
         t.start()
 
-    # for t in thread_list:
-    #     t.join()
-    #     while not result_queue.empty():
-    #         result = result_queue.get()
-    #         print_data(result[1], serialNum=result[0])
+    for t in thread_list:
+        t.join()
+        while not result_queue.empty():
+            result = result_queue.get()
+            print_data(result[1], serialNum=result[0])
 
-    p = raw_input()
