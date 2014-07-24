@@ -89,6 +89,11 @@ class CuriousLearner2():
         best_q_index_flat = self.q_table.argmax()
         return np.unravel_index(best_q_index_flat, self.q_table.shape)
 
+    def get_action_with_highest_q(self, state):
+
+        best_q_index_flat = self.q_table[state].argmax()
+        return np.unravel_index(best_q_index_flat, self.q_table[state].shape)
+
     def get_q_column(self, state0):
         # bound the values
         state0 = int(min(max(0, state0), self.fea_num-1))

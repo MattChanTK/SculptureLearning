@@ -65,8 +65,9 @@ class SimSystem():
         elif self.output == 2:
             self.input = [self.input[0] + self.output[0] - 1]
         else:
-            self.input = [self.output[0]+2]
+            #self.input = [self.output[0]+2]
             #self.input = [self.input[0] + (self.output[0]-1)*0.9 + random.randint(-1, 1)*0.1]
+            self.input = [self.input[0] + (self.output[0]-1)*0.5 + math.sin(self.output[0]-1)*0.5]
 
     def read_feature(self):
 

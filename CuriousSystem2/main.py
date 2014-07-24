@@ -31,6 +31,7 @@ state0_history = []
 action0_history = []
 state1_history = []
 optimal_state_action_history = []
+optimal_action_history = []
 q_history = []
 
 # ==== Algorithm ======
@@ -55,7 +56,7 @@ while t < loop_num:
     q_history.append(copy.copy(q_learner.get_q_column(input_val[0])))
     output_val = q_learner.select_action(input_val)
     optimal_state_action = q_learner.get_state_action_with_highest_q()
-
+    optimal_action_given_state = q_learner.get_action_with_highest_q(input_val)
 
     # ---- predict features ----
     #expert = partition.get_expert(input_val[0], output_val[0])
@@ -70,6 +71,7 @@ while t < loop_num:
     state0_history.append(input_val_0[0])
     action0_history.append(output_val_0[0])
     optimal_state_action_history.append(tuple(optimal_state_action))
+    optimal_action_history.append(tuple(optimal_action_given_state))
     sim_sys.simulate()
 
     # ---- read features ----
@@ -225,6 +227,17 @@ pl.ylabel("Action")
 pl.ylim([-1, 11])
 pl.legend()
 save_figure.save(folder_name+"/Optimal Action and Actual Action")
+
+optimal_action_history = np.array(optimal_action_history)
+pl.figure(expert.cluster_num+10)
+pl.plot(optimal_action_history[:,1], 'b-', label="Optimal")
+pl.plot(action0_history, 'r.', label="Actual")
+pl.title("Optimal Action Given State and Actual Action")
+pl.xlabel("time")
+pl.ylabel("Action")
+pl.ylim([-1, 11])
+pl.legend()
+save_figure.save(folder_name+"/Optimal Action Given State and Actual Action")
 
 
 pl.show()
