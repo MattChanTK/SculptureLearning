@@ -11,11 +11,30 @@ import threading
 import Queue
 import changePriority
 import struct
+import random
 
 packet_size_in = 64
 packet_size_out = 64
 
-def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
+def compose_msg(blinkPeriod):
+
+    # unique id for each message
+    front_id_dec = random.randint(0, 255)
+    back_id_dec = random.randint(0, 255)
+    front_id = struct.pack('c', chr(front_id_dec))
+    back_id = struct.pack('c', chr(back_id_dec))
+
+    # the actual message
+    out_string = struct.pack('l', blinkPeriod)
+    # fill up the empty spots
+    padding = chr(0)*(packet_size_out - len(out_string) - 2)
+
+    # stitch the message together
+    out_msg = bytearray(front_id + out_string + padding + back_id)
+
+    return out_msg, front_id_dec, back_id_dec
+
+def listen_to_Teensy(intf, timeout=100, byte_num=64):
 
     ep = usb.util.find_descriptor(
         intf,
@@ -42,7 +61,7 @@ def listen_to_Teensy(dev, intf, timeout=100, byte_num=64):
     return data
 
 
-def talk_to_Teensy(dev, intf, out_msg, timeout=10):
+def talk_to_Teensy(intf, out_msg, timeout=10):
 
     # print("release device")
     # usb.util.release_interface(dev, intf)
@@ -116,7 +135,7 @@ def listen_and_respond_test(resultQueue, vendorID, productID, serialNumber, loop
     while loop_count < loop_num:
 
 
-        data = listen_to_Teensy(dev, intf, timeout=0, byte_num=packet_size_in)
+        data = listen_to_Teensy( intf, timeout=0, byte_num=packet_size_in)
 
 
         if data:
@@ -132,10 +151,10 @@ def listen_and_respond_test(resultQueue, vendorID, productID, serialNumber, loop
                 out_msg = bytearray((out_string + padding)[:packet_size_out])
 
                 #print("Sent: " + out_string + padding)
-                talk_to_Teensy(dev, intf, out_msg, timeout=0)
+                talk_to_Teensy(intf, out_msg, timeout=0)
 
                 # read reply
-                data = listen_to_Teensy(dev, intf, timeout=0, byte_num=packet_size_in)
+                data = listen_to_Teensy(intf, timeout=0, byte_num=packet_size_in)
 
                 if data:
                     for i in range(len(listen_reply_msg)):
@@ -179,19 +198,33 @@ def interactive_test(vendorID, productID, serialNumber):
             blinkPeriod = -1
 
         # compose the data
-        out_string = struct.pack('l', blinkPeriod)
-        padding = chr(0) *(packet_size_out - len(out_string))
-        out_msg = bytearray((out_string + padding)[:packet_size_out])
+        out_msg, front_id, back_id = compose_msg(blinkPeriod=blinkPeriod)
 
         # sending the data
+        print("---Sent---")
         print_data(out_msg, serialNumber, raw_dec=True)
-        talk_to_Teensy(dev, intf, out_msg, timeout=0)
-        data = listen_to_Teensy(dev, intf, timeout=0, byte_num=packet_size_in)
 
-        if data:
-            print(data)
-            print(struct.unpack_from('l', data))
-           # print(data[0] + data [1]<<8) # + data[2]<<16) #+ data[3]<<24)
+        received_reply = False
+        while received_reply is False:
+            talk_to_Teensy(intf, out_msg, timeout=0)
+
+            # waiting for reply
+            data = listen_to_Teensy(intf, timeout=100, byte_num=packet_size_in)
+            while data and received_reply is False:
+                # check if reply matches sent message
+                if data[0] == front_id and data[-1] == back_id:
+
+                    print("---Received Reply---")
+                    print_data(data, serialNum=serialNumber, raw_dec=True)
+                    print(struct.unpack_from('l', data[1:-1]))
+                    received_reply = True
+                else:
+                    print("......Received invalid reply......")
+                    print_data(data, serialNum=serialNumber, raw_dec=True)
+                    print(struct.unpack_from('l', data[1:-1]))
+
+
+
 
 
 
@@ -228,7 +261,4 @@ if __name__ == '__main__':
 
     for t in thread_list:
         t.join()
-        while not result_queue.empty():
-            result = result_queue.get()
-            print_data(result[1], serialNum=result[0])
 
