@@ -25,7 +25,11 @@ def compose_msg(blinkPeriod):
     back_id = struct.pack('c', chr(back_id_dec))
 
     # the actual message
-    out_string = struct.pack('l', blinkPeriod)
+    try:
+        out_string = struct.pack('l', blinkPeriod)
+    except:
+        out_string = struct.pack('l', -1)
+
     # fill up the empty spots
     padding = chr(0)*(packet_size_out - len(out_string) - 2)
 
@@ -205,23 +209,23 @@ def interactive_test(vendorID, productID, serialNumber):
         print_data(out_msg, serialNumber, raw_dec=True)
 
         received_reply = False
-        while received_reply is False:
-            talk_to_Teensy(intf, out_msg, timeout=0)
+        talk_to_Teensy(intf, out_msg, timeout=0)
 
-            # waiting for reply
-            data = listen_to_Teensy(intf, timeout=100, byte_num=packet_size_in)
-            while data and received_reply is False:
-                # check if reply matches sent message
-                if data[0] == front_id and data[-1] == back_id:
+        # waiting for reply
+        data = listen_to_Teensy(intf, timeout=100, byte_num=packet_size_in)
 
-                    print("---Received Reply---")
-                    print_data(data, serialNum=serialNumber, raw_dec=True)
-                    print(struct.unpack_from('l', data[1:-1]))
-                    received_reply = True
-                else:
-                    print("......Received invalid reply......")
-                    print_data(data, serialNum=serialNumber, raw_dec=True)
-                    print(struct.unpack_from('l', data[1:-1]))
+        while data and received_reply is False:
+            # check if reply matches sent message
+            if data[0] == front_id and data[-1] == back_id:
+
+                print("---Received Reply---")
+                print_data(data, serialNum=serialNumber, raw_dec=True)
+                #print(struct.unpack_from('l', data[1:-1]))
+                received_reply = True
+            else:
+                print("......Received invalid reply......")
+                print_data(data, serialNum=serialNumber, raw_dec=True)
+                #print(struct.unpack_from('l', data[1:-1]))
 
 
 
