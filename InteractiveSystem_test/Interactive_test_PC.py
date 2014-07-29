@@ -196,6 +196,7 @@ def interactive_test(vendorID, productID, serialNumber):
 
     while(True):
 
+        print(str(serial_num) + ": "),
         try:
             blinkPeriod = long(raw_input())
         except ValueError:
@@ -214,6 +215,7 @@ def interactive_test(vendorID, productID, serialNumber):
         # waiting for reply
         data = listen_to_Teensy(intf, timeout=100, byte_num=packet_size_in)
 
+        invalid_reply_counter  = 0
         while data and received_reply is False:
             # check if reply matches sent message
             if data[0] == front_id and data[-1] == back_id:
@@ -227,7 +229,10 @@ def interactive_test(vendorID, productID, serialNumber):
                 print_data(data, serialNum=serialNumber, raw_dec=True)
                 #print(struct.unpack_from('l', data[1:-1]))
 
-
+            invalid_reply_counter += 1
+            if invalid_reply_counter > 5:
+                print("......Number of invalid replies exceeded 5! Stopped trying......")
+                break
 
 
 
@@ -246,23 +251,29 @@ def find_teensy_serial_number(vendorID=0x16C0, productID=0x0486):
 
 if __name__ == '__main__':
 
-
+    # change priority of the the Python process to HIGH
     changePriority.SetPriority(changePriority.Priorities.HIGH_PRIORITY_CLASS)
 
+    # filter out the Teensy with vendor ID and product ID
     vendor_id = 0x16C0
     product_id = 0x0486
-    serial_num_list = find_teensy_serial_number(vendorID=vendor_id, productID=product_id)
 
+    # find all the Teensy
+    serial_num_list = find_teensy_serial_number(vendorID=vendor_id, productID=product_id)
     print("Number of Teensy devices found: " + str(len(serial_num_list)))
 
-    result_queue = Queue.Queue()
-    thread_list = []
+    Teensy_thread_list = []
+    Teensy_id = 0
     for serial_num in serial_num_list:
+        print("Teensy " + str(Teensy_id) + " --- " + str(serial_num))
+        Teensy_id += 1
         t = threading.Thread(target=interactive_test, args=(vendor_id, product_id, serial_num))
-        thread_list.append(t)
+        Teensy_thread_list.append(t)
         t.daemon = False
         t.start()
 
-    for t in thread_list:
+
+
+    for t in Teensy_thread_list:
         t.join()
 

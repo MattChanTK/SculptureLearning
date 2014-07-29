@@ -44,7 +44,7 @@ void receive_msg(byte data_buff[]){
 void send_msg(byte data_buff[]){
    // Send a message
    noInterrupts();
-   RawHID.send(data_buff, 0);
+   RawHID.send(data_buff, 10);
    interrupts();
 }
 
@@ -53,7 +53,7 @@ void loop() {
    receive_msg(incomingByte);
    long val = 0;
    for (int i = 0; i <4 ; i++)
-     val += incomingByte[i] << (8*i);
+     val += incomingByte[i+1] << (8*i);
    ledBlinkPeriod = val;
    
    if (ledBlinkPeriod != ledBlinkPeriod_0){
