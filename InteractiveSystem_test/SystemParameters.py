@@ -12,6 +12,10 @@ class SystemParameters():
     def set_indicator_led_on(self, state):
         if isinstance(state, bool):
             self.indicator_led_on = state
+        elif state == 0:
+            self.indicator_led_on = False
+        elif state == 1:
+            self.indicator_led_on = True
         else:
             raise TypeError("LED state must either be 'True' or 'False'")
 
