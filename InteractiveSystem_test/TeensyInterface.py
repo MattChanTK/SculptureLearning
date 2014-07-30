@@ -85,6 +85,8 @@ class TeensyInterface(threading.Thread):
                         if self.print_to_term:
                             print("---Received Reply---")
                             self.print_data(data, raw_dec=True)
+                            self.param.parse_message_content(data)
+                            print(self.param.analog_0_state)
                         received_reply = True
                     else:
                         if self.print_to_term:

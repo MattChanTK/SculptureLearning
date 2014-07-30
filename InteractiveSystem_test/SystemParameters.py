@@ -6,8 +6,13 @@ class SystemParameters():
     msg_length = 64
 
     def __init__(self):
+
+        #==== outputs ====
         self.indicator_led_on = False
         self.indicator_led_period = 2**16 - 1
+
+        #==== inputs ====
+        self.analog_0_state = 0
 
     def set_indicator_led_on(self, state):
         if isinstance(state, bool):
@@ -27,6 +32,13 @@ class SystemParameters():
         else:
             raise TypeError("LED period must be an integer")
 
+
+    def parse_message_content(self, msg):
+
+        # byte 0 and byte 63: the msg signature; can ignore
+
+        # byte 1: analog 0 state
+        self.analog_0_state = struct.unpack_from('H', msg[1:3])
 
     def compose_message_content(self):
 

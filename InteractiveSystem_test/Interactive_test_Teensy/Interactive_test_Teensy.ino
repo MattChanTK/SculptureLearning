@@ -6,6 +6,7 @@ const unsigned int period = 0;
 
 //==== pin assignments ====
 const unsigned short indicator_led_pin = 13;
+const unsigned short analog_0_pin = A0;
 
 //==== internal global variables =====
 byte outgoingByte[numOutgoingByte];
@@ -21,10 +22,18 @@ IntervalTimer indicator_led_blinkTimer;
 volatile int indicator_led_blinkPeriod_0 = 0;
 volatile int indicator_led_blinkPeriod = 0;
 
+//----- analog 0 ------
+volatile unsigned int analog_0_state = 0;
+
 void setup() {
+  
+  //---- indicator led ----
   pinMode(indicator_led_pin, OUTPUT);
   digitalWrite(indicator_led_pin, ledState);  
   indicator_led_blinkTimer.begin(blinkLED, indicator_led_blinkPeriod_0);
+  
+  //---- analog read -----
+  pinMode(analog_0_pin, INPUT);
 }
 
 
@@ -33,15 +42,24 @@ void blinkLED(void){
     digitalWrite(indicator_led_pin, ledState);  
 }
 
-boolean receive_msg(byte data_buff[]){
+boolean receive_msg(byte recv_data_buff[], byte send_data_buff[]){
   
     noInterrupts();
-    unsigned short byteCount = RawHID.recv(data_buff, 0);
+    unsigned short byteCount = RawHID.recv(recv_data_buff, 0);
     interrupts();
   
     if (byteCount > 0) {
+      
+      // sample the sensors
+      sample_inputs();
+      
+      // extract the front and end signaures
+      byte front_signature = recv_data_buff[0];
+      byte back_signature = recv_data_buff[numIncomingByte-1];
+  
       // compose reply message
-      send_msg(data_buff);
+      compose_reply(send_data_buff, front_signature, back_signature);
+      send_msg(send_data_buff);
       return true;
     }
     else{
@@ -50,7 +68,8 @@ boolean receive_msg(byte data_buff[]){
 }
 
 void send_msg(byte data_buff[]){
-   // Send a message
+  
+  // Send a message
    noInterrupts();
    RawHID.send(data_buff, 10);
    interrupts();
@@ -59,13 +78,28 @@ void send_msg(byte data_buff[]){
 void parse_msg(byte data_buff[]){
   
   // byte 1 --- indicator led on or off
-  indicator_led_on = incomingByte[1];
+  indicator_led_on = data_buff[1];
   
   // byte 2 and 3 --- indicator led blinking frequency
   int val = 0;
   for (int i = 0; i < 2 ; i++)
-    val += incomingByte[i+2] << (8*i);
+    val += data_buff[i+2] << (8*i);
   indicator_led_blinkPeriod = val*1000;
+}
+
+void sample_inputs(){
+  analog_0_state = analogRead(analog_0_pin);
+}
+
+void compose_reply(byte data_buff[], byte front_signature, byte back_signature){
+  
+  // add the signatures to first and last byte
+  data_buff[0] = front_signature;
+  data_buff[numOutgoingByte-1] = back_signature;
+  
+  // byte 1 and 2 --- analog 0
+  for (int i = 0; i < 2 ; i++)
+    data_buff[i+1] = analog_0_state >> (8*i);
   
 }
 
@@ -74,7 +108,7 @@ void loop() {
   
   
   // check for new messages
-   if (receive_msg(incomingByte)){
+   if (receive_msg(incomingByte, outgoingByte)){
    
      // parse the message and save to parameters
      parse_msg(incomingByte);
