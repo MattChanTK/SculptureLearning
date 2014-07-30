@@ -34,6 +34,11 @@ class TeensyInterface(threading.Thread):
             interface.append(iter)
         self.intf = interface[0]
 
+        # release device
+        #usb.util.release_interface(dev, self.intf)
+        # claiming device
+        usb.util.claim_interface(dev, self.intf)
+
         # instantiate the system parameters
         self.param = SysParam.SystemParameters()
 

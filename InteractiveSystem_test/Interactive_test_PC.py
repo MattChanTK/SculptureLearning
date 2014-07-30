@@ -51,34 +51,44 @@ if __name__ == '__main__':
         Teensy_id += 1
 
         # create a new thread for communicating with
-        Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num)
-        Teensy_thread_list.append(Teensy_thread)
-
+        try:
+            Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num)
+            Teensy_thread_list.append(Teensy_thread)
+        except Exception, e:
+            print(str(e))
 
     # interactive code
     while True:
 
-        Teensy_selected = int(raw_input("Enter the Teensy number: "))
-        Teensy_indicator_led_on = int(raw_input("0 for LED off and 1 for LED on: "))
-        Teensy_indicator_led_period = int(raw_input("Blinking period (ms): "))
+        try:
+            Teensy_selected = int(raw_input("Enter the Teensy number: "))
+            Teensy_indicator_led_on = int(raw_input("0 for LED off and 1 for LED on: "))
+            Teensy_indicator_led_period = int(raw_input("Blinking period (ms): "))
 
-        if 0 <= Teensy_selected < len(serial_num_list):
+        except ValueError:
+            print("Invalid input!")
+            continue
 
-            Teensy_thread_list[Teensy_selected].lock.acquire()
-            Teensy_thread_list[Teensy_selected].param.set_indicator_led_on(Teensy_indicator_led_on)
-            Teensy_thread_list[Teensy_selected].param.set_indicator_led_period(Teensy_indicator_led_period)
-            Teensy_thread_list[Teensy_selected].param_updated = True
-            Teensy_thread_list[Teensy_selected].lock.release()
 
-        elif Teensy_selected == -1:
+        try:
+            if 0 <= Teensy_selected < len(serial_num_list):
 
-            for Teensy_thread in Teensy_thread_list:
-                Teensy_thread.lock.acquire()
-                Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on)
-                Teensy_thread.param.set_indicator_led_period(Teensy_indicator_led_period)
-                Teensy_thread.param_updated = True
-                Teensy_thread.lock.release()
+                Teensy_thread_list[Teensy_selected].lock.acquire()
+                Teensy_thread_list[Teensy_selected].param.set_indicator_led_on(Teensy_indicator_led_on)
+                Teensy_thread_list[Teensy_selected].param.set_indicator_led_period(Teensy_indicator_led_period)
+                Teensy_thread_list[Teensy_selected].param_updated = True
+                Teensy_thread_list[Teensy_selected].lock.release()
 
+            elif Teensy_selected == -1:
+
+                for Teensy_thread in Teensy_thread_list:
+                    Teensy_thread.lock.acquire()
+                    Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on)
+                    Teensy_thread.param.set_indicator_led_period(Teensy_indicator_led_period)
+                    Teensy_thread.param_updated = True
+                    Teensy_thread.lock.release()
+        except Exception, e:
+            print(str(e))
 
     for t in Teensy_thread_list:
         t.join()
