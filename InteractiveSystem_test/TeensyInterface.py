@@ -43,7 +43,8 @@ class TeensyInterface(threading.Thread):
         self.param = SysParam.SystemParameters()
 
         # when True, param has been updated; set to back to False after sending a new message
-        self.param_updated = False
+        self.param_updated_event = threading.Event()
+
         self.lock = threading.Lock()
 
         # start thread
@@ -51,18 +52,17 @@ class TeensyInterface(threading.Thread):
         self.daemon = False
         self.start()
 
+
         # print to terminal or not
         self.print_to_term = print_to_term
 
     def run(self):
 
         while True:
+            if (self.param_updated_event.wait()):
 
-            self.lock.acquire()
-            if self.param_updated:
-
-
-                self.param_updated = False
+                self.param_updated_event.clear()
+                self.lock.acquire()
 
                 # compose the data
                 out_msg, front_id, back_id = self.compose_msg()
@@ -72,11 +72,10 @@ class TeensyInterface(threading.Thread):
                 if self.print_to_term:
                     print("\n---Sent---")
                     self.print_data(out_msg, raw_dec=True)
-
-                received_reply = False
                 self.talk_to_Teensy(out_msg, timeout=0)
 
                 # waiting for reply
+                received_reply = False
                 data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
                 invalid_reply_counter = 0
                 while data and received_reply is False:
@@ -102,6 +101,7 @@ class TeensyInterface(threading.Thread):
                             print("Received:")
                             self.print_data(data, raw_dec=True)
                         break
+
             else:
                 self.lock.release()
 
@@ -185,4 +185,3 @@ class TeensyInterface(threading.Thread):
                 i +=1
 
             print('\n')
-

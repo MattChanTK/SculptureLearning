@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
         # create a new thread for communicating with
         try:
-            Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num)
+            Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num, print_to_term=False)
             Teensy_thread_list.append(Teensy_thread)
         except Exception, e:
             print(str(e))
@@ -76,7 +76,7 @@ if __name__ == '__main__':
                 Teensy_thread_list[Teensy_selected].lock.acquire()
                 Teensy_thread_list[Teensy_selected].param.set_indicator_led_on(Teensy_indicator_led_on)
                 Teensy_thread_list[Teensy_selected].param.set_indicator_led_period(Teensy_indicator_led_period)
-                Teensy_thread_list[Teensy_selected].param_updated = True
+                Teensy_thread_list[Teensy_selected].param_updated_event.set()
                 Teensy_thread_list[Teensy_selected].lock.release()
 
             elif Teensy_selected == -1:
@@ -85,8 +85,9 @@ if __name__ == '__main__':
                     Teensy_thread.lock.acquire()
                     Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on)
                     Teensy_thread.param.set_indicator_led_period(Teensy_indicator_led_period)
-                    Teensy_thread.param_updated = True
+                    Teensy_thread.param_updated_event.set()
                     Teensy_thread.lock.release()
+
         except Exception, e:
             print(str(e))
 
