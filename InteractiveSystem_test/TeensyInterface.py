@@ -61,7 +61,7 @@ class TeensyInterface(threading.Thread):
                 self.lock.release()
 
                 # sending the data
-                print("---Sent---")
+                print("\n---Sent---")
                 self.print_data(out_msg, raw_dec=True)
 
                 received_reply = False
