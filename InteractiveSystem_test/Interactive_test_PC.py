@@ -62,7 +62,7 @@ if __name__ == '__main__':
         Teensy_indicator_led_on = int(raw_input("0 for LED off and 1 for LED on: "))
         Teensy_indicator_led_period = int(raw_input("Blinking period (ms): "))
 
-        if Teensy_selected < len(serial_num_list):
+        if 0 <= Teensy_selected < len(serial_num_list):
 
             Teensy_thread_list[Teensy_selected].lock.acquire()
             Teensy_thread_list[Teensy_selected].param.set_indicator_led_on(Teensy_indicator_led_on)
@@ -70,8 +70,14 @@ if __name__ == '__main__':
             Teensy_thread_list[Teensy_selected].param_updated = True
             Teensy_thread_list[Teensy_selected].lock.release()
 
+        elif Teensy_selected == -1:
 
-
+            for Teensy_thread in Teensy_thread_list:
+                Teensy_thread.lock.acquire()
+                Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on)
+                Teensy_thread.param.set_indicator_led_period(Teensy_indicator_led_period)
+                Teensy_thread.param_updated = True
+                Teensy_thread.lock.release()
 
 
     for t in Teensy_thread_list:

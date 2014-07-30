@@ -11,7 +11,7 @@ class TeensyInterface(threading.Thread):
     packet_size_in = 64
     packet_size_out = 64
 
-    def __init__(self, vendor_id, product_id, serial_num):
+    def __init__(self, vendor_id, product_id, serial_num, print_to_term=False):
 
         # find our device
         dev = usb.core.find(idVendor=vendor_id, idProduct=product_id, serial_number=serial_num)
@@ -46,6 +46,9 @@ class TeensyInterface(threading.Thread):
         self.daemon = False
         self.start()
 
+        # print to terminal or not
+        self.print_to_term = print_to_term
+
     def run(self):
 
         while True:
@@ -61,8 +64,9 @@ class TeensyInterface(threading.Thread):
                 self.lock.release()
 
                 # sending the data
-                print("\n---Sent---")
-                self.print_data(out_msg, raw_dec=True)
+                if self.print_to_term:
+                    print("\n---Sent---")
+                    self.print_data(out_msg, raw_dec=True)
 
                 received_reply = False
                 self.talk_to_Teensy(out_msg, timeout=0)
@@ -74,17 +78,20 @@ class TeensyInterface(threading.Thread):
                 while data and received_reply is False:
                     # check if reply matches sent message
                     if data[0] == front_id and data[-1] == back_id:
-
-                        print("---Received Reply---")
-                        self.print_data(data, raw_dec=True)
+                        if self.print_to_term:
+                            print("---Received Reply---")
+                            self.print_data(data, raw_dec=True)
                         received_reply = True
                     else:
-                        print("......Received invalid reply......")
-                        self.print_data(data, raw_dec=True)
+                        if self.print_to_term:
+                            print("......Received invalid reply......")
+                            self.print_data(data, raw_dec=True)
 
                     invalid_reply_counter += 1
                     if invalid_reply_counter > 5:
-                        print("......Number of invalid replies exceeded 5! Stopped trying......")
+                        if 1: #self.print_to_term:
+                            self.print_data(data, raw_dec=True)
+                            print( "......Number of invalid replies exceeded 5! Stopped trying......")
                         break
             else:
                 self.lock.release()
