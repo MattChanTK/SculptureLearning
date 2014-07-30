@@ -23,13 +23,13 @@ volatile boolean ledState = 1;
 volatile boolean indicator_led_on = true;
 //----- indicator LED blink ------
 IntervalTimer indicator_led_blinkTimer;
-volatile short indicator_led_blinkPeriod_0 = 0;
-volatile short indicator_led_blinkPeriod = 0;
+volatile int indicator_led_blinkPeriod_0 = 0;
+volatile int indicator_led_blinkPeriod = 0;
 
 void setup() {
   pinMode(indicator_led_pin, OUTPUT);
   digitalWrite(indicator_led_pin, ledState);  
-  //ledBlinkTimer.begin(blinkLED, ledBlinkPeriod_0);
+  indicator_led_blinkTimer.begin(blinkLED, indicator_led_blinkPeriod_0);
 }
 
 
@@ -53,22 +53,24 @@ void receive_msg(byte data_buff[]){
 void send_msg(byte data_buff[]){
    // Send a message
    noInterrupts();
-   RawHID.send(data_buff, 10);
+   RawHID.send(data_buff, 50);
    interrupts();
 }
 
 void loop() {
   
+  
+  // check for new messages
    receive_msg(incomingByte);
    
    indicator_led_on = incomingByte[indicator_led_on_byte[0]];
    
-   ledState = indicator_led_on;
-   digitalWrite(indicator_led_pin, ledState);  
-   /*
+   //ledState = indicator_led_on;
+   //digitalWrite(indicator_led_pin, ledState);  
+   int val = 0;
    for (int i = 0; i <indicator_led_period_byte[1] ; i++)
-     indicator_led_blinkPeriod += incomingByte[i+indicator_led_period_byte[0]] << (8*i);
-   indicator_led_blinkPeriod *= 1000;
+     val += incomingByte[i+indicator_led_period_byte[0]] << (8*i);
+   indicator_led_blinkPeriod = val*1000;
    
    if (indicator_led_on == 1){
      if (indicator_led_blinkPeriod != indicator_led_blinkPeriod_0){
@@ -83,19 +85,16 @@ void loop() {
          ledState = 1;
          digitalWrite(indicator_led_pin, ledState);
        }
-       else{
-         indicator_led_blinkTimer.end();
-         ledState = 0;
-         digitalWrite(indicator_led_pin, ledState);
-       }
      }
    }
    else{
      indicator_led_blinkTimer.end();
      ledState = 0;
+     indicator_led_blinkPeriod = -1;
+     indicator_led_blinkPeriod_0 = -1;
      digitalWrite(indicator_led_pin, ledState);
    }
-   */
+   
 
 }
 
