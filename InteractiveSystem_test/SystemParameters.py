@@ -38,7 +38,7 @@ class SystemParameters():
         # byte 0 and byte 63: the msg signature; can ignore
 
         # byte 1: analog 0 state
-        self.analog_0_state = struct.unpack_from('H', msg[1:3])
+        self.analog_0_state = struct.unpack_from('H', msg[1:3])[0]
 
     def compose_message_content(self):
 

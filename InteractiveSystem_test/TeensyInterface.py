@@ -7,6 +7,10 @@ import struct
 import SystemParameters as SysParam
 
 class TeensyInterface(threading.Thread):
+    """Docstring for class Foo."""
+
+    #: Doc comment for class attribute Foo.bar.
+    #: It can have multiple lines.
 
     packet_size_in = 64
     packet_size_out = 64
@@ -42,8 +46,11 @@ class TeensyInterface(threading.Thread):
         # instantiate the system parameters
         self.param = SysParam.SystemParameters()
 
-        # when True, param has been updated; set to back to False after sending a new message
+        # event is set when parameters are updated by the main thread
         self.param_updated_event = threading.Event()
+
+        # event is set when the Teensy thread updated the inputs parameters
+        self.inputs_sampled_event = threading.Event()
 
         self.lock = threading.Lock()
 
@@ -63,10 +70,11 @@ class TeensyInterface(threading.Thread):
 
                 self.param_updated_event.clear()
                 self.lock.acquire()
+                #print("Teensy thread: lock acquired")
 
                 # compose the data
                 out_msg, front_id, back_id = self.compose_msg()
-                self.lock.release()
+
 
                 # sending the data
                 if self.print_to_term:
@@ -103,9 +111,9 @@ class TeensyInterface(threading.Thread):
                             print("Received:")
                             self.print_data(data, raw_dec=True)
                         break
-
-            else:
+                self.inputs_sampled_event.set()
                 self.lock.release()
+                #print("Teensy thread: lock released")
 
     def compose_msg(self, rand_signature=True):
 

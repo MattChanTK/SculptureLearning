@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
         # create a new thread for communicating with
         try:
-            Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num, print_to_term=True)
+            Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num, print_to_term=False)
             Teensy_thread_list.append(Teensy_thread)
         except Exception, e:
             print(str(e))
@@ -83,13 +83,31 @@ if __name__ == '__main__':
 
                 for Teensy_thread in Teensy_thread_list:
                     Teensy_thread.lock.acquire()
+                    #print("main thread: lock acquired")
                     Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on)
                     Teensy_thread.param.set_indicator_led_period(Teensy_indicator_led_period)
                     Teensy_thread.param_updated_event.set()
                     Teensy_thread.lock.release()
+                    #print("main thread: lock released")
 
         except Exception, e:
             print(str(e))
+
+        # print sensor output
+        sensor_outputs = []
+        try:
+            for Teensy_thread in Teensy_thread_list:
+                Teensy_thread.inputs_sampled_event.wait()
+                Teensy_thread.inputs_sampled_event.clear()
+                Teensy_thread.lock.acquire()
+                #print("main thread: lock acquired")
+                sensor_outputs.append(Teensy_thread.param.analog_0_state)
+                Teensy_thread.lock.release()
+                #print("main thread: lock released")
+            print(sensor_outputs)
+        except Exception, e:
+            print(str(e))
+
 
     for t in Teensy_thread_list:
         t.join()
