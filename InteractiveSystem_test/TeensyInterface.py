@@ -95,7 +95,6 @@ class TeensyInterface(threading.Thread):
 
                         self.print_to_term("---Received Reply---")
                         self.print_data(data, raw_dec=True)
-                        self.print_to_term("Analog 0: " + str(self.param.analog_0_state))
 
                     else:
                         self.print_to_term("......Received invalid reply......")
