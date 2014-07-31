@@ -59,6 +59,7 @@ if __name__ == '__main__':
 
     # interactive code
     led_period = 0
+    new_sample_received = True
     while True:
 
 
@@ -72,17 +73,20 @@ if __name__ == '__main__':
             Teensy_indicator_led_period = int(led_period)
             led_period += 0.02
             led_period = led_period % 250
-            print("LED period: " + str(Teensy_indicator_led_period))
+            print("\n<<< LED period >>> " + str(Teensy_indicator_led_period))
 
         except ValueError:
             print("Invalid input!")
             continue
 
         start_time = clock()
+
+        # one specific Teensy device selected
         if 0 <= Teensy_selected < len(serial_num_list):
 
             Teensy_thread_list[Teensy_selected].lock.acquire()
-            Teensy_thread.print_to_term("main thread: lock acquired")
+            Teensy_thread_list[Teensy_selected].inputs_sampled_event.clear()
+            Teensy_thread.print_to_term("main thread: lock acquired 1")
 
             try:
                 Teensy_thread_list[Teensy_selected].param.set_indicator_led_on(Teensy_indicator_led_on)
@@ -92,13 +96,15 @@ if __name__ == '__main__':
                 print(str(e))
             finally:
                 Teensy_thread_list[Teensy_selected].lock.release()
-                Teensy_thread_list[Teensy_selected].print_to_term("main thread: lock released")
+                Teensy_thread_list[Teensy_selected].print_to_term("main thread: lock released 1")
 
+        # selected all Teensy devices
         elif Teensy_selected == -1:
 
             for Teensy_thread in Teensy_thread_list:
                 Teensy_thread.lock.acquire()
-                Teensy_thread.print_to_term("main thread: lock acquired")
+                Teensy_thread.inputs_sampled_event.clear()
+                Teensy_thread.print_to_term("main thread: lock acquired 1")
 
                 try:
                     Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on)
@@ -108,7 +114,7 @@ if __name__ == '__main__':
                     print(str(e))
                 finally:
                     Teensy_thread.lock.release()
-                    Teensy_thread.print_to_term("main thread: lock released")
+                    Teensy_thread.print_to_term("main thread: lock released 1")
 
         else:
             print('The selected Teensy device does not exist!')
@@ -117,24 +123,44 @@ if __name__ == '__main__':
 
         # print sensor output
         sensor_outputs = []
-        for Teensy_thread in Teensy_thread_list:
-            if Teensy_thread.inputs_sampled_event.wait(timeout=0.005):
-                Teensy_thread.inputs_sampled_event.clear()
-                Teensy_thread.lock.acquire()
-                Teensy_thread.print_to_term("main thread: lock acquired")
+        new_sample_received = False
+
+        # one specific Teensy device selected
+        if 0 <= Teensy_selected < len(serial_num_list):
+
+            new_sample_received = Teensy_thread_list[Teensy_selected].inputs_sampled_event.wait(0.005)
+            if new_sample_received:
+                print("New sample received")
+                Teensy_thread_list[Teensy_selected].inputs_sampled_event.clear()
 
                 try:
-                    sensor_outputs.append(Teensy_thread.param.analog_0_state)
+                    sensor_outputs.append(Teensy_thread_list[Teensy_selected].param.analog_0_state)
                 except Exception, e:
                     print(str(e))
-                finally:
-                    Teensy_thread.lock.release()
-                    Teensy_thread.print_to_term("main thread: lock released")
+            else:
+                print("No new sample received")
 
-        print("Analog 0 state: " + str(sensor_outputs))
+        # selected all Teensy devices
+        elif Teensy_selected == -1:
+            for Teensy_thread in Teensy_thread_list:
 
-        end_time = clock()
-        print("Echo time (ms): " + str((end_time-start_time)*1000))
+                new_sample_received = Teensy_thread.inputs_sampled_event.wait(timeout=0.005)
+                if new_sample_received:
+                    Teensy_thread.inputs_sampled_event.clear()
+
+                    try:
+                        sensor_outputs.append(Teensy_thread.param.analog_0_state)
+                    except Exception, e:
+                        print(str(e))
+                else:
+                    print("No new sample received")
+
+        # print if new sample received
+        if new_sample_received:
+            print("Analog 0 state: " + str(sensor_outputs))
+
+            end_time = clock()
+            print("Echo time (ms): " + str((end_time-start_time)*1000))
 
     for t in Teensy_thread_list:
         t.join()

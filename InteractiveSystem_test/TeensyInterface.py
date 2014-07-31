@@ -69,8 +69,8 @@ class TeensyInterface(threading.Thread):
             if (self.param_updated_event.wait()):
 
                 self.param_updated_event.clear()
-                self.lock.acquire()
 
+                self.lock.acquire()
                 self.print_to_term("Teensy thread: lock acquired")
 
                 # compose the data
@@ -86,32 +86,38 @@ class TeensyInterface(threading.Thread):
                 received_reply = False
                 data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
                 invalid_reply_counter = 0
-                while data and received_reply is False:
+                no_reply_counter = 0
+                while received_reply is False:
+                    if data:
+                        # check if reply matches sent message
+                        if data[0] == front_id and data[-1] == back_id:
+                            received_reply = True
+                            self.param.parse_message_content(data)
+                            self.inputs_sampled_event.set()
+                            self.print_to_term("Teensy thread: input sampled")
 
-                    # check if reply matches sent message
-                    if data[0] == front_id and data[-1] == back_id:
-                        received_reply = True
-                        self.param.parse_message_content(data)
-
-                        self.print_to_term("---Received Reply---")
-                        self.print_data(data, raw_dec=True)
-
-                    else:
-                        self.print_to_term("......Received invalid reply......")
-                        self.print_data(data, raw_dec=True)
-
-                        invalid_reply_counter += 1
-                        if invalid_reply_counter > 5:
-                            print( "......Number of invalid replies exceeded 5! Stopped trying......")
-                            print("Sent:")
-                            self.print_data(out_msg, raw_dec=True)
-                            print("Received:")
+                            self.print_to_term("---Received Reply---")
                             self.print_data(data, raw_dec=True)
-                            break
+
                         else:
-                            # request another reply
-                            data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
-                self.inputs_sampled_event.set()
+                            self.print_to_term("......Received invalid reply......")
+                            self.print_data(data, raw_dec=True)
+
+                            invalid_reply_counter += 1
+                            if invalid_reply_counter > 5:
+                                print( "......Number of invalid replies exceeded 5! Stopped trying......")
+                                print("Sent:")
+                                self.print_data(out_msg, raw_dec=True)
+                                print("Received:")
+                                self.print_data(data, raw_dec=True)
+                                break
+                            else:
+                                # request another reply
+                                data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
+                    else:
+                        print("......Didn't receive any reply. Packet lost.......")
+                        break
+
                 self.lock.release()
 
                 self.print_to_term("Teensy thread: lock released")
