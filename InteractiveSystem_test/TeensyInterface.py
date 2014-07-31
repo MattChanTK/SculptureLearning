@@ -61,7 +61,7 @@ class TeensyInterface(threading.Thread):
 
 
         # print to terminal or not
-        self.print_to_term = print_to_term
+        self.print_to_term_enabled = print_to_term
 
     def run(self):
 
@@ -70,17 +70,17 @@ class TeensyInterface(threading.Thread):
 
                 self.param_updated_event.clear()
                 self.lock.acquire()
-                #print("Teensy thread: lock acquired")
+
+                self.print_to_term("Teensy thread: lock acquired")
 
                 # compose the data
                 out_msg, front_id, back_id = self.compose_msg()
 
 
                 # sending the data
-                if self.print_to_term:
-                    print("\n---Sent---")
-                    self.print_data(out_msg, raw_dec=True)
                 self.talk_to_Teensy(out_msg, timeout=0)
+                self.print_to_term("\n---Sent---")
+                self.print_data(out_msg, raw_dec=True)
 
                 # waiting for reply
                 received_reply = False
@@ -90,30 +90,32 @@ class TeensyInterface(threading.Thread):
 
                     # check if reply matches sent message
                     if data[0] == front_id and data[-1] == back_id:
-                        if self.print_to_term:
-                            print("---Received Reply---")
-                            self.print_data(data, raw_dec=True)
-                            self.param.parse_message_content(data)
-                            print(self.param.analog_0_state)
                         received_reply = True
+                        self.param.parse_message_content(data)
+
+                        self.print_to_term("---Received Reply---")
+                        self.print_data(data, raw_dec=True)
+                        self.print_to_term("Analog 0: " + str(self.param.analog_0_state))
+
                     else:
-                        if self.print_to_term:
-                            print("......Received invalid reply......")
-                            self.print_data(data, raw_dec=True)
-                        # request another reply
-                        data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
-                    invalid_reply_counter += 1
-                    if invalid_reply_counter > 5:
-                        if 1: #self.print_to_term:
+                        self.print_to_term("......Received invalid reply......")
+                        self.print_data(data, raw_dec=True)
+
+                        invalid_reply_counter += 1
+                        if invalid_reply_counter > 5:
                             print( "......Number of invalid replies exceeded 5! Stopped trying......")
                             print("Sent:")
                             self.print_data(out_msg, raw_dec=True)
                             print("Received:")
                             self.print_data(data, raw_dec=True)
-                        break
+                            break
+                        else:
+                            # request another reply
+                            data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
                 self.inputs_sampled_event.set()
                 self.lock.release()
-                #print("Teensy thread: lock released")
+
+                self.print_to_term("Teensy thread: lock released")
 
     def compose_msg(self, rand_signature=True):
 
@@ -180,9 +182,8 @@ class TeensyInterface(threading.Thread):
             pass
             #print("Timeout! Couldn't write")
 
-
     def print_data(self, data, raw_dec=False):
-        if data:
+        if data and self.print_to_term_enabled:
             i = 0
             print("Serial Number: " + str(self.serial_number))
             print("Number of byte: " + str(len(data)))
@@ -195,3 +196,7 @@ class TeensyInterface(threading.Thread):
                 i +=1
 
             print('\n')
+
+    def print_to_term(self, string):
+        if self.print_to_term_enabled:
+            print(string)

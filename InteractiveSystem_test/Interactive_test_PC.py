@@ -61,7 +61,7 @@ if __name__ == '__main__':
     while True:
 
         try:
-            Teensy_selected = int(raw_input("Enter the Teensy number: "))
+            Teensy_selected = int(raw_input("\nEnter the Teensy number: "))
             Teensy_indicator_led_on = int(raw_input("0 for LED off and 1 for LED on: "))
             Teensy_indicator_led_period = int(raw_input("Blinking period (ms): "))
 
@@ -83,12 +83,15 @@ if __name__ == '__main__':
 
                 for Teensy_thread in Teensy_thread_list:
                     Teensy_thread.lock.acquire()
-                    #print("main thread: lock acquired")
+                    Teensy_thread.print_to_term("main thread: lock acquired")
                     Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on)
                     Teensy_thread.param.set_indicator_led_period(Teensy_indicator_led_period)
                     Teensy_thread.param_updated_event.set()
                     Teensy_thread.lock.release()
-                    #print("main thread: lock released")
+                    Teensy_thread.print_to_term("main thread: lock released")
+
+            else:
+                raise ValueError('The selected Teensy device does no exist!')
 
         except Exception, e:
             print(str(e))
@@ -97,14 +100,14 @@ if __name__ == '__main__':
         sensor_outputs = []
         try:
             for Teensy_thread in Teensy_thread_list:
-                Teensy_thread.inputs_sampled_event.wait()
-                Teensy_thread.inputs_sampled_event.clear()
-                Teensy_thread.lock.acquire()
-                #print("main thread: lock acquired")
-                sensor_outputs.append(Teensy_thread.param.analog_0_state)
-                Teensy_thread.lock.release()
-                #print("main thread: lock released")
-            print(sensor_outputs)
+                if Teensy_thread.inputs_sampled_event.wait(timeout=0.01):
+                    Teensy_thread.inputs_sampled_event.clear()
+                    Teensy_thread.lock.acquire()
+                    Teensy_thread.print_to_term("main thread: lock acquired")
+                    sensor_outputs.append(Teensy_thread.param.analog_0_state)
+                    Teensy_thread.lock.release()
+                    Teensy_thread.print_to_term("main thread: lock released")
+            print("Analog 0 state: " + str(sensor_outputs))
         except Exception, e:
             print(str(e))
 
