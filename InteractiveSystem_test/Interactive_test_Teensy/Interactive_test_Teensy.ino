@@ -71,7 +71,7 @@ void send_msg(byte data_buff[]){
   
   // Send a message
    noInterrupts();
-   RawHID.send(data_buff, 10);
+   RawHID.send(data_buff, 0);
    interrupts();
 }
 

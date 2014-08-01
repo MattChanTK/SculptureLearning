@@ -3,6 +3,7 @@ import usb.util
 import threading
 import random
 import struct
+from time import clock
 
 import SystemParameters as SysParam
 
@@ -105,7 +106,7 @@ class TeensyInterface(threading.Thread):
 
                             invalid_reply_counter += 1
                             if invalid_reply_counter > 5:
-                                print( "......Number of invalid replies exceeded 5! Stopped trying......")
+                                print(str(self.serial_number) + "......Number of invalid replies exceeded 5! Stopped trying......")
                                 print("Sent:")
                                 self.print_data(out_msg, raw_dec=True)
                                 print("Received:")
@@ -115,7 +116,7 @@ class TeensyInterface(threading.Thread):
                                 # request another reply
                                 data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
                     else:
-                        print("......Didn't receive any reply. Packet lost.......")
+                        print(str(self.serial_number) + "......Didn't receive any reply. Packet lost.......")
                         break
 
                 self.lock.release()
@@ -150,24 +151,21 @@ class TeensyInterface(threading.Thread):
     def listen_to_Teensy(self, timeout=100, byte_num=64):
 
         ep = usb.util.find_descriptor(
-            self.intf,
-            # match the first OUT endpoint
+            self.intf,  # match the first IN endpoint
             custom_match = \
             lambda e: \
-                usb.util.endpoint_direction(e.bEndpointAddress) == \
-                usb.util.ENDPOINT_IN)
+                usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_IN and \
+                usb.util.endpoint_type(e.bEndpointAddress) == usb.util.ENDPOINT_TYPE_INTR)
 
         assert ep is not None
 
         try:
             data = ep.read(byte_num, timeout)
-
         except usb.core.USBError:
             #print("Timeout! Couldn't read anything")
             data = None
 
         return data
-
 
     def talk_to_Teensy(self, out_msg, timeout=10):
 
@@ -176,8 +174,8 @@ class TeensyInterface(threading.Thread):
             # match the first OUT endpoint
             custom_match = \
             lambda e: \
-                usb.util.endpoint_direction(e.bEndpointAddress) == \
-                usb.util.ENDPOINT_OUT)
+                usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_OUT and \
+                usb.util.endpoint_type(e.bEndpointAddress) == usb.util.ENDPOINT_TYPE_CTRL)
 
         assert ep is not None
 

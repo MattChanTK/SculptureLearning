@@ -130,7 +130,7 @@ if __name__ == '__main__':
 
             new_sample_received = Teensy_thread_list[Teensy_selected].inputs_sampled_event.wait(0.005)
             if new_sample_received:
-                print("New sample received")
+                #print("New sample received")
                 Teensy_thread_list[Teensy_selected].inputs_sampled_event.clear()
 
                 try:
@@ -138,14 +138,15 @@ if __name__ == '__main__':
                 except Exception, e:
                     print(str(e))
             else:
-                print("No new sample received")
+                #print("No new sample received")
+                pass
 
         # selected all Teensy devices
         elif Teensy_selected == -1:
             for Teensy_thread in Teensy_thread_list:
 
-                new_sample_received = Teensy_thread.inputs_sampled_event.wait(timeout=0.005)
-                if new_sample_received:
+                this_new_sample_received = Teensy_thread.inputs_sampled_event.wait(timeout=0.005)
+                if this_new_sample_received:
                     Teensy_thread.inputs_sampled_event.clear()
 
                     try:
@@ -153,7 +154,9 @@ if __name__ == '__main__':
                     except Exception, e:
                         print(str(e))
                 else:
-                    print("No new sample received")
+                    #print("No new sample received")
+                    pass
+                new_sample_received |= this_new_sample_received
 
         # print if new sample received
         if new_sample_received:
