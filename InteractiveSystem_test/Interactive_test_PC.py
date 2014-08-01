@@ -68,11 +68,11 @@ if __name__ == '__main__':
             # Teensy_indicator_led_on = int(raw_input("0 for LED off and 1 for LED on: "))
             # Teensy_indicator_led_period = int(raw_input("Blinking period (ms): "))
 
-            Teensy_selected = -1
+            Teensy_selected = 0
             Teensy_indicator_led_on = 1
-            Teensy_indicator_led_period = int(led_period)
-            led_period += 0.02
-            led_period = led_period % 250
+            Teensy_indicator_led_period = int(led_period) * 50
+            led_period += 0.001
+            led_period = led_period % 10
             print("\n<<< LED period >>> " + str(Teensy_indicator_led_period))
 
         except ValueError:

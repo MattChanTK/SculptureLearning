@@ -71,7 +71,7 @@ void send_msg(byte data_buff[]){
   
   // Send a message
    noInterrupts();
-   RawHID.send(data_buff, 0);
+   RawHID.send(data_buff, 10);
    interrupts();
 }
 
@@ -109,7 +109,7 @@ void loop() {
   
   // check for new messages
    if (receive_msg(incomingByte, outgoingByte)){
-   
+    
      // parse the message and save to parameters
      parse_msg(incomingByte);
    
@@ -145,6 +145,7 @@ void loop() {
        digitalWrite(indicator_led_pin, ledState);
      }
    }
+   
    
 
 }

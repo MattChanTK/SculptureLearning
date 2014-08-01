@@ -3,7 +3,7 @@ import usb.util
 import threading
 import random
 import struct
-from time import clock
+import changePriority
 
 import SystemParameters as SysParam
 
@@ -65,6 +65,8 @@ class TeensyInterface(threading.Thread):
         self.print_to_term_enabled = print_to_term
 
     def run(self):
+        # change priority of the the Python process to HIGH
+        changePriority.SetPriority(changePriority.Priorities.REALTIME_PRIORITY_CLASS)
 
         while True:
             if (self.param_updated_event.wait()):
