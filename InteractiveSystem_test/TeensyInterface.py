@@ -4,6 +4,7 @@ import threading
 import random
 import struct
 import changePriority
+import sys
 
 import SystemParameters as SysParam
 
@@ -140,8 +141,12 @@ class TeensyInterface(threading.Thread):
         if rand_signature:
             front_id_dec = random.randint(0, 255)
             back_id_dec = random.randint(0, 255)
-            front_id = struct.pack('c', chr(front_id_dec))
-            back_id = struct.pack('c', chr(back_id_dec))
+            if sys.version_info.major is 2:
+                front_id = struct.pack('c', chr(front_id_dec))
+                back_id = struct.pack('c', chr(back_id_dec))
+            else:
+                front_id = front_id_dec
+                back_id = back_id_dec
             content[0] = front_id
             content[-1] = back_id
         else:

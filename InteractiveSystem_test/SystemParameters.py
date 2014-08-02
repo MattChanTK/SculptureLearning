@@ -43,7 +43,7 @@ class SystemParameters():
     def compose_message_content(self):
 
         # create an 64 bytes of zeros
-        msg = bytearray(chr(0)*SystemParameters.msg_length)
+        msg = bytearray(chr(0)*SystemParameters.msg_length, 'utf-8')
 
         # byte 0 and byte 63: the msg signature; left as 0 for now
 

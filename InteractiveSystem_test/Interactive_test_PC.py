@@ -8,7 +8,6 @@ import copy
 import array
 import math
 import threading
-import Queue
 import changePriority
 import struct
 import random
@@ -54,7 +53,7 @@ if __name__ == '__main__':
         try:
             Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num, print_to_term=False)
             Teensy_thread_list.append(Teensy_thread)
-        except Exception, e:
+        except Exception as e:
             print(str(e))
 
     # interactive code
@@ -70,7 +69,7 @@ if __name__ == '__main__':
             # Teensy_indicator_led_on = int(raw_input("0 for LED off and 1 for LED on: "))
             # Teensy_indicator_led_period = int(raw_input("Blinking period (ms): "))
 
-            Teensy_selected = 0
+            Teensy_selected = -1
             Teensy_indicator_led_on = led_on
             Teensy_indicator_led_period = int(led_period) * 50
             led_period += 0.001
@@ -94,7 +93,7 @@ if __name__ == '__main__':
                 Teensy_thread_list[Teensy_selected].param.set_indicator_led_on(Teensy_indicator_led_on[Teensy_selected])
                 Teensy_thread_list[Teensy_selected].param.set_indicator_led_period(Teensy_indicator_led_period)
                 Teensy_thread_list[Teensy_selected].param_updated_event.set()
-            except Exception, e:
+            except Exception as e:
                 print(str(e))
             finally:
                 Teensy_thread_list[Teensy_selected].lock.release()
@@ -112,7 +111,7 @@ if __name__ == '__main__':
                     Teensy_thread.param.set_indicator_led_on(Teensy_indicator_led_on[Teensy_thread_id])
                     Teensy_thread.param.set_indicator_led_period(Teensy_indicator_led_period)
                     Teensy_thread.param_updated_event.set()
-                except Exception, e:
+                except Exception as e:
                     print(str(e))
                 finally:
                     Teensy_thread.lock.release()
@@ -137,7 +136,7 @@ if __name__ == '__main__':
 
                 try:
                     sensor_outputs[Teensy_selected] = Teensy_thread_list[Teensy_selected].param.analog_0_state
-                except Exception, e:
+                except Exception as e:
                     print(str(e))
             else:
                 #print("No new sample received")
@@ -154,7 +153,7 @@ if __name__ == '__main__':
 
                     try:
                         sensor_outputs[Teensy_thread_id] = Teensy_thread.param.analog_0_state
-                    except Exception, e:
+                    except Exception as e:
                         print(str(e))
                 else:
                     #print("No new sample received")
