@@ -32,8 +32,13 @@ class SystemParameters():
     def set_output_param(self, param_type, param_val):
         if isinstance(param_type, str):
             if param_type in self.output_param:
-                #warning! this function does not do type error check on values
-                self.output_param[param_type] = param_val
+                if param_type == 'indicator_led_on':
+                    self.set_indicator_led_on(param_val)
+                elif param_type == 'indicator_led_period':
+                    self.set_indicator_led_period(param_val)
+                else:
+                    #warning! this function does not do type error check on values
+                    self.output_param[param_type] = param_val
             else:
                 raise ValueError(param_type + " does not exist!")
         else:

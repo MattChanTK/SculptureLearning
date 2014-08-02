@@ -13,6 +13,7 @@ import struct
 import random
 
 import TeensyInterface as ti
+import InteractiveCmd as cmd
 
 packet_size_in = 64
 packet_size_out = 64
@@ -57,10 +58,13 @@ if __name__ == '__main__':
             print(str(e))
 
     # interactive code
+    cmd_thead = cmd.InteractiveCmd(Teensy_thread_list)
+
     led_period = 0
     new_sample_received = True
     led_on = [0]*len(serial_num_list)
     sensor_outputs = [-1]*len(serial_num_list)
+    '''
     while True:
 
 
@@ -87,7 +91,7 @@ if __name__ == '__main__':
 
             Teensy_thread_list[Teensy_selected].lock.acquire()
             Teensy_thread_list[Teensy_selected].inputs_sampled_event.clear()
-            Teensy_thread.print_to_term("main thread: lock acquired 1")
+            Teensy_thread_list[Teensy_selected].print_to_term("main thread: lock acquired 1")
 
             try:
                 Teensy_thread_list[Teensy_selected].param.set_indicator_led_on(Teensy_indicator_led_on[Teensy_selected])
@@ -170,7 +174,7 @@ if __name__ == '__main__':
 
             for i in range(len(sensor_outputs)):
                 led_on[i] = (sensor_outputs[i] > 850)
-
+'''
     for t in Teensy_thread_list:
         t.join()
 
