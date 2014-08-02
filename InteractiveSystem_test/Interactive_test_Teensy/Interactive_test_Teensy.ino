@@ -19,7 +19,7 @@ volatile boolean ledState = 1;
 volatile boolean indicator_led_on = true;
 //----- indicator LED blink ------
 IntervalTimer indicator_led_blinkTimer;
-volatile int indicator_led_blinkPeriod_0 = 0;
+volatile int indicator_led_blinkPeriod_0 = -99;
 volatile int indicator_led_blinkPeriod = 0;
 
 //----- analog 0 ------
@@ -140,8 +140,6 @@ void loop() {
        // end the blink timer and turn it off
        indicator_led_blinkTimer.end();
        ledState = 0;
-       indicator_led_blinkPeriod = -1;
-       indicator_led_blinkPeriod_0 = -1;
        digitalWrite(indicator_led_pin, ledState);
      }
    }
