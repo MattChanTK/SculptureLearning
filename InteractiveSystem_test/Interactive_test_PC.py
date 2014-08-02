@@ -32,7 +32,7 @@ def find_teensy_serial_number(vendorID=0x16C0, productID=0x0486):
 if __name__ == '__main__':
 
     # change priority of the the Python process to HIGH
-    changePriority.SetPriority(changePriority.Priorities.REALTIME_PRIORITY_CLASS)
+    changePriority.SetPriority(changePriority.Priorities.HIGH_PRIORITY_CLASS)
 
     # filter out the Teensy with vendor ID and product ID
     vendor_id = 0x16C0
