@@ -202,7 +202,7 @@ class TeensyInterface(threading.Thread):
                     char = int(data[i])
                 else:
                     char = chr(data[i])
-                print(char),
+                print(char, end=' ')
                 i +=1
 
             print('\n')

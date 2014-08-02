@@ -135,7 +135,7 @@ if __name__ == '__main__':
                 Teensy_thread_list[Teensy_selected].inputs_sampled_event.clear()
 
                 try:
-                    sensor_outputs[Teensy_selected] = Teensy_thread_list[Teensy_selected].param.analog_0_state
+                    sensor_outputs[Teensy_selected] = Teensy_thread_list[Teensy_selected].param.get_input_state('analog_0_state')
                 except Exception as e:
                     print(str(e))
             else:
@@ -152,7 +152,7 @@ if __name__ == '__main__':
                     Teensy_thread.inputs_sampled_event.clear()
 
                     try:
-                        sensor_outputs[Teensy_thread_id] = Teensy_thread.param.analog_0_state
+                        sensor_outputs[Teensy_thread_id] = Teensy_thread.param.get_input_state('analog_0_state')
                     except Exception as e:
                         print(str(e))
                 else:

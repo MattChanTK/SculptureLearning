@@ -8,19 +8,44 @@ class SystemParameters():
     def __init__(self):
 
         #==== outputs ====
-        self.indicator_led_on = False
-        self.indicator_led_period = 2**16 - 1
+        self.output_param = dict()
+        # ---defaults---
+        self.output_param['indicator_led_on'] = False
+        self.output_param['indicator_led_period'] = 2**16 - 1
+        #self.indicator_led_on = False
+        #self.indicator_led_period = 2**16 - 1
 
         #==== inputs ====
-        self.analog_0_state = 0
+        self.input_state = dict()
+        self.input_state['analog_0_state'] = 0
+        #self.analog_0_state = 0
+
+    def get_input_state(self, state_type):
+        if isinstance(state_type, str):
+            if state_type in self.input_state:
+                return self.input_state[state_type]
+            else:
+                raise ValueError(state_type + " does not exist!")
+        else:
+            raise TypeError("'State type' must be a string!")
+
+    def set_output_param(self, param_type, param_val):
+        if isinstance(param_type, str):
+            if param_type in self.output_param:
+                #warning! this function does not do type error check on values
+                self.output_param[param_type] = param_val
+            else:
+                raise ValueError(param_type + " does not exist!")
+        else:
+            raise TypeError("'Parameter type' must be a string!")
 
     def set_indicator_led_on(self, state):
         if isinstance(state, bool):
-            self.indicator_led_on = state
+            self.output_param['indicator_led_on'] = state
         elif state == 0:
-            self.indicator_led_on = False
+            self.output_param['indicator_led_on'] = False
         elif state == 1:
-            self.indicator_led_on = True
+            self.output_param['indicator_led_on'] = True
         else:
             raise TypeError("LED state must either be 'True' or 'False'")
 
@@ -28,9 +53,11 @@ class SystemParameters():
         if isinstance(period, int):
             if period > 2**16 - 1 or period < 0:
                 raise TypeError("LED period must either be positive and less than " + str(2**16))
-            self.indicator_led_period = period
+            self.output_param['indicator_led_period'] = period
         else:
             raise TypeError("LED period must be an integer")
+
+
 
 
     def parse_message_content(self, msg):
@@ -38,7 +65,7 @@ class SystemParameters():
         # byte 0 and byte 63: the msg signature; can ignore
 
         # byte 1: analog 0 state
-        self.analog_0_state = struct.unpack_from('H', msg[1:3])[0]
+        self.input_state['analog_0_state'] = struct.unpack_from('H', msg[1:3])[0]
 
     def compose_message_content(self):
 
@@ -48,10 +75,10 @@ class SystemParameters():
         # byte 0 and byte 63: the msg signature; left as 0 for now
 
         # byte 1: whether the indicator LED on or off
-        msg[1] = self.indicator_led_on
+        msg[1] = self.output_param['indicator_led_on']
 
         # byte 2 to 4: blinking frequency of the LED
-        msg[2:4] = struct.pack('H', self.indicator_led_period)
+        msg[2:4] = struct.pack('H', self.output_param['indicator_led_period'])
 
         return msg
 
@@ -64,7 +91,7 @@ def print_data(data, raw_dec=False):
                 char = int(data[i])
             else:
                 char = chr(data[i])
-            print(char),
+            print(char, end=" ")
             i += 1
 
         print('\n')
