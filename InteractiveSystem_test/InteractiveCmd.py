@@ -69,8 +69,8 @@ class InteractiveCmd(threading.Thread):
                 for param_cmd in param_cmd_list[1:]:
                     param = param_cmd.split(":")
                     cmd_obj.add_param_change(param[0], param[1])
-            except Exception as e:
-                print("Invalid change request! --- ", e, )
+            except Exception:
+                print("Invalid change request!")
                 return -1
 
             self.cmd_q.put(cmd_obj)
@@ -86,6 +86,9 @@ class InteractiveCmd(threading.Thread):
 
     def apply_change_request(self, cmd_obj):
 
+        if cmd_obj.teensy_id >= len(self.Teensy_thread_list):
+            print("Teensy #" + str(cmd_obj.teensy_id) + " does not exist!")
+            return -1
         self.Teensy_thread_list[cmd_obj.teensy_id].lock.acquire()
         self.Teensy_thread_list[cmd_obj.teensy_id].inputs_sampled_event.clear()
 
@@ -94,11 +97,14 @@ class InteractiveCmd(threading.Thread):
             for param_type, param_val in cmd_obj.change_request.items():
                 self.Teensy_thread_list[cmd_obj.teensy_id].param.set_output_param(param_type, param_val)
             self.Teensy_thread_list[cmd_obj.teensy_id].param_updated_event.set()
+            print(">>>>> sent command to Teensy #" + str(cmd_obj.teensy_id))
         except Exception as e:
             print(e)
+
         finally:
             self.Teensy_thread_list[cmd_obj.teensy_id].lock.release()
-        print(">>>>> sent command to Teensy #" + str(cmd_obj.teensy_id))
+
+        return 0
 
 
 class command_object():
