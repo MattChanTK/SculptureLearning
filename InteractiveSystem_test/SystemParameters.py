@@ -11,14 +11,11 @@ class SystemParameters():
         self.output_param = dict()
         # ---defaults---
         self.output_param['indicator_led_on'] = False
-        self.output_param['indicator_led_period'] = 2**16 - 1
-        #self.indicator_led_on = False
-        #self.indicator_led_period = 2**16 - 1
+        self.output_param['indicator_led_period'] = 0
 
         #==== inputs ====
         self.input_state = dict()
         self.input_state['analog_0_state'] = 0
-        #self.analog_0_state = 0
 
     def get_input_state(self, state_type):
         if isinstance(state_type, str):
@@ -33,10 +30,11 @@ class SystemParameters():
         if isinstance(param_type, str):
             if param_type in self.output_param:
                 if param_type == 'indicator_led_on':
-                    self.set_indicator_led_on(param_val)
+                    self.set_indicator_led_on(int(param_val))
                 elif param_type == 'indicator_led_period':
-                    self.set_indicator_led_period(param_val)
+                    self.set_indicator_led_period(int(param_val))
                 else:
+                    print("setting random stuff")
                     #warning! this function does not do type error check on values
                     self.output_param[param_type] = param_val
             else:

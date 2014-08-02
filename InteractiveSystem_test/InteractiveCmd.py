@@ -20,16 +20,16 @@ class InteractiveCmd(threading.Thread):
 
     def run(self):
 
-        for i in range(1):
-            try:
-                cmd_obj = command_object(0)
-                cmd_obj.add_param_change('indicator_led_on',  1)
-                cmd_obj.add_param_change('indicator_led_period',  500)
-                self.enter_command(cmd_obj)
-            except Exception as e:
-                print(e)
-
-        self.enter_command()
+        # for i in range(1):
+        #     try:
+        #         cmd_obj = command_object(0)
+        #         cmd_obj.add_param_change('indicator_led_on',  1)
+        #         cmd_obj.add_param_change('indicator_led_period',  500)
+        #         self.enter_command(cmd_obj)
+        #     except Exception as e:
+        #         print(e)
+        while True:
+            self.enter_command()
 
     def enter_command(self, cmd=None):
 
@@ -48,7 +48,7 @@ class InteractiveCmd(threading.Thread):
             try:
                 applying_cmd = str(param_cmd_list[0])
                 if applying_cmd == ">>apply":
-                    threading.Thread(target=self.send_command())
+                    self.send_commands()
                     return 1
             except Exception as e:
                 print(e)
@@ -69,33 +69,36 @@ class InteractiveCmd(threading.Thread):
                 for param_cmd in param_cmd_list[1:]:
                     param = param_cmd.split(":")
                     cmd_obj.add_param_change(param[0], param[1])
-
             except Exception as e:
-                print(e)
+                print("Invalid change request! --- ", e, )
                 return -1
 
             self.cmd_q.put(cmd_obj)
 
-            return 0
+        print("Command Queue length: ", self.cmd_q.qsize())
+        return 0
 
-
-    def send_command(self):
-        print("===sent command===")
+    def send_commands(self):
         while not self.cmd_q.empty():
             cmd_obj = self.cmd_q.get()
+            threading.Thread(target=self.apply_change_request(cmd_obj))
 
-            self.Teensy_thread_list[cmd_obj.teensy_id].lock.acquire()
-            self.Teensy_thread_list[cmd_obj.teensy_id].inputs_sampled_event.clear()
 
-            try:
-                for param_type, param_val in cmd_obj.change_request.items():
-                    self.Teensy_thread_list[cmd_obj.teensy_id].param.set_output_param(param_type, param_val)
-                self.Teensy_thread_list[cmd_obj.teensy_id].param_updated_event.set()
-            except Exception as e:
-                print(str(e))
-            finally:
-                self.Teensy_thread_list[cmd_obj.teensy_id].lock.release()
+    def apply_change_request(self, cmd_obj):
 
+        self.Teensy_thread_list[cmd_obj.teensy_id].lock.acquire()
+        self.Teensy_thread_list[cmd_obj.teensy_id].inputs_sampled_event.clear()
+
+        try:
+            #cmd_obj.print()
+            for param_type, param_val in cmd_obj.change_request.items():
+                self.Teensy_thread_list[cmd_obj.teensy_id].param.set_output_param(param_type, param_val)
+            self.Teensy_thread_list[cmd_obj.teensy_id].param_updated_event.set()
+        except Exception as e:
+            print(e)
+        finally:
+            self.Teensy_thread_list[cmd_obj.teensy_id].lock.release()
+        print(">>>>> sent command to Teensy #" + str(cmd_obj.teensy_id))
 
 
 class command_object():
