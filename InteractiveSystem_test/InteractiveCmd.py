@@ -1,9 +1,7 @@
 import threading
 import queue
 from time import clock
-
-import TeensyInterface as ti
-
+import changePriority
 
 class InteractiveCmd():
 
@@ -16,55 +14,14 @@ class InteractiveCmd():
 
     def run(self):
 
-        teensy_ids = range(len(self.Teensy_thread_list))
-        led_period = [0]*len(self.Teensy_thread_list)
-        indicator_led_on = [0]*len(self.Teensy_thread_list)
 
         while True:
-        #for i in range(5):
+            self.enter_command()
 
-            analog_0_samples = []
-            if len(self.Teensy_thread_list) == 0:
-                return
-
-            for teensy_id in teensy_ids:
-
-                # check if the thread is still alive
-                if not self.Teensy_thread_list[teensy_id].is_alive():
-
-                    self.Teensy_thread_list.pop(teensy_id)
-                    led_period.pop(teensy_id)
-                    indicator_led_on.pop(teensy_id)
-                    teensy_ids = range(len(self.Teensy_thread_list))
-
-                else:
-                    cmd_obj = command_object(teensy_id)
-
-                    cmd_obj.add_param_change('indicator_led_on',  int(indicator_led_on[teensy_id]))
-                    cmd_obj.add_param_change('indicator_led_period', int(led_period[teensy_id])*25)
-                    self.enter_command(cmd_obj)
-                    start_time = clock()
-                    self.send_commands()
-                    sample, is_new_update = self.get_input_states(0, ('analog_0_state', ))
-                    analog_0_samples.append(sample['analog_0_state'])
-                    if is_new_update:
-                        print(teensy_id, " - Echo time: ", clock() - start_time)
-                        if analog_0_samples[teensy_id] > 850:
-                            indicator_led_on[teensy_id] = 1
-                        else:
-                            indicator_led_on[teensy_id] = 0
-
-                    # new blink period
-                    led_period[teensy_id] += 0.002
-                    led_period[teensy_id] %= 10
-
-
-            print(analog_0_samples)
-
-
-        # while True:
-        #     self.enter_command()
-        #     self.get_input_states(0, 'indicator_led_period')
+            for teensy_id in range(len(self.Teensy_thread_list)):
+                sample, is_new_update = self.get_input_states(teensy_id)
+                if is_new_update:
+                    print( teensy_id, ": ", sample)
 
     def enter_command(self, cmd=None):
 
@@ -143,7 +100,10 @@ class InteractiveCmd():
 
         return 0
 
-    def get_input_states(self, teensy_id, input_types, timeout=0.005):
+    def get_input_states(self, teensy_id, input_types='all', timeout=0.005):
+
+        if input_types == 'all':
+            input_types = ('all',)
 
         if not isinstance(teensy_id, int):
             raise TypeError("Teensy ID must be integers!")
@@ -161,7 +121,10 @@ class InteractiveCmd():
                 raise TypeError("'Input type' must be a string!")
 
             try:
-                requested_inputs[input_type] = self.Teensy_thread_list[teensy_id].param.get_input_state(input_type)
+                if input_type == 'all':
+                    requested_inputs = self.Teensy_thread_list[teensy_id].param.input_state
+                else:
+                    requested_inputs[input_type] = self.Teensy_thread_list[teensy_id].param.get_input_state(input_type)
             except Exception as e:
                 print(str(e))
 

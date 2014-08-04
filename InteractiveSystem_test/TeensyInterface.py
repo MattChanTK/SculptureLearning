@@ -5,6 +5,7 @@ import random
 import struct
 import changePriority
 import sys
+from time import clock
 
 import SystemParameters as SysParam
 
@@ -84,6 +85,7 @@ class TeensyInterface(threading.Thread):
 
 
                     # sending the data
+                    # start_time = clock()
                     self.talk_to_Teensy(out_msg, timeout=0)
                     self.print_to_term("\n---Sent---")
                     self.print_data(out_msg, raw_dec=True)
@@ -129,7 +131,7 @@ class TeensyInterface(threading.Thread):
                                 return
                 finally:
                     self.lock.release()
-
+                # print(self.serial_number, " - Echo time: ", clock() - start_time)
                 self.print_to_term("Teensy thread: lock released")
 
     def compose_msg(self, rand_signature=True):
