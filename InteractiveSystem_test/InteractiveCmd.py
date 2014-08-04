@@ -1,5 +1,6 @@
 import threading
 import queue
+from time import clock
 
 import TeensyInterface as ti
 
@@ -21,9 +22,11 @@ class InteractiveCmd():
 
         while True:
         #for i in range(5):
+
             analog_0_samples = []
             if len(self.Teensy_thread_list) == 0:
                 return
+
             for teensy_id in teensy_ids:
 
                 # check if the thread is still alive
@@ -36,19 +39,20 @@ class InteractiveCmd():
 
                 else:
                     cmd_obj = command_object(teensy_id)
-                    print("LED indicator period", int(led_period[teensy_id])*25)
+
                     cmd_obj.add_param_change('indicator_led_on',  int(indicator_led_on[teensy_id]))
                     cmd_obj.add_param_change('indicator_led_period', int(led_period[teensy_id])*25)
                     self.enter_command(cmd_obj)
+                    start_time = clock()
                     self.send_commands()
                     sample, is_new_update = self.get_input_states(0, ('analog_0_state', ))
                     analog_0_samples.append(sample['analog_0_state'])
                     if is_new_update:
+                        print(teensy_id, " - Echo time: ", clock() - start_time)
                         if analog_0_samples[teensy_id] > 850:
                             indicator_led_on[teensy_id] = 1
                         else:
                             indicator_led_on[teensy_id] = 0
-                        print("LED indicator on: ", indicator_led_on[teensy_id])
 
                     # new blink period
                     led_period[teensy_id] += 0.002
