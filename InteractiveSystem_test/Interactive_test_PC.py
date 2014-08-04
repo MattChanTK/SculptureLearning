@@ -57,13 +57,16 @@ if __name__ == '__main__':
         except Exception as e:
             print(str(e))
 
-    # interactive code
-    cmd_thead = cmd.InteractiveCmd(Teensy_thread_list)
+
 
     led_period = 0
     new_sample_received = True
     led_on = [0]*len(serial_num_list)
     sensor_outputs = [-1]*len(serial_num_list)
+
+    # interactive code
+    behaviours = cmd.InteractiveCmd(Teensy_thread_list)
+    behaviours.run()
     '''
     while True:
 
@@ -177,4 +180,6 @@ if __name__ == '__main__':
 '''
     for t in Teensy_thread_list:
         t.join()
+
+    print("All threads terminated")
 

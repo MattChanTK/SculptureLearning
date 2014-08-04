@@ -68,6 +68,7 @@ class TeensyInterface(threading.Thread):
     def run(self):
         # change priority of the the Python process to HIGH
         changePriority.SetPriority(changePriority.Priorities.REALTIME_PRIORITY_CLASS)
+        return_val = 0
 
         while True:
             if (self.param_updated_event.wait()):
@@ -91,6 +92,7 @@ class TeensyInterface(threading.Thread):
                     received_reply = False
                     data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
                     invalid_reply_counter = 0
+                    no_reply_counter = 0
                     while received_reply is False:
                         if data:
                             # check if reply matches sent message
@@ -119,8 +121,12 @@ class TeensyInterface(threading.Thread):
                                     # request another reply
                                     data = self.listen_to_Teensy(timeout=100, byte_num=TeensyInterface.packet_size_in)
                         else:
-                            print(str(self.serial_number) + "......Didn't receive any reply. Packet lost.......")
-                            break
+                            no_reply_counter += 1
+                            print("Teensy (" + str(self.serial_number) + ")......Didn't receive any reply. Packet lost......." + str(no_reply_counter))
+                            if no_reply_counter >= 5:
+                                print("Teensy (" + str(self.serial_number) + ") has probably been disconnected.")
+
+                                return
                 finally:
                     self.lock.release()
 

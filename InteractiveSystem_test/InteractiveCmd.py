@@ -4,7 +4,7 @@ import queue
 import TeensyInterface as ti
 
 
-class InteractiveCmd(threading.Thread):
+class InteractiveCmd():
 
     def __init__(self, Teensy_thread_list):
 
@@ -12,24 +12,55 @@ class InteractiveCmd(threading.Thread):
         self.cmd_q = queue.Queue()
         self.Teensy_thread_list = Teensy_thread_list
 
-        # start thread
-        threading.Thread.__init__(self)
-        self.daemon = False
-        self.start()
-
 
     def run(self):
 
-        # for i in range(1):
-        #     try:
-        #         cmd_obj = command_object(0)
-        #         cmd_obj.add_param_change('indicator_led_on',  1)
-        #         cmd_obj.add_param_change('indicator_led_period',  500)
-        #         self.enter_command(cmd_obj)
-        #     except Exception as e:
-        #         print(e)
+        teensy_ids = range(len(self.Teensy_thread_list))
+        led_period = [0]*len(self.Teensy_thread_list)
+        indicator_led_on = [0]*len(self.Teensy_thread_list)
+
         while True:
-            self.enter_command()
+        #for i in range(5):
+            analog_0_samples = []
+            if len(self.Teensy_thread_list) == 0:
+                return
+            for teensy_id in teensy_ids:
+
+                # check if the thread is still alive
+                if not self.Teensy_thread_list[teensy_id].is_alive():
+
+                    self.Teensy_thread_list.pop(teensy_id)
+                    led_period.pop(teensy_id)
+                    indicator_led_on.pop(teensy_id)
+                    teensy_ids = range(len(self.Teensy_thread_list))
+
+                else:
+                    cmd_obj = command_object(teensy_id)
+                    print("LED indicator period", int(led_period[teensy_id])*25)
+                    cmd_obj.add_param_change('indicator_led_on',  int(indicator_led_on[teensy_id]))
+                    cmd_obj.add_param_change('indicator_led_period', int(led_period[teensy_id])*25)
+                    self.enter_command(cmd_obj)
+                    self.send_commands()
+                    sample, is_new_update = self.get_input_states(0, ('analog_0_state', ))
+                    analog_0_samples.append(sample['analog_0_state'])
+                    if is_new_update:
+                        if analog_0_samples[teensy_id] > 850:
+                            indicator_led_on[teensy_id] = 1
+                        else:
+                            indicator_led_on[teensy_id] = 0
+                        print("LED indicator on: ", indicator_led_on[teensy_id])
+
+                    # new blink period
+                    led_period[teensy_id] += 0.002
+                    led_period[teensy_id] %= 10
+
+
+            print(analog_0_samples)
+
+
+        # while True:
+        #     self.enter_command()
+        #     self.get_input_states(0, 'indicator_led_period')
 
     def enter_command(self, cmd=None):
 
@@ -81,11 +112,13 @@ class InteractiveCmd(threading.Thread):
     def send_commands(self):
         while not self.cmd_q.empty():
             cmd_obj = self.cmd_q.get()
-            threading.Thread(target=self.apply_change_request(cmd_obj))
-
+            t = threading.Thread(target=self.apply_change_request, args=(cmd_obj,))
+            t.daemon = True
+            t.start()
 
     def apply_change_request(self, cmd_obj):
 
+        print("apply change request")
         if cmd_obj.teensy_id >= len(self.Teensy_thread_list):
             print("Teensy #" + str(cmd_obj.teensy_id) + " does not exist!")
             return -1
@@ -105,6 +138,30 @@ class InteractiveCmd(threading.Thread):
             self.Teensy_thread_list[cmd_obj.teensy_id].lock.release()
 
         return 0
+
+    def get_input_states(self, teensy_id, input_types, timeout=0.005):
+
+        if not isinstance(teensy_id, int):
+            raise TypeError("Teensy ID must be integers!")
+        if not isinstance(input_types, tuple):
+            raise TypeError("'Input Types' must be inputted as tuple of strings!")
+
+        # wait for sample update
+        new_sample_received = self.Teensy_thread_list[teensy_id].inputs_sampled_event.wait(timeout=timeout)
+        if new_sample_received:
+            self.Teensy_thread_list[teensy_id].inputs_sampled_event.clear()
+
+        requested_inputs = dict()
+        for input_type in input_types:
+            if not isinstance(input_type, str):
+                raise TypeError("'Input type' must be a string!")
+
+            try:
+                requested_inputs[input_type] = self.Teensy_thread_list[teensy_id].param.get_input_state(input_type)
+            except Exception as e:
+                print(str(e))
+
+        return requested_inputs, new_sample_received
 
 
 class command_object():
