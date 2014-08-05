@@ -17,6 +17,7 @@ volatile boolean ledState = 1;
 
 //----- indicator LED on -----
 volatile boolean indicator_led_on = true;
+volatile boolean indicator_led_on_0 = false;
 //----- indicator LED blink ------
 IntervalTimer indicator_led_blinkTimer;
 volatile int indicator_led_blinkPeriod_0 = -99;
@@ -77,13 +78,13 @@ void send_msg(byte data_buff[]){
 
 void parse_msg(byte data_buff[]){
   
-  // byte 1 --- indicator led on or off
-  indicator_led_on = data_buff[1];
+  // byte 2 --- indicator led on or off
+  indicator_led_on = data_buff[2];
   
-  // byte 2 and 3 --- indicator led blinking frequency
+  // byte 3 and 4 --- indicator led blinking frequency
   int val = 0;
   for (int i = 0; i < 2 ; i++)
-    val += data_buff[i+2] << (8*i);
+    val += data_buff[i+3] << (8*i);
   indicator_led_blinkPeriod = val*1000;
 }
 
@@ -118,9 +119,12 @@ void loop() {
      //..... indicator LED .....
      // if it should be on
      if (indicator_led_on == 1){
+       
+       
        // if there is a change in blink period
-       if (indicator_led_blinkPeriod != indicator_led_blinkPeriod_0){
-         
+       if (indicator_led_blinkPeriod != indicator_led_blinkPeriod_0 ||
+           indicator_led_on != indicator_led_on_0){
+         indicator_led_on_0 = indicator_led_on;
          indicator_led_blinkPeriod_0 = indicator_led_blinkPeriod;
          
          //update the blinker's period
@@ -136,7 +140,8 @@ void loop() {
        }
      }
      // if it should be off
-     else{ 
+     else if (indicator_led_on == 0){ 
+       indicator_led_on_0 = indicator_led_on;
        // end the blink timer and turn it off
        indicator_led_blinkTimer.end();
        ledState = 0;

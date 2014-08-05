@@ -10,10 +10,6 @@ from time import clock
 import SystemParameters as SysParam
 
 class TeensyInterface(threading.Thread):
-    """Docstring for class Foo."""
-
-    #: Doc comment for class attribute Foo.bar.
-    #: It can have multiple lines.
 
     packet_size_in = 64
     packet_size_out = 64
@@ -69,16 +65,18 @@ class TeensyInterface(threading.Thread):
     def run(self):
         # change priority of the the Python process to HIGH
         changePriority.SetPriority(changePriority.Priorities.REALTIME_PRIORITY_CLASS)
-        return_val = 0
 
         while True:
-            if (self.param_updated_event.wait()):
+            if self.param_updated_event.wait():
 
                 self.param_updated_event.clear()
 
                 self.lock.acquire()
                 try:
-                    self.print_to_term("Teensy thread: lock acquired")
+                    self.inputs_sampled_event.clear()
+
+                    self.print_to_term("Teensy thread: lock acquired, sampled event cleared")
+
 
                     # compose the data
                     out_msg, front_id, back_id = self.compose_msg()
@@ -218,3 +216,14 @@ class TeensyInterface(threading.Thread):
     def print_to_term(self, string):
         if self.print_to_term_enabled:
             print(string)
+
+def find_teensy_serial_number(vendorID=0x16C0, productID=0x0486):
+
+    # find our device
+    dev_iter = usb.core.find(find_all=True, idVendor=vendorID, idProduct=productID)
+
+    serialNum = []
+    for iter in dev_iter:
+        serialNum.append(iter.serial_number)
+
+    return tuple(serialNum)

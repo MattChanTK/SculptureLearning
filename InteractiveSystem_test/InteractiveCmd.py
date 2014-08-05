@@ -14,7 +14,6 @@ class InteractiveCmd():
 
     def run(self):
 
-
         while True:
             self.enter_command()
 
@@ -67,7 +66,7 @@ class InteractiveCmd():
 
             self.cmd_q.put(cmd_obj)
 
-        print("Command Queue length: ", self.cmd_q.qsize())
+        #print("Command Queue length: ", self.cmd_q.qsize())
         return 0
 
     def send_commands(self):
@@ -79,7 +78,7 @@ class InteractiveCmd():
 
     def apply_change_request(self, cmd_obj):
 
-        print("apply change request")
+        #print("apply change request")
         if cmd_obj.teensy_id >= len(self.Teensy_thread_list):
             print("Teensy #" + str(cmd_obj.teensy_id) + " does not exist!")
             return -1
@@ -91,7 +90,7 @@ class InteractiveCmd():
             for param_type, param_val in cmd_obj.change_request.items():
                 self.Teensy_thread_list[cmd_obj.teensy_id].param.set_output_param(param_type, param_val)
             self.Teensy_thread_list[cmd_obj.teensy_id].param_updated_event.set()
-            print(">>>>> sent command to Teensy #" + str(cmd_obj.teensy_id))
+            #print(">>>>> sent command to Teensy #" + str(cmd_obj.teensy_id))
         except Exception as e:
             print(e)
 
@@ -112,6 +111,11 @@ class InteractiveCmd():
 
         # wait for sample update
         new_sample_received = self.Teensy_thread_list[teensy_id].inputs_sampled_event.wait(timeout=timeout)
+
+        # acquiring the lock for the Teensy thread, so that value cannot change while reading
+        self.Teensy_thread_list[teensy_id].lock.acquire()
+
+        # clear the input_sampled_event flag
         if new_sample_received:
             self.Teensy_thread_list[teensy_id].inputs_sampled_event.clear()
 
@@ -120,13 +124,13 @@ class InteractiveCmd():
             if not isinstance(input_type, str):
                 raise TypeError("'Input type' must be a string!")
 
-            try:
-                if input_type == 'all':
-                    requested_inputs = self.Teensy_thread_list[teensy_id].param.input_state
-                else:
-                    requested_inputs[input_type] = self.Teensy_thread_list[teensy_id].param.get_input_state(input_type)
-            except Exception as e:
-                print(str(e))
+            if input_type == 'all':
+                requested_inputs = self.Teensy_thread_list[teensy_id].param.input_state
+            else:
+                requested_inputs[input_type] = self.Teensy_thread_list[teensy_id].param.get_input_state(input_type)
+
+        # releasing the lock for the Teensy thread
+        self.Teensy_thread_list[teensy_id].lock.release()
 
         return requested_inputs, new_sample_received
 

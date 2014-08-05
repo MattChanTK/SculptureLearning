@@ -1,5 +1,4 @@
 import struct
-import sys
 
 class SystemParameters():
 
@@ -12,10 +11,37 @@ class SystemParameters():
         # ---defaults---
         self.output_param['indicator_led_on'] = False
         self.output_param['indicator_led_period'] = 0
+        self.output_param['high_power_led_on'] = False
+        self.output_param['high_power_led_level'] = 0
+        self.output_param['vb_trigger_level'] = 300
+        self.output_param['sma_0_on'] = False
+        self.output_param['sma_1_on'] = False
+        self.output_param['sound_type'] = 0
+
 
         #==== inputs ====
         self.input_state = dict()
+        # ---defaults---
         self.input_state['analog_0_state'] = 0
+        self.input_state['ir_stern_range'] = 0
+        self.input_state['ir_tip_range'] = 0
+        self.input_state['ir_acoustic_range'] = 0
+        self.input_state['sound_detect_0'] = 0
+        self.input_state['sound_detect_1'] = 0
+        self.input_state['ambient_light_state'] = 0
+
+        #=== list of behaviours for selection ====
+        self.behaviour_type = enum_dict('INTERACTIVE', 'AUTO')
+        self.behaviour = self.behaviour_type['INTERACTIVE']
+
+    def set_behaviour_type(self, behaviour_type):
+        if isinstance(behaviour_type, str):
+            if behaviour_type in self.behaviour_type:
+                self.behaviour = self.behaviour_type[behaviour_type]
+            else:
+                raise ValueError(behaviour_type + " does not exist!")
+        else:
+            raise TypeError("'State type' must be a string!")
 
     def get_input_state(self, state_type):
         if isinstance(state_type, str):
@@ -30,9 +56,9 @@ class SystemParameters():
         if isinstance(param_type, str):
             if param_type in self.output_param:
                 if param_type == 'indicator_led_on':
-                    self.set_indicator_led_on(int(param_val))
+                    self.__set_indicator_led_on(int(param_val))
                 elif param_type == 'indicator_led_period':
-                    self.set_indicator_led_period(int(param_val))
+                    self.__set_indicator_led_period(int(param_val))
                 else:
                     print("setting random stuff")
                     #warning! this function does not do type error check on values
@@ -42,7 +68,7 @@ class SystemParameters():
         else:
             raise TypeError("'Parameter type' must be a string!")
 
-    def set_indicator_led_on(self, state):
+    def __set_indicator_led_on(self, state):
         if isinstance(state, bool):
             self.output_param['indicator_led_on'] = state
         elif state == 0:
@@ -52,16 +78,13 @@ class SystemParameters():
         else:
             raise TypeError("LED state must either be 'True' or 'False'")
 
-    def set_indicator_led_period(self, period):
+    def __set_indicator_led_period(self, period):
         if isinstance(period, int):
             if period > 2**16 - 1 or period < 0:
                 raise TypeError("LED period must either be positive and less than " + str(2**16))
             self.output_param['indicator_led_period'] = period
         else:
             raise TypeError("LED period must be an integer")
-
-
-
 
     def parse_message_content(self, msg):
 
@@ -77,30 +100,36 @@ class SystemParameters():
 
         # byte 0 and byte 63: the msg signature; left as 0 for now
 
-        # byte 1: whether the indicator LED on or off
-        msg[1] = self.output_param['indicator_led_on']
+        # byte 1: type of behaviour
+        msg[1] = self.behaviour
 
-        # byte 2 to 4: blinking frequency of the LED
-        msg[2:4] = struct.pack('H', self.output_param['indicator_led_period'])
+        # byte 2: whether the indicator LED on or off
+        msg[2] = self.output_param['indicator_led_on']
+
+        # byte 3 to 4: blinking frequency of the LED
+        msg[3:5] = struct.pack('H', self.output_param['indicator_led_period'])
 
         return msg
 
-def print_data(data, raw_dec=False):
-    if data:
-        i = 0
-        print("Number of byte: " + str(len(data)))
-        while i < len(data):
-            if raw_dec:
-                char = int(data[i])
-            else:
-                char = chr(data[i])
-            print(char, end=" ")
-            i += 1
-
-        print('\n')
-
+def enum_dict(*sequential, **named):
+    enums = dict(zip(sequential, range(len(sequential))), **named)
+    return enums
 
 if __name__ == '__main__':
+    def print_data(data, raw_dec=False):
+        if data:
+            i = 0
+            print("Number of byte: " + str(len(data)))
+            while i < len(data):
+                if raw_dec:
+                    char = int(data[i])
+                else:
+                    char = chr(data[i])
+                print(char, end=" ")
+                i += 1
+
+            print('\n')
+
     s = SystemParameters()
     s.set_indicator_led_on(True)
     s.set_indicator_led_period(65535)
