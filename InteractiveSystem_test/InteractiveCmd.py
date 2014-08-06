@@ -1,7 +1,5 @@
 import threading
 import queue
-from time import clock
-import changePriority
 
 class InteractiveCmd():
 
@@ -20,7 +18,9 @@ class InteractiveCmd():
             for teensy_id in range(len(self.Teensy_thread_list)):
                 sample, is_new_update = self.get_input_states(teensy_id)
                 if is_new_update:
-                    print( teensy_id, ": ", sample)
+                    print(teensy_id, ": new* ", sample)
+                else:
+                    print(teensy_id, ": ", sample)
 
     def enter_command(self, cmd=None):
 

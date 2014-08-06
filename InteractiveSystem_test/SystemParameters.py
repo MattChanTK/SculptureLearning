@@ -11,24 +11,15 @@ class SystemParameters():
         # ---defaults---
         self.output_param['indicator_led_on'] = False
         self.output_param['indicator_led_period'] = 0
-        self.output_param['high_power_led_on'] = False
-        self.output_param['high_power_led_level'] = 0
-        self.output_param['vb_trigger_level'] = 300
-        self.output_param['sma_0_on'] = False
-        self.output_param['sma_1_on'] = False
-        self.output_param['sound_type'] = 0
 
+        self.bool_var_list = ('indicator_led_on',)
+        self.int8_var_list = ()
+        self.int16_var_list = ('indicator_led_period',)
 
         #==== inputs ====
         self.input_state = dict()
         # ---defaults---
         self.input_state['analog_0_state'] = 0
-        self.input_state['ir_stern_range'] = 0
-        self.input_state['ir_tip_range'] = 0
-        self.input_state['ir_acoustic_range'] = 0
-        self.input_state['sound_detect_0'] = 0
-        self.input_state['sound_detect_1'] = 0
-        self.input_state['ambient_light_state'] = 0
 
         #=== list of behaviours for selection ====
         self.behaviour_type = enum_dict('INTERACTIVE', 'AUTO')
@@ -55,12 +46,13 @@ class SystemParameters():
     def set_output_param(self, param_type, param_val):
         if isinstance(param_type, str):
             if param_type in self.output_param:
-                if param_type == 'indicator_led_on':
-                    self.__set_indicator_led_on(int(param_val))
-                elif param_type == 'indicator_led_period':
-                    self.__set_indicator_led_period(int(param_val))
+                if param_type in self.bool_var_list:
+                    self.__set_bool_var(param_type, int(param_val))
+                elif param_type in self.int8_var_list:
+                    self.__set_int_var(param_type, int(param_val), 8)
+                elif param_type in self.int16_var_list:
+                    self.__set_int_var(param_type, int(param_val), 16)
                 else:
-                    print("setting random stuff")
                     #warning! this function does not do type error check on values
                     self.output_param[param_type] = param_val
             else:
@@ -68,23 +60,24 @@ class SystemParameters():
         else:
             raise TypeError("'Parameter type' must be a string!")
 
-    def __set_indicator_led_on(self, state):
-        if isinstance(state, bool):
-            self.output_param['indicator_led_on'] = state
-        elif state == 0:
-            self.output_param['indicator_led_on'] = False
-        elif state == 1:
-            self.output_param['indicator_led_on'] = True
-        else:
-            raise TypeError("LED state must either be 'True' or 'False'")
 
-    def __set_indicator_led_period(self, period):
-        if isinstance(period, int):
-            if period > 2**16 - 1 or period < 0:
-                raise TypeError("LED period must either be positive and less than " + str(2**16))
-            self.output_param['indicator_led_period'] = period
+    def __set_int_var(self, input_type, input, num_bit):
+        if isinstance(input, int):
+            if input > 2**num_bit - 1 or input < 0:
+                raise TypeError(input_type + " must either be positive and less than " + str(2**num_bit))
+            self.output_param[input_type] = input
         else:
-            raise TypeError("LED period must be an integer")
+            raise TypeError(input_type + " must be an integer")
+
+    def __set_bool_var(self, input_type, input):
+        if isinstance(input, bool):
+            self.output_param[input_type] = input
+        elif input == 0:
+            self.output_param[input_type] = False
+        elif input == 1:
+            self.output_param[input_type] = True
+        else:
+            raise TypeError(input_type + " must either be 'True' or 'False'")
 
     def parse_message_content(self, msg):
 
@@ -103,10 +96,10 @@ class SystemParameters():
         # byte 1: type of behaviour
         msg[1] = self.behaviour
 
-        # byte 2: whether the indicator LED on or off
+        # byte 2: indicator LED on or off
         msg[2] = self.output_param['indicator_led_on']
 
-        # byte 3 to 4: blinking frequency of the LED
+        # byte 3 to 4: blinking frequency of the indicator LED
         msg[3:5] = struct.pack('H', self.output_param['indicator_led_period'])
 
         return msg

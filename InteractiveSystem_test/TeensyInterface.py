@@ -7,14 +7,19 @@ import changePriority
 import sys
 from time import clock
 
-import SystemParameters as SysParam
-
-class TeensyInterface(threading.Thread):
+class TeensyInterface(threading.Thread, ):
 
     packet_size_in = 64
     packet_size_out = 64
 
-    def __init__(self, vendor_id, product_id, serial_num, print_to_term=False):
+    def __init__(self, vendor_id, product_id, serial_num, print_to_term=False, unit_config='default'):
+
+        if unit_config == 'FULL_TEST_UNIT' :
+            from TestUnitConfiguration import FullTestUnit as SysParam
+        elif unit_config == 'SIMPLIFIED_TEST_UNIT' :
+            from TestUnitConfiguration import SimplifiedTestUnit as SysParam
+        else:
+            from SystemParameters import SimplifiedTestUnit as SysParam
 
         # find our device
         dev = usb.core.find(idVendor=vendor_id, idProduct=product_id, serial_number=serial_num)
@@ -43,7 +48,7 @@ class TeensyInterface(threading.Thread):
         usb.util.claim_interface(dev, self.intf)
 
         # instantiate the system parameters
-        self.param = SysParam.SystemParameters()
+        self.param = SysParam()
 
         # event is set when parameters are updated by the main thread
         self.param_updated_event = threading.Event()

@@ -1,7 +1,7 @@
 import changePriority
 import TeensyInterface as ti
-#from Behaviours import HardcodedBehaviours as cmd
-from Behaviours import HardcodedBehaviours_test as cmd
+from Behaviours import HardcodedBehaviours as cmd
+#from Behaviours import HardcodedBehaviours_test as cmd
 #from InteractiveCmd import InteractiveCmd as cmd
 
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
         # create a new thread for communicating with
         try:
-            Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num, print_to_term=False)
+            Teensy_thread = ti.TeensyInterface(vendor_id, product_id, serial_num, unit_config='SIMPLIFIED_TEST_UNIT', print_to_term=False)
             Teensy_thread_list.append(Teensy_thread)
 
         except Exception as e:
