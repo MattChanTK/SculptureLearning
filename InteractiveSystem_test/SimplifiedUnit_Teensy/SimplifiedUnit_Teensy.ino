@@ -42,7 +42,6 @@ volatile int indicator_led_blinkPeriod = 0; //exposed
 //----- Protocell reflex -----
 volatile unsigned short high_power_led_level = 5;  //exposed
 volatile int high_power_led_reflex_enabled = true;
-IntervalTimer high_power_led_cycleTimer;
 volatile boolean high_power_led_cycling = false;
 const unsigned short high_power_led_level_max = 125;
 volatile unsigned int high_power_led_reflex_threshold = 100;
@@ -50,6 +49,7 @@ volatile unsigned int high_power_led_reflex_threshold = 100;
 
 //--- Tentacle reflex ----
 volatile boolean tentacle_reflex_enabled = true;
+volatile boolean tentacle_reflex_cycling = false;
 volatile unsigned short sma_0_level = 10; //exposed
 volatile unsigned short sma_1_level = 10; //exposed
 volatile unsigned short reflex_0_level = 10; //exposed
@@ -241,7 +241,7 @@ void led_blink_behaviour(){
 	}
 }
 
-volatile unsigned long phase_time;
+volatile unsigned long protocell_reflex_phase_time;
 void protocell_reflex(unsigned long curr_time){
 	if (high_power_led_reflex_enabled){
 		
@@ -250,10 +250,10 @@ void protocell_reflex(unsigned long curr_time){
 		if (high_power_led_cycling == false && 
 				ambient_light_sensor_state < high_power_led_reflex_threshold){
 			high_power_led_cycling = true;
-			phase_time = millis();       
+			protocell_reflex_phase_time = millis();       
 		}
 		else if (high_power_led_cycling == true){
-			if ((curr_time - phase_time) < 1000){
+			if ((curr_time - protocell_reflex_phase_time) < 2000){
 				analogWrite(high_power_led_pin, high_power_led_level);
 			}
 			else{
@@ -264,27 +264,43 @@ void protocell_reflex(unsigned long curr_time){
 	}
 }
 
-void tentacle_reflex(){
+volatile unsigned long tentacle_reflex_phase_time;
+void tentacle_reflex(unsigned long curr_time){
 	if (tentacle_reflex_enabled){
 		ir_0_state = analogRead(ir_0_pin);
 		ir_1_state = analogRead(ir_1_pin);
 		
-		if (ir_0_state > ir_0_threshold){
-			analogWrite(sma_0_pin, sma_0_level);
-			analogWrite(sma_1_pin, sma_1_level);
+		if (tentacle_reflex_cycling == false &&
+			ir_0_state > ir_0_threshold){   
+			
+			tentacle_reflex_cycling = true;
+			tentacle_reflex_phase_time = millis();  
+	
 		}
-                else{
-                        analogWrite(sma_0_pin, 0);
-			analogWrite(sma_1_pin, 0);
-                }
+		else if (tentacle_reflex_cycling == true){
+			if ((curr_time - tentacle_reflex_phase_time) < 1500){
+				analogWrite(sma_0_pin, sma_0_level);
+				analogWrite(sma_1_pin, sma_1_level);
+			}
+			else if ((curr_time - tentacle_reflex_phase_time) < 5000)
+			{
+				analogWrite(sma_0_pin, 0);
+				analogWrite(sma_1_pin, 0);
+			}
+			else{
+				tentacle_reflex_cycling = false;
+				analogWrite(sma_0_pin, 0);
+				analogWrite(sma_1_pin, 0);
+			}
+		}
 		if (ir_0_state > ir_1_threshold){
 			analogWrite(reflex_0_pin, reflex_0_level);
 			analogWrite(reflex_1_pin, reflex_1_level);
 		}
-                else{
-                        analogWrite(reflex_0_pin, 0);
+		else{
+			analogWrite(reflex_0_pin, 0);
 			analogWrite(reflex_1_pin, 0);
-                }
+		}
                
 	}
 }
@@ -294,7 +310,7 @@ void loop() {
 
 	protocell_reflex(curr_time);
 	led_blink_behaviour();
-	tentacle_reflex();
+	tentacle_reflex(curr_time);
 
 	// check for new messages
 	if (receive_msg(incomingByte, outgoingByte)){

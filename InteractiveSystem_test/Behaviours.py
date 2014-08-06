@@ -11,7 +11,8 @@ class HardcodedBehaviours(InteractiveCmd.InteractiveCmd):
         led_period = [0]*len(self.Teensy_thread_list)
         indicator_led_on = [0]*len(self.Teensy_thread_list)
         high_power_led_level = [0]*len(self.Teensy_thread_list)
-        pwm_level = [0]*len(self.Teensy_thread_list)
+        reflex_level = [0]*len(self.Teensy_thread_list)
+        sma_level = [255]*len(self.Teensy_thread_list)
 
         while True:
         #for i in range(5):
@@ -36,10 +37,10 @@ class HardcodedBehaviours(InteractiveCmd.InteractiveCmd):
                     cmd_obj.add_param_change('indicator_led_on',  int(indicator_led_on[teensy_id]))
                     cmd_obj.add_param_change('indicator_led_period', int(led_period[teensy_id])*25)
                     cmd_obj.add_param_change('high_power_led_level', int(high_power_led_level[teensy_id]))
-                    cmd_obj.add_param_change('sma_0_level', int(pwm_level[teensy_id]))
-                    cmd_obj.add_param_change('sma_1_level', int((pwm_level[teensy_id])+50)%255)
-                    cmd_obj.add_param_change('reflex_0_level', int((pwm_level[teensy_id])+100)%255)
-                    cmd_obj.add_param_change('reflex_1_level', int((pwm_level[teensy_id])+150)%255)
+                    cmd_obj.add_param_change('sma_0_level', int(sma_level[teensy_id]))
+                    cmd_obj.add_param_change('sma_1_level', int(sma_level[teensy_id]))
+                    cmd_obj.add_param_change('reflex_0_level', int((reflex_level[teensy_id])+50)%150)
+                    cmd_obj.add_param_change('reflex_1_level', int((reflex_level[teensy_id])+100)%150)
                     self.enter_command(cmd_obj)
 
             self.send_commands()
@@ -68,8 +69,8 @@ class HardcodedBehaviours(InteractiveCmd.InteractiveCmd):
                     led_period[teensy_id] %= 10
                     high_power_led_level[teensy_id] += 0.2
                     high_power_led_level[teensy_id] %= 100
-                    pwm_level[teensy_id] += 0.1
-                    pwm_level[teensy_id] %= 255
+                    reflex_level[teensy_id] += 0.2
+                    reflex_level[teensy_id] %= 150
                     print(teensy_id, ": ", sample)
 
 class HardcodedBehaviours_test(InteractiveCmd.InteractiveCmd):
