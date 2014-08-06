@@ -1,8 +1,16 @@
 import changePriority
 import TeensyInterface as ti
-from Behaviours import HardcodedBehaviours as cmd
-#from Behaviours import HardcodedBehaviours_test as cmd
-#from InteractiveCmd import InteractiveCmd as cmd
+
+behaviours_config = 2
+
+if behaviours_config == 0:
+    from InteractiveCmd import InteractiveCmd as cmd
+elif behaviours_config == 1:
+    from Behaviours import HardcodedBehaviours_test as cmd
+elif behaviours_config == 2:
+    from Behaviours import HardcodedBehaviours as cmd
+else:
+    from InteractiveCmd import InteractiveCmd as cmd
 
 
 packet_size_in = 64

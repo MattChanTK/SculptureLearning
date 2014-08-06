@@ -9,13 +9,19 @@ class SimplifiedTestUnit(SysParam.SystemParameters):
         #==== outputs ====
         self.output_param = dict()
         # ---defaults---
-        self.output_param['indicator_led_on'] = False
-        self.output_param['indicator_led_period'] = 0
+        self.output_param['indicator_led_on'] = True
+        self.output_param['indicator_led_period'] = 100
         self.output_param['high_power_led_level'] = 5
+        self.output_param['high_power_led_reflex_threshold'] = 100
+        self.output_param['sma_0_level'] = 100
+        self.output_param['sma_1_level'] = 100
+        self.output_param['reflex_0_level'] = 100
+        self.output_param['reflex_1_level'] = 100
 
         self.bool_var_list = ('indicator_led_on',)
-        self.int8_var_list =('high_power_led_level',)
-        self.int16_var_list = ('indicator_led_period',)
+        self.int8_var_list = ('high_power_led_level','sma_0_level', 'sma_1_level',
+                              'reflex_0_level', 'reflex_1_level')
+        self.int16_var_list = ('indicator_led_period', 'high_power_led_reflex_threshold')
 
 
         #==== inputs ====
@@ -56,6 +62,21 @@ class SimplifiedTestUnit(SysParam.SystemParameters):
 
         # byte 5: high power LED level
         msg[5] = self.output_param['high_power_led_level']
+
+        # byte 6 to 7: high power LED reflex threshold
+        msg[6:8] = struct.pack('H', self.output_param['high_power_led_reflex_threshold'])
+
+        # byte 8: SMA 0 level
+        msg[8] = self.output_param['sma_0_level']
+
+        # byte 9: SMA 1 level
+        msg[9] = self.output_param['sma_1_level']
+
+        # byte 10: Reflex 0 level
+        msg[10] = self.output_param['reflex_0_level']
+
+        # byte 11: Reflex 1 level
+        msg[11] = self.output_param['reflex_1_level']
 
         return msg
 

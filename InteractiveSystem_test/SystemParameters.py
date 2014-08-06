@@ -9,8 +9,8 @@ class SystemParameters():
         #==== outputs ====
         self.output_param = dict()
         # ---defaults---
-        self.output_param['indicator_led_on'] = False
-        self.output_param['indicator_led_period'] = 0
+        self.output_param['indicator_led_on'] = True
+        self.output_param['indicator_led_period'] = 100
 
         self.bool_var_list = ('indicator_led_on',)
         self.int8_var_list = ()
