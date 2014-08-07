@@ -1,14 +1,13 @@
 
-//==== constants ====
-const unsigned int numOutgoingByte = 64;
-const unsigned int numIncomingByte = 64;
-const unsigned int period = 0;
 
 //==== pin assignments ====
+//--- Teensy on-board ---
 const unsigned short indicator_led_pin = 13;
-const unsigned short high_power_led_pin = 23;
 const unsigned short analog_0_pin = A0;
+//--- Protocell module ---
+const unsigned short high_power_led_pin = 23;
 const unsigned short ambient_light_sensor_pin = A3;
+//--- Tentacle module ----
 const unsigned short sma_0_pin = 5;
 const unsigned short sma_1_pin = 6;
 const unsigned short reflex_0_pin = 9;
@@ -17,6 +16,18 @@ const unsigned short ir_0_pin = A2;
 const unsigned short ir_1_pin = A1;
 const unsigned short acc_scl_pin = A5;
 const unsigned short acc_sda_pin = A4;
+//--- Sound module ---
+const unsigned short sound_detect_pin = 5;
+const unsigned short sound_trigger_pin = 6;
+const unsigned short sound_module_led_0_pin = 9;
+const unsigned short sound_module_led_1_pin = 10;
+const unsigned short sound_module_ir_pin = A2;
+const unsigned short vbatt_pin = A1;
+
+//==== constants ====
+const unsigned int numOutgoingByte = 64;
+const unsigned int numIncomingByte = 64;
+const unsigned int period = 0;
 
 //==== internal global variables =====
 byte outgoingByte[numOutgoingByte];
@@ -25,8 +36,8 @@ unsigned long msUntilNextSend = millis() + period;
 unsigned int packetCount = 0;
 volatile boolean ledState = 1;
 
-//====== Output Variables for Behaviours =====
 
+//====== Output Variables for Behaviours =====
 
 //---- indicator LED blinking -----
 // indicator LED on 
@@ -57,9 +68,13 @@ volatile unsigned short reflex_1_level = 10; //exposed
 volatile unsigned int ir_0_threshold = 150;
 volatile unsigned int ir_1_threshold = 150;
 
+//--- sound module reflex ---
+volatile boolean sound_module_reflex_enabled = true;
+volatile boolean sound_module_cycling = false;
+
 //====== Input Variables for Behaviours =====
 
-//----- analog 0 ------
+//----- Teensy on-board ------
 volatile unsigned int analog_0_state = 0;
 
 //----- ambient light sensor -----
@@ -69,10 +84,14 @@ volatile unsigned int ambient_light_sensor_state = 0;
 volatile unsigned int ir_0_state = 0;
 volatile unsigned int ir_1_state = 0;
 
+//--- sound module reflex ---
+volatile boolean sound_detect_state = 0;
+volatile unsigned int sound_module_ir_state = 0;
+
 
 void setup() {
 
-	//==== Teensy =====
+	//==== Teensy On-Board=====
 	//---- indicator led ----
 	pinMode(indicator_led_pin, OUTPUT);
 	digitalWrite(indicator_led_pin, ledState);  
@@ -96,6 +115,14 @@ void setup() {
 	pinMode(reflex_1_pin, OUTPUT);
 	pinMode(ir_0_pin, INPUT);
 	pinMode(ir_1_pin, INPUT);
+	
+	//==== Sound module ====
+	pinMode(sound_detect_pin, INPUT);
+	pinMode(sound_trigger_pin, OUTPUT);
+	pinMode(sound_module_led_0_pin, OUTPUT);
+	pinMode(sound_module_led_1_pin, OUTPUT);
+	pinMode(sound_module_ir_pin, INPUT);
+	pinMode(vbatt_pin, INPUT);
 
 	//===== clear all existing messages ======
 	unsigned long clearing_counter = 0;
@@ -120,7 +147,7 @@ boolean receive_msg(byte recv_data_buff[], byte send_data_buff[]){
 		// sample the sensors
 		sample_inputs();
 		
-		// extract the front and end signaures
+		// extract the front and end signatures
 		byte front_signature = recv_data_buff[0];
 		byte back_signature = recv_data_buff[numIncomingByte-1];
 
@@ -194,11 +221,19 @@ void compose_reply(byte data_buff[], byte front_signature, byte back_signature){
 
 	// byte 1 and 2 --- analog 0
 	for (int i = 0; i < 2 ; i++)
-	data_buff[i+1] = analog_0_state >> (8*i);
+		data_buff[i+1] = analog_0_state >> (8*i);
 
 	// byte 3 and 4 --- ambient light sensor
 	for (int i = 0; i < 2 ; i++)
-	data_buff[i+3] = ambient_light_sensor_state >> (8*i);
+		data_buff[i+3] = ambient_light_sensor_state >> (8*i);
+	
+	// byte 5 and 6 --- IR 0 state
+	for (int i = 0; i < 2 ; i++)
+		data_buff[i+5] = ir_0_state >> (8*i);
+		
+	// byte 7 and 8 --- IR 1 state
+	for (int i = 0; i < 2 ; i++)
+		data_buff[i+7] = sound_module_ir_state >> (8*i);
 
 }
 
@@ -304,13 +339,44 @@ void tentacle_reflex(unsigned long curr_time){
                
 	}
 }
+
+volatile unsigned long sound_module_reflex_phase_time;
+void sound_module_reflex(unsigned long curr_time){
+	if (sound_module_reflex_enabled){
+		
+		sound_module_ir_state = analogRead(sound_module_ir_pin);
+		//sound_detect_state = digitalRead(sound_detect_pin);
+		
+		if (sound_module_cycling == false && 
+			//sound_detect_state == true){
+			sound_module_ir_state > 300){
+			sound_module_cycling = true;
+			sound_module_reflex_phase_time = millis();       
+		}
+		else if (sound_module_cycling == true){
+			if ((curr_time - sound_module_reflex_phase_time) < 50){
+				digitalWrite(sound_trigger_pin, 1);
+			}
+			else if ((curr_time - sound_module_reflex_phase_time) < 100){
+				digitalWrite(sound_trigger_pin, 0);
+			}
+			else{
+				sound_module_cycling = false;
+				digitalWrite(sound_trigger_pin, 0);
+			}
+		}
+	}
+}
+
+//===== main loop =====
 void loop() {
 
 	volatile unsigned long curr_time = millis();
 
 	protocell_reflex(curr_time);
 	led_blink_behaviour();
-	tentacle_reflex(curr_time);
+	//tentacle_reflex(curr_time);
+	sound_module_reflex(curr_time);
 
 	// check for new messages
 	if (receive_msg(incomingByte, outgoingByte)){

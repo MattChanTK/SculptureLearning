@@ -64,6 +64,8 @@ class HardcodedBehaviours(InteractiveCmd.InteractiveCmd):
                         else:
                             indicator_led_on[(teensy_id+1)%len(self.Teensy_thread_list)] = 1
 
+                    print(teensy_id, ": ", sample)
+
                     # new blink period
                     led_period[teensy_id] += 0.002
                     led_period[teensy_id] %= 10
@@ -71,7 +73,7 @@ class HardcodedBehaviours(InteractiveCmd.InteractiveCmd):
                     high_power_led_level[teensy_id] %= 100
                     reflex_level[teensy_id] += 0.2
                     reflex_level[teensy_id] %= 150
-                    print(teensy_id, ": ", sample)
+
 
 class HardcodedBehaviours_test(InteractiveCmd.InteractiveCmd):
 

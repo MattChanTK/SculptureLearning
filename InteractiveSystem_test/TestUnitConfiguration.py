@@ -29,6 +29,8 @@ class SimplifiedTestUnit(SysParam.SystemParameters):
         # ---defaults---
         self.input_state['analog_0_state'] = 0
         self.input_state['ambient_light_state'] = 0
+        self.input_state['ir_0_state'] = 0
+        self.input_state['ir_1_state'] = 0
 
         #=== list of behaviours for selection ====
         self.behaviour_type = enum_dict('INTERACTIVE', 'AUTO')
@@ -43,6 +45,12 @@ class SimplifiedTestUnit(SysParam.SystemParameters):
 
         # byte 3 and 4: ambient light sensor state
         self.input_state['ambient_light_state'] = struct.unpack_from('H', msg[3:5])[0]
+
+        # byte 5 and 6: ir sensor 0 state
+        self.input_state['ir_0_state'] = struct.unpack_from('H', msg[5:7])[0]
+
+        # byte 7 and 8: ir sensor 1 state
+        self.input_state['ir_1_state'] = struct.unpack_from('H', msg[7:9])[0]
 
     def compose_message_content(self):
 
