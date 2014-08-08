@@ -261,3 +261,5 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+*.png
+InteractiveSystem_test/exportToHTML/InteractiveCmd.py.html

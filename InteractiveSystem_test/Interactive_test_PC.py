@@ -1,7 +1,7 @@
 import changePriority
 import TeensyInterface as ti
 
-behaviours_config = 2
+behaviours_config = 0
 
 if behaviours_config == 0:
     from InteractiveCmd import InteractiveCmd as cmd

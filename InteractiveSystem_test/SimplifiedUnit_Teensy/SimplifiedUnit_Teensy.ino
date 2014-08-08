@@ -41,7 +41,7 @@ volatile boolean ledState = 1;
 
 //---- indicator LED blinking -----
 // indicator LED on 
-volatile boolean indicator_led_on = true; //exposed
+volatile boolean indicator_led_on = false; //exposed
 volatile boolean indicator_led_on_0 = false;
 
 // indicator LED blink 
@@ -55,14 +55,14 @@ volatile unsigned short high_power_led_level = 5;  //exposed
 volatile int high_power_led_reflex_enabled = true;
 volatile boolean high_power_led_cycling = false;
 const unsigned short high_power_led_level_max = 125;
-volatile unsigned int high_power_led_reflex_threshold = 100;
+volatile unsigned int high_power_led_reflex_threshold = 50;
 
 
 //--- Tentacle reflex ----
 volatile boolean tentacle_reflex_enabled = true;
 volatile boolean tentacle_reflex_cycling = false;
-volatile unsigned short sma_0_level = 10; //exposed
-volatile unsigned short sma_1_level = 10; //exposed
+volatile unsigned short sma_0_level = 0; //exposed
+volatile unsigned short sma_1_level = 0; //exposed
 volatile unsigned short reflex_0_level = 10; //exposed
 volatile unsigned short reflex_1_level = 10; //exposed
 volatile unsigned int ir_0_threshold = 150;
@@ -233,7 +233,7 @@ void compose_reply(byte data_buff[], byte front_signature, byte back_signature){
 		
 	// byte 7 and 8 --- IR 1 state
 	for (int i = 0; i < 2 ; i++)
-		data_buff[i+7] = sound_module_ir_state >> (8*i);
+		data_buff[i+7] = ir_1_state >> (8*i);
 
 }
 
@@ -283,7 +283,8 @@ void protocell_reflex(unsigned long curr_time){
 		ambient_light_sensor_state = analogRead(ambient_light_sensor_pin);
 		
 		if (high_power_led_cycling == false && 
-				ambient_light_sensor_state < high_power_led_reflex_threshold){
+                    sound_module_ir_state > 300){
+			//	ambient_light_sensor_state < high_power_led_reflex_threshold){
 			high_power_led_cycling = true;
 			protocell_reflex_phase_time = millis();       
 		}
@@ -291,7 +292,10 @@ void protocell_reflex(unsigned long curr_time){
 			if ((curr_time - protocell_reflex_phase_time) < 2000){
 				analogWrite(high_power_led_pin, high_power_led_level);
 			}
-			else{
+			else if ((curr_time - protocell_reflex_phase_time) < 4000){
+				analogWrite(high_power_led_pin, 0);
+			}
+                        else{
 				high_power_led_cycling = false;
 				analogWrite(high_power_led_pin, 0);
 			}
@@ -375,8 +379,8 @@ void loop() {
 
 	protocell_reflex(curr_time);
 	led_blink_behaviour();
-	//tentacle_reflex(curr_time);
-	sound_module_reflex(curr_time);
+	tentacle_reflex(curr_time);
+	//sound_module_reflex(curr_time);
 
 	// check for new messages
 	if (receive_msg(incomingByte, outgoingByte)){

@@ -41,6 +41,7 @@ class HardcodedBehaviours(InteractiveCmd.InteractiveCmd):
                     cmd_obj.add_param_change('sma_1_level', int(sma_level[teensy_id]))
                     cmd_obj.add_param_change('reflex_0_level', int((reflex_level[teensy_id])+50)%150)
                     cmd_obj.add_param_change('reflex_1_level', int((reflex_level[teensy_id])+100)%150)
+                    cmd_obj.add_param_change('high_power_led_reflex_threshold',  10)
                     self.enter_command(cmd_obj)
 
             self.send_commands()
