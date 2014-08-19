@@ -7,16 +7,111 @@ import changePriority
 import sys
 from time import clock
 
-class TeensyInterface(threading.Thread, ):
+TEENSY_VENDOR_ID = 0x16C0
+TEENSY_PRODUCT_ID = 0x0486
+
+class TeensyManager(threading.Thread):
+
+    def __init__(self):
+
+        # find all connected Teensy
+        self.__find_teensy_serial_number()
+
+        self.Teensy_thread_list = []
+
+        self.unit_config = 'SIMPLIFIED_TEST_UNIT'
+        self.print_to_term = False
+
+        # create all the initial Teensy Threads
+        Teensy_id = 0
+        for serial_num in self.serial_num_list:
+            print("Teensy " + str(Teensy_id) + " --- " + str(serial_num))
+            Teensy_id += 1
+
+            # create a new thread for communicating with
+            try:
+                Teensy_thread = TeensyInterface(serial_num, unit_config=self.unit_config, print_to_term=self.print_to_term)
+                self.Teensy_thread_list.append(Teensy_thread)
+            except Exception as e:
+                print(str(e))
+
+        # start thread
+        threading.Thread.__init__(self)
+        self.daemon = False
+        self.start()
+
+
+    def run(self):
+
+        # while True:
+
+            # # check the current list of connected Teensy
+            # old_teensy_serial_number = self.get_teensy_serial_num()
+            #
+            # # self.__find_teensy_serial_number()
+            # # print(self.get_teensy_serial_num())
+            #
+            # # if there is Teensy missing, remove from the list.
+            # for teensy_thread in self.Teensy_thread_list:
+            #     if teensy_thread.serial_number not in self.serial_num_list:
+            #         teensy_thread.lock.acquire()
+            #         try:
+            #             teensy_thread.connected = False
+            #         finally:
+            #             teensy_thread.lock.release()
+            #
+            #
+            # # if there is new Teensy, append to the list.
+            # for serial_num in self.get_teensy_serial_num():
+            #     if serial_num not in old_teensy_serial_number:
+            #         print("Number of Teensy devices found: " + str(len(self.get_teensy_serial_num())))
+            #         # create a new thread for communicating with
+            #         try:
+            #             Teensy_thread = TeensyInterface(serial_num, unit_config=self.unit_config, print_to_term=self.print_to_term)
+            #             self.Teensy_thread_list.append(Teensy_thread)
+            #
+            #
+            #         except Exception as e:
+            #             print(str(e))
+
+
+            # # check if the thread is still alive
+            # for teensy_id in range(len(self.Teensy_thread_list)):
+            #     if not self.Teensy_thread_list[teensy_id].is_alive():
+            #         self.Teensy_thread_list.pop(teensy_id)
+        pass
+
+    def get_teensy_serial_num(self):
+        return self.serial_num_list
+
+    def get_teensy_thread_list(self):
+        return self.Teensy_thread_list
+
+    def __find_teensy_serial_number(self, vendor_id=TEENSY_VENDOR_ID, product_id=TEENSY_PRODUCT_ID):
+
+        # find our device
+        dev_iter = usb.core.find(find_all=True, idVendor=vendor_id, idProduct=product_id)
+
+        serialNum = []
+        for iter in dev_iter:
+            serialNum.append(iter.serial_number)
+
+        self.serial_num_list = tuple(serialNum)
+
+
+
+
+
+class TeensyInterface(threading.Thread):
 
     packet_size_in = 64
     packet_size_out = 64
 
-    def __init__(self, vendor_id, product_id, serial_num, print_to_term=False, unit_config='default'):
+    def __init__(self, serial_num, vendor_id=TEENSY_VENDOR_ID, product_id=TEENSY_PRODUCT_ID, print_to_term=False, unit_config='default'):
 
-        if unit_config == 'FULL_TEST_UNIT' :
+        if unit_config == 'FULL_TEST_UNIT':
             from TestUnitConfiguration import FullTestUnit as SysParam
-        elif unit_config == 'SIMPLIFIED_TEST_UNIT' :
+        elif unit_config == 'SIMPLIFIED_TEST_UNIT':
             from TestUnitConfiguration import SimplifiedTestUnit as SysParam
         else:
             from SystemParameters import SimplifiedTestUnit as SysParam
@@ -28,6 +123,7 @@ class TeensyInterface(threading.Thread, ):
             raise ValueError('Device not found')
 
         self.serial_number = serial_num
+        self.connected = True
 
         # set the active configuration. With no arguments, the first
         # configuration will be the active one
@@ -72,7 +168,18 @@ class TeensyInterface(threading.Thread, ):
         changePriority.SetPriority(changePriority.Priorities.REALTIME_PRIORITY_CLASS)
 
         while True:
-            if self.param_updated_event.wait():
+
+            self.lock.acquire()
+
+            if self.connected:
+                self.lock.release()
+            else:
+                # release lock before terminating
+                self.lock.release()
+                # terminate itself
+                return
+
+            if self.param_updated_event.wait(timeout=1):
 
                 self.param_updated_event.clear()
 
@@ -136,6 +243,8 @@ class TeensyInterface(threading.Thread, ):
                     self.lock.release()
                 # print(self.serial_number, " - Echo time: ", clock() - start_time)
                 self.print_to_term("Teensy thread: lock released")
+
+
 
     def compose_msg(self, rand_signature=True):
 
@@ -222,13 +331,4 @@ class TeensyInterface(threading.Thread, ):
         if self.print_to_term_enabled:
             print(string)
 
-def find_teensy_serial_number(vendorID=0x16C0, productID=0x0486):
 
-    # find our device
-    dev_iter = usb.core.find(find_all=True, idVendor=vendorID, idProduct=productID)
-
-    serialNum = []
-    for iter in dev_iter:
-        serialNum.append(iter.serial_number)
-
-    return tuple(serialNum)
