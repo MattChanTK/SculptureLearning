@@ -5,4 +5,4 @@ SculptureLearning
 
 <b>CuriousSystem2</b>: Code for Curiosity Based Learning Algorithm simulation
 
-<b>:The rest</b>: old projects
+<b>The rest</b>: old projects
