@@ -43,43 +43,11 @@ class TeensyManager(threading.Thread):
 
     def run(self):
 
-        # while True:
+        # #wait for each thread to terminate
+        for t in self.get_teensy_thread_list():
+            t.join()
 
-            # # check the current list of connected Teensy
-            # old_teensy_serial_number = self.get_teensy_serial_num()
-            #
-            # # self.__find_teensy_serial_number()
-            # # print(self.get_teensy_serial_num())
-            #
-            # # if there is Teensy missing, remove from the list.
-            # for teensy_thread in self.Teensy_thread_list:
-            #     if teensy_thread.serial_number not in self.serial_num_list:
-            #         teensy_thread.lock.acquire()
-            #         try:
-            #             teensy_thread.connected = False
-            #         finally:
-            #             teensy_thread.lock.release()
-            #
-            #
-            # # if there is new Teensy, append to the list.
-            # for serial_num in self.get_teensy_serial_num():
-            #     if serial_num not in old_teensy_serial_number:
-            #         print("Number of Teensy devices found: " + str(len(self.get_teensy_serial_num())))
-            #         # create a new thread for communicating with
-            #         try:
-            #             Teensy_thread = TeensyInterface(serial_num, unit_config=self.unit_config, print_to_term=self.print_to_term)
-            #             self.Teensy_thread_list.append(Teensy_thread)
-            #
-            #
-            #         except Exception as e:
-            #             print(str(e))
-
-
-            # # check if the thread is still alive
-            # for teensy_id in range(len(self.Teensy_thread_list)):
-            #     if not self.Teensy_thread_list[teensy_id].is_alive():
-            #         self.Teensy_thread_list.pop(teensy_id)
-        pass
+        print("All threads terminated")
 
     def get_teensy_serial_num(self):
         return self.serial_num_list
