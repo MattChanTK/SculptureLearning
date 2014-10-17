@@ -1,0 +1,37 @@
+Partlist
+
+Exported from pcb.brd at 8/2/2014 10:08:18 AM
+
+EAGLE Version 6.5.0 Copyright (c) 1988-2012 CadSoft
+
+Assembly variant: 
+
+Part     Value          Package     Library            Position (mm)         Orientation
+
+
+C1       0.33uF         C1206       resistor           (12.2 -20.1)          R0
+C2       0.1uF          C1206       resistor           (-13.5 29)            R270
+C3       0.01uF         C1206       resistor           (-10.7 -28.2)         R270
+C4       10uF           153CLV-0505 resistor           (8.4 -37.7)           R0
+C5       47uF           153CLV-0505 resistor           (-20.1 26.4)          R0
+C7       47uF           153CLV-0505 resistor           (8.7 -11.9)           R0
+
+D1       CDBC560-G      SMC         diode              (18.1 25.2)           R270
+D2       CDBC560-G      SMC         diode              (-8.3 -35.2)          R180
+
+L1       100uH          DO3316P     inductor-coilcraft (18 -6.1)             R180
+L2       100uH          DO3316P     inductor-coilcraft (-17.5 -5.8)          R0
+R7       2.7k           R0805       resistor           (-12.5 -24)           R0
+R8       2.2k           R0805       resistor           (-7.8 -28.7)          R90
+R9       2.8k           R0805       resistor           (-5 -25.5)            R90
+R10      2.2k           R0805       resistor           (6.3 -20.2)           R180
+R11      2k             R0805       resistor           (6.4 -17.3)           R180
+R12      17.4k          R0805       resistor           (10.5 -17.3)          R0
+
+SV1                     MA03-2      con-lstb           (1.4 45.2)            R90
+
+U$15     LT1076Q        LT1076      LT1076             (-1.4 -28.6)          R270
+
+U$18     MINI_OSD       MINI_OSD    mini_osd           (-8.7 2.5)            R90
+U$19     LM2577S-12     TO-263      LM2577S-12         (1.8 -15.9)           R90
+

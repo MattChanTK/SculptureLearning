@@ -1,0 +1,53 @@
+Partlist
+
+Exported from PCB1.brd at 10/4/2014 3:32:20 PM
+
+EAGLE Version 6.1.0 Copyright (c) 1988-2012 CadSoft
+
+Assembly variant: 
+
+Part     Value               Package     Library             Position (mm)         Orientation
+
+C1       0.1uF               0603-CAP    SparkFun-Capacitors (1.8 -6.4)            R180
+C2       0.01uF              0805        SparkFun-Capacitors (1.9 4.8)             R270
+C3       100uF               EIA7343     SparkFun-Capacitors (-6.8 -8.3)           R0
+C4       0.1uF               0603-CAP    SparkFun-Capacitors (9.1 -4.6)            R0
+C5       100uF               EIA7343     SparkFun-Capacitors (-2.1 7.6)            R270
+D2       MBRS130LT3          SMB         diode               (-8.8 11)             R0
+JP1                          1X03        SparkFun-Connectors (2.7 -14.7)           R180
+JP2                          1X03        SparkFun-Connectors (-2.5 14.8)           R0
+JP3                          1X03        SparkFun-Connectors (5.1 6.1)             R270
+JP4      M02PTH              1X02        SparkFun-Connectors (8.8 11.2)            R0
+JP5      M02PTH              1X02        SparkFun-Connectors (8.8 8.7)             R0
+JP6      M02PTH              1X02        SparkFun-Connectors (8.8 -11.4)           R0
+JP7      M02PTH              1X02        SparkFun-Connectors (8.8 -8.9)            R0
+JP8                          JP2Q        jumper              (10.4 0.2)            R0
+L1       SRN6045-100M (10uH) SRN6045     SparkFun-Passives   (-0.9 -1.2)           R0
+L2       33uH                SRN6045     SparkFun-Passives   (-8.9 -1.6)           R180
+PAD1     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 11.9)          R0
+PAD2     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 8.5)           R0
+PAD3     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 5.1)           R0
+PAD4     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 1.7)           R0
+PAD5     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 -1.7)          R0
+PAD6     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 -5.1)          R0
+PAD7     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 -8.5)          R0
+PAD8     PAD_3MM             PAD_3MM     PAD_3MM             (-14.8 -11.9)         R0
+PAD9     PAD_3MM             PAD_3MM     PAD_3MM             (14.8 11.9)           R0
+PAD10    PAD_3MM             PAD_3MM     PAD_3MM             (14.8 8.5)            R0
+PAD11    PAD_3MM             PAD_3MM     PAD_3MM             (14.8 5.1)            R0
+PAD12    PAD_3MM             PAD_3MM     PAD_3MM             (14.8 1.7)            R0
+PAD13    PAD_3MM             PAD_3MM     PAD_3MM             (14.8 -1.7)           R0
+PAD14    PAD_3MM             PAD_3MM     PAD_3MM             (14.8 -5.1)           R0
+PAD15    PAD_3MM             PAD_3MM     PAD_3MM             (14.8 -8.5)           R0
+PAD16    PAD_3MM             PAD_3MM     PAD_3MM             (14.8 -11.9)          R0
+PAD17    PAD_3MM             PAD_3MM     PAD_3MM             (11.1 14.8)           R0
+PAD18    PAD_3MM             PAD_3MM     PAD_3MM             (7.5 14.8)            R0
+PAD19    PAD_3MM             PAD_3MM     PAD_3MM             (-7.5 14.8)           R0
+PAD20    PAD_3MM             PAD_3MM     PAD_3MM             (-11.1 14.8)          R0
+PAD21    PAD_3MM             PAD_3MM     PAD_3MM             (-11.1 -14.8)         R0
+PAD22    PAD_3MM             PAD_3MM     PAD_3MM             (-7.5 -14.8)          R0
+PAD23    PAD_3MM             PAD_3MM     PAD_3MM             (11.1 -14.8)          R0
+PAD24    PAD_3MM             PAD_3MM     PAD_3MM             (7.5 -14.8)           R0
+U$1      3WAY_SMD_JUMPER     3WAY_JUMPER jumper_smd_3way     (3.8 11)              R0
+U$3      3WAY_SMD_JUMPER     3WAY_JUMPER jumper_smd_3way     (3.8 -10.9)           R180
+U2       LM2678DX-5.0        VSON-14     LM2678SDX-5.0       (-9.2 3.1)            R0
