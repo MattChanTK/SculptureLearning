@@ -7,6 +7,65 @@ CuriousSystem/outputs/*/*
 CuriousSystem/outputs/*.png
 CuriousSystem2/outputs/*/*.png
 
+#-------------------------#
+# Hardware's Ignore Files #
+#-------------------------#
+
+
+# Ignore list for Eagle, a PCB layout tool
+
+*.job
+*.pro
+*.scr
+# Backup files
+*.s#?
+*.b#?
+*.l#?
+*~*.xlsx
+
+# Eagle project file
+# It contains a serial number and references to the file structure
+# on your computer.
+# comment the following line if you want to have your project file included.
+eagle.epf
+
+# CAM files
+*.$$$
+*.cmp
+*.ly2
+*.l15
+*.sol
+*.plc
+*.stc
+*.sts
+*.crc
+*.crs
+
+*.dri
+*.drl
+*.gpi
+*.pls
+
+*.drd
+*.drd.*
+
+*.info
+
+*.eps
+
+*.GTO
+*.GBP
+*.GML
+*.GBS
+*.TXT
+*.GTP
+*.GTS
+*.GTP
+*.GBO
+*.GBL
+*.GTL
+
+
 
 # Compiled source #
 ###################
